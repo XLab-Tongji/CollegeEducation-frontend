@@ -47,6 +47,7 @@
         methods: {
             register(){
                 console.log("register")
+                // 如果没有下面这一行，页面跳转不过去。submitForm()函数跳转至/dashboard页面确实要先检查ms_username，但是/register下我没有找到任何跟localStorage有关的逻辑。希望你们能解决这个神奇的问题 ：） By徐啊歪-2018-09-25
                 localStorage.setItem('ms_username',this.ruleForm.username);
                 this.$router.push('/register');
             },
