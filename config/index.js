@@ -5,6 +5,7 @@
 const path = require('path')
 
 module.exports = {
+  url: 'http://localhost:8080',
   dev: {
 
     // Paths

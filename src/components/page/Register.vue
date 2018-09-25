@@ -13,13 +13,18 @@
                         <el-button slot="prepend" icon="el-icon-lx-lock"></el-button>
                     </el-input>
                 </el-form-item>
-                <div class="login-btn">
-                    <el-button type="primary" @click="submitForm()">登录</el-button>
-                </div>
+                <el-form-item prop="auth">
+                    <el-select v-model="ruleForm.auth" placeholder="请选择">
+                        <el-option v-for="item in auths"
+                                                       :label="item.label"
+                                                       :value="item.value">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
                  <div class="login-btn">
                     <el-button type="primary" @click="register()">注册</el-button>
                 </div>
-                <p class="login-tips">Tips : 用户名和密码随便填。</p>
+                <p class="login-tips">Tips : 这是注册页面。</p>
             </el-form>
         </div>
     </div>
@@ -31,9 +36,10 @@
         data: function(){
             return {
                 ruleForm: {
-                    username: 'student',
-                    password: 'password'
+                    username: 'admin',
+                    password: '123123'
                 },
+                auths: [{label:"学生", value:"student"}, {label:"教师", value:"teacher"}],
                 rules: {
                     username: [
                         { required: true, message: '请输入用户名', trigger: 'blur' }
@@ -45,23 +51,14 @@
             }
         },
         methods: {
-            register(){
-                console.log("register")
-                localStorage.setItem('ms_username',this.ruleForm.username);
-                this.$router.push('/register');
-            },
-            submitForm() {
-                this.$http.post(server.url + '/auth', {username:this.ruleForm.username,password:this.ruleForm.password}).then(response => {
-                    localStorage.setItem('token',response.data.token);
-                    localStorage.setItem('ms_username',this.ruleForm.username);
-                    this.$router.push('/');
+            register() {
+                this.$http.post(server.url + '/register', {}).then(response => {
+
+            
                    }, response => {
                      console.log("error");
                      console.log(response);
                 });
-            },
-            getToken(){
-                return localStorage.getItem('token');
             }
         }
     }

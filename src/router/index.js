@@ -92,6 +92,10 @@ export default new Router({
             component: resolve => require(['../components/page/Login.vue'], resolve)
         },
         {
+            path: '/register',
+            component: resolve => require(['../components/page/Register.vue'], resolve)
+        },
+        {
             path: '*',
             redirect: '/404'
         }
