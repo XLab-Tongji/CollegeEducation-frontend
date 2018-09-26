@@ -13,14 +13,6 @@
                         <el-button slot="prepend" icon="el-icon-lx-lock"></el-button>
                     </el-input>
                 </el-form-item>
-                <el-form-item prop="auth">
-                    <el-select v-model="ruleForm.auth" placeholder="请选择">
-                        <el-option v-for="item in auths"
-                                                       :label="item.label"
-                                                       :value="item.value">
-                        </el-option>
-                    </el-select>
-                </el-form-item>
                  <div class="login-btn">
                     <el-button type="primary" @click="register()">注册</el-button>
                 </div>
@@ -39,7 +31,6 @@
                     username: 'admin',
                     password: '123123'
                 },
-                auths: [{label:"学生", value:"student"}, {label:"教师", value:"teacher"}],
                 rules: {
                     username: [
                         { required: true, message: '请输入用户名', trigger: 'blur' }
