@@ -12,7 +12,7 @@
                     </el-form-item>
 
                     <el-radio-group v-model="ruleForm.gender" size="small" style='margin-bottom: 23px;margin-top: 2px'>
-                        <el-radio-button label="请选择你的性别" disabled ></el-radio-button>
+                        <el-radio-button label="请选择你的性别" disabled></el-radio-button>
                         <el-radio-button label="男" ></el-radio-button>
                         <el-radio-button label="女"></el-radio-button>
                     </el-radio-group>
@@ -96,11 +96,9 @@
 
                 </el-col>
                 </el-row>
-                
-                <div class="login-btn">
-                    <el-button type="primary" @click="register()">注册</el-button>
-                </div>
-                <p class="login-tips">Tips : 所有信息均为必填。</p>
+                <el-row class="el-row--flex" justify="end"><p class="login-tips">Tips : 所有信息均为必填。</p></el-row>
+                <div class="login-btn"><el-button type="primary" @click="register()">注册</el-button></div>
+                <el-row class="el-row--flex" justify="center"><el-button type="text" @click="toLogin()">已有账号？点击登录</el-button></el-row>
             </el-form>
         </div>
     </div>
@@ -113,20 +111,26 @@
             // 验证密码合法性
             var passwordValidity = (rule, value, callback) =>{
                 // Evan: 这里设定密码的规则，value值是输入框中的值
+                // 密码必须含有大写字母、小写字母和数字，长度为6-18位
+                var myReg=/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[^]{6,18}$/;
                 if(!value){
                     return callback(new Error('请输入密码'));
-                }else if(value.length<5){
-                    return callback(new Error('密码非法'));
+                }else if(!myReg.test(value)){
+                    return callback(new Error('包含大写字母和数字，且不小于6位'));
                 }else{
                     return callback();
                 }
             };
             // 验证再次输入密码是否与原值相同
             var repasswordValidity = (rule, value, callback) =>{
+                var myReg=/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[^]{6,18}$/;
                 if(!value){
                     return callback(new Error('请再次输入密码以确认'));
-                }else if(value!=this.ruleForm.password){
-                    return callback(new Error('两次输入的密码不一致，请重试'));
+                }
+                if(value != this.ruleForm.password){
+                    return callback(new Error('两次输入的密码不一致'));
+                }else if(!myReg.test(value)){
+                    return callback(new Error('包含大写字母和数字，且不小于6位'));
                 }else{
                     callback();
                 }
@@ -135,10 +139,11 @@
             var emailValidity = (rule, value, callback) =>{
                 var atPos=value.indexOf('@');
                 var dotPos=value.indexOf('.');
+                var myReg=/^[a-zA-Z0-9_-]+@([a-zA-Z0-9]+\.)+(com|cn|net|org)$/;
                 if(!value){
                     return callback(new Error('请输入电子邮箱'));
-                }else if(!(atPos>0&&dotPos>0&&dotPos-atPos>1&&dotPos!=value.length-1)){
-                    return callback(new Error('输入的电子邮箱非法，请重试'));
+                }else if(!myReg.test(value)){
+                    return callback(new Error('邮箱格式错误'));
                 }else{
                     return callback();
                 }
@@ -216,6 +221,12 @@
             },
         },
         methods: {
+            toLogin(){
+                console.log("toLogin")
+                // 如果没有下面这一行，页面跳转不过去。submitForm()函数跳转至/dashboard页面确实要先检查ms_username，但是/register下我没有找到任何跟localStorage有关的逻辑。希望你们能解决这个神奇的问题 ：） By徐啊歪-2018-09-25
+                // localStorage.setItem('ms_username',this.ruleForm.username);
+                this.$router.push('/login');
+            },
             getUniversityList(){
                 // Evan:请在这里加入获取大学列表的接口信息
                 // 之后把get得到的大学列表push进universityOptions中，如下
@@ -229,7 +240,7 @@
                 if(this.ruleForm.birthday==''||this.ruleForm.startYear==''||this.ruleForm.birthday==null||this.ruleForm.startYear==null){
                     this.$notify.error({
                     title: '注册失败',
-                    message: '没有填写出生年月或入学时间'
+                    message: '所有信息均为必填'
                     });
                     this.loading=false;
                 }
