@@ -2,101 +2,150 @@
     <div class="login-wrap" v-loading='loading'>
         <div class="ms-login">
             <div class="ms-title">用户注册</div>
-            <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="0px" class="ms-content" status-icon='true'>
+            <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="10px" class="ms-content" status-icon='true'>
                 <el-row :gutter="20">
-                <el-col :span='12' id='ms-left'>
+                    <el-col :span='12'>
+                    <el-form-item prop="imgUrl">
+                    <el-upload
+                        class="avatar-uploader"
+                        action="https://jsonplaceholder.typicode.com/posts/"
+                        :show-file-list="false"
+                        :on-success="handleAvatarSuccess"
+                        :before-upload="beforeAvatarUpload">
+                        <img v-model="ruleForm.imgUrl" v-if="imageUrl" :src="imageUrl" class="avatar">
+                        <i><div class="ms-setImg">上传头像</div></i>
+                    </el-upload>
+                    </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item></el-form-item>
+                        <el-form-item prop="gender">
+                            <el-radio-group v-model="ruleForm.gender">
+                                <el-radio-button label="男"></el-radio-button>
+                                <el-radio-button label="女"></el-radio-button>
+                            </el-radio-group>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+
+                <el-row :gutter="20">
+                    <el-col :span='12'>
                     <el-form-item prop="uName">
                         <el-input v-model="ruleForm.uName" placeholder="请输入姓名" >
                             <el-button slot="prepend" icon="el-icon-lx-people"></el-button>
                         </el-input>
                     </el-form-item>
+                    </el-col>
+                    <el-col :span='12'>
+                        <el-form-item prop="birthday">
+                            <el-date-picker
+                                v-model="ruleForm.birthday"
+                                type="month"
+                                placeholder="请选择出生年月" style='width: 100%'>
+                            </el-date-picker>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
 
+<<<<<<< HEAD
+                <el-row :gutter="20">
+                    <el-col :span='12'>
+=======
                     <el-radio-group v-model="ruleForm.gender" size="small" style='margin-bottom: 23px;margin-top: 2px'>
                         <el-radio-button label="请选择你的性别" disabled></el-radio-button>
                         <el-radio-button label="男" ></el-radio-button>
                         <el-radio-button label="女"></el-radio-button>
                     </el-radio-group>
 
+>>>>>>> 0e58c5fa5fa677c84905bf030504fdfb4a59e5a0
                     <el-form-item prop="sID">
-                        <el-input v-model="ruleForm.sID" placeholder="请输入学号">
+                        <el-input v-model="ruleForm.sID" placeholder="请输入学号/工号">
                             <el-button slot="prepend" icon="el-icon-edit"></el-button>
                         </el-input>
                     </el-form-item>
+                    </el-col>
+                    <el-col :span='12'>
+                        <el-form-item prop="university">
+                            <el-select v-model="ruleForm.university" placeholder="请选择所在学校" style='width: 100%'>
+                                <el-option
+                                    v-for="item in universityOptions"
+                                    :key="item.value"
+                                    :label="item.label"
+                                    :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
 
+                <el-row :gutter="20">
+                    <el-col :span='12'>
                     <el-form-item prop="email">
                         <el-input v-model="ruleForm.email" placeholder="请输入电子邮箱">
                             <el-button slot="prepend" icon="el-icon-lx-mail"></el-button>
                         </el-input>
                     </el-form-item>
+                    </el-col>
+                    <el-col :span='12'>
+                        <el-form-item prop="school">
+                            <el-select v-model="ruleForm.school" placeholder="请选择所在院系" style='width: 100%' no-data-text='请首先选择所在学校'>
+                                <el-option
+                                    v-for="item in schoolOptions"
+                                    :key="item.value"
+                                    :label="item.label"
+                                    :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
 
+                <el-row :gutter="20">
+                    <el-col :span='12'>
                     <el-form-item prop="password">
                         <el-input type="password" placeholder="请输入密码" v-model="ruleForm.password"> 
                             <el-button slot="prepend" icon="el-icon-lx-lock"></el-button>
                         </el-input>
                     </el-form-item>
+                    </el-col>
+                    <el-col :span='12'>
+                        <el-form-item prop="auth">
+                            <el-select v-model="ruleForm.auth" placeholder="请选择注册身份" style='width: 100%'>
+                                <el-option
+                                    v-for="item in authOptions"
+                                    :key="item.value"
+                                    :label="item.label"
+                                    :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
 
+                <el-row :gutter="20">
+                    <el-col :span='12'>
                     <el-form-item prop="repassword">
                         <el-input type="password" placeholder="请确认密码" v-model="ruleForm.repassword"> 
                             <el-button slot="prepend" icon="el-icon-lx-lock"></el-button>
                         </el-input>
                     </el-form-item>
-
-                </el-col>
-
-                <el-col :span='12' id='ms-right'>
-
-                    <el-form-item prop="birthday">
-                        <el-date-picker
-                         v-model="ruleForm.birthday"
-                         type="month"
-                         placeholder="请选择出生年月" style='width: 100%'>
-                        </el-date-picker>
-                    </el-form-item>
-
-                    <el-form-item prop="university">
-                        <el-select v-model="ruleForm.university" placeholder="请选择所在学校" style='width: 100%'>
-                            <el-option
-                             v-for="item in universityOptions"
-                             :key="item.value"
-                             :label="item.label"
-                             :value="item.value">
-                            </el-option>
-                        </el-select>
-                    </el-form-item>
-
-                    <el-form-item prop="school">
-                        <el-select v-model="ruleForm.school" placeholder="请选择所在院系" style='width: 100%' no-data-text='请首先选择所在学校'>
-                            <el-option
-                             v-for="item in schoolOptions"
-                             :key="item.value"
-                             :label="item.label"
-                             :value="item.value">
-                            </el-option>
-                        </el-select>
-                    </el-form-item>
-
-                    <el-form-item prop="auth">
-                        <el-select v-model="ruleForm.auth" placeholder="请选择注册身份" style='width: 100%'>
-                            <el-option
-                             v-for="item in authOptions"
-                             :key="item.value"
-                             :label="item.label"
-                             :value="item.value">
-                            </el-option>
-                        </el-select>
-                    </el-form-item>
-
-                    <el-form-item prop="startYear">
-                        <el-date-picker
-                         v-model="ruleForm.startYear"
-                         type="year"
-                         placeholder="请选择入学年份" style='width: 100%'>
-                        </el-date-picker>
-                    </el-form-item>
-
-                </el-col>
+                    </el-col>
+                    <el-col :span='12'>
+                        <el-form-item prop="startYear">
+                            <el-date-picker
+                                v-model="ruleForm.startYear"
+                                type="year"
+                                placeholder="请选择入学年份" style='width: 100%'>
+                            </el-date-picker>
+                        </el-form-item>
+                    </el-col>
                 </el-row>
+<<<<<<< HEAD
+
+                <el-row class="el-row--flex" justify="end"><p class="login-tips">Tips : 如不上传头像，系统将使用默认头像，其他信息不能为空。</p></el-row>
+=======
                 <el-row class="el-row--flex" justify="end"><p class="login-tips">Tips : 所有信息均为必填。</p></el-row>
+>>>>>>> 0e58c5fa5fa677c84905bf030504fdfb4a59e5a0
                 <div class="login-btn"><el-button type="primary" @click="register()">注册</el-button></div>
                 <el-row class="el-row--flex" justify="center"><el-button type="text" @click="toLogin()">已有账号？点击登录</el-button></el-row>
             </el-form>
@@ -149,6 +198,10 @@
                 }
             }
             return {
+                genderOptions:[
+                    {value:'M', label:'男'},
+                    {value:'F', label:'女'}
+                ],
                 authOptions:[{
                                 value:'1',// Evan: 这里请填入接口中定义的学生和老师对应编号
                                 label:'学生'
@@ -170,6 +223,7 @@
                     school:'',
                     auth:'',
                     startYear:'',
+                    imgUrl:''
                 },
                 rules: {
                     uName: [
@@ -205,7 +259,8 @@
                     university:false,
                     school:false,
                     auth:false,
-                    startYear:false
+                    startYear:false,
+                    imgUrl:false
                 }
             }
         },
@@ -231,6 +286,22 @@
                 // Evan:请在这里加入获取大学列表的接口信息
                 // 之后把get得到的大学列表push进universityOptions中，如下
                 this.universityOptions.push({value:'1',label:'同济大学'});
+            },
+            handleAvatarSuccess(res, file) {
+                this.imageUrl = URL.createObjectURL(file.raw);
+            },
+            beforeAvatarUpload(file) {
+                const isJPG = file.type === 'image/jpeg';
+                const isPNG = file.type === 'image/png';
+                const isLt2M = file.size / 1024 / 1024 < 2;
+
+                if (!isJPG && !isPNG) {
+                    this.$message.error('上传头像图片只能是 JPG 或 PNG 格式!');
+                }
+                if (!isLt2M) {
+                    this.$message.error('上传头像图片大小不能超过 2MB!');
+                }
+                return isJPG && isPNG && isLt2M;
             },
             register() {
                 this.loading=true;
@@ -258,6 +329,7 @@
                     school:this.ruleForm.school,
                     auth:this.ruleForm.auth,
                     startYear:this.ruleForm.startYear.getFullYear(),
+                    imgUrl:this.ruleForm.imgUrl
                 }).then(response => {
 
                     this.$notify({
@@ -334,6 +406,7 @@
         width:46%;
         vertical-align:top;
         float:right;
+        padding: 30px 0px;
     }
     .login-btn{
         text-align: center;
@@ -352,4 +425,41 @@
         color:#0066ff;
     }
 
+<<<<<<< HEAD
+    .ms-setImg{
+        font-size: 12px;
+        text-align: center;
+        margin-top: 15px;
+        color:#888;
+    }
+
+    .avatar-uploader .el-upload {
+        width: 60px;
+        height: 60px;
+        border: 1px dashed #d9d9d9;
+        border-radius: 6px;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+    }
+    .avatar-uploader .el-upload:hover {
+        width: 60px;
+        height: 60px;
+        border-color: #409EFF;
+    }
+    .avatar-uploader-icon {
+        font-size: 28px;
+        color: #8c939d;
+        width: 60px;
+        height: 60px;
+        text-align: center;
+    }
+    .avatar {
+        width: 60px;
+        height: 60px;
+        display: block;
+    }
+
+=======
+>>>>>>> 0e58c5fa5fa677c84905bf030504fdfb4a59e5a0
 </style>
