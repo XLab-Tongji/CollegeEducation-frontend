@@ -47,6 +47,7 @@
         methods: {
             toRegister(){
                 console.log("toRegister");
+                localStorage.setItem('ms_username',this.ruleForm.username);
                 this.$router.push('/register');
             },
             submitForm() {
