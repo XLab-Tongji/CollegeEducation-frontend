@@ -20,10 +20,14 @@
                     <el-col :span="12">
                         <el-form-item></el-form-item>
                         <el-form-item prop="gender">
-                            <el-radio-group v-model="ruleForm.gender">
-                                <el-radio-button label="男"></el-radio-button>
-                                <el-radio-button label="女"></el-radio-button>
-                            </el-radio-group>
+                            <el-select v-model="ruleForm.gender" placeholder="请选择你的性别" style='width: 100%'>
+                                <el-option
+                                    v-for="item in genderOptions"
+                                    :key="item.value"
+                                    :label="item.label"
+                                    :value="item.value">
+                                </el-option>
+                            </el-select>
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -47,17 +51,8 @@
                     </el-col>
                 </el-row>
 
-<<<<<<< HEAD
                 <el-row :gutter="20">
                     <el-col :span='12'>
-=======
-                    <el-radio-group v-model="ruleForm.gender" size="small" style='margin-bottom: 23px;margin-top: 2px'>
-                        <el-radio-button label="请选择你的性别" disabled></el-radio-button>
-                        <el-radio-button label="男" ></el-radio-button>
-                        <el-radio-button label="女"></el-radio-button>
-                    </el-radio-group>
-
->>>>>>> 0e58c5fa5fa677c84905bf030504fdfb4a59e5a0
                     <el-form-item prop="sID">
                         <el-input v-model="ruleForm.sID" placeholder="请输入学号/工号">
                             <el-button slot="prepend" icon="el-icon-edit"></el-button>
@@ -140,12 +135,9 @@
                         </el-form-item>
                     </el-col>
                 </el-row>
-<<<<<<< HEAD
 
                 <el-row class="el-row--flex" justify="end"><p class="login-tips">Tips : 如不上传头像，系统将使用默认头像，其他信息不能为空。</p></el-row>
-=======
-                <el-row class="el-row--flex" justify="end"><p class="login-tips">Tips : 所有信息均为必填。</p></el-row>
->>>>>>> 0e58c5fa5fa677c84905bf030504fdfb4a59e5a0
+
                 <div class="login-btn"><el-button type="primary" @click="register()">注册</el-button></div>
                 <el-row class="el-row--flex" justify="center"><el-button type="text" @click="toLogin()">已有账号？点击登录</el-button></el-row>
             </el-form>
@@ -425,7 +417,6 @@
         color:#0066ff;
     }
 
-<<<<<<< HEAD
     .ms-setImg{
         font-size: 12px;
         text-align: center;
@@ -459,7 +450,4 @@
         height: 60px;
         display: block;
     }
-
-=======
->>>>>>> 0e58c5fa5fa677c84905bf030504fdfb4a59e5a0
 </style>
