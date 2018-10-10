@@ -111,7 +111,12 @@
                                 title: '404页面'
                             }
                         ]
-                    }
+                    },
+                    {
+                        icon: 'el-icon-lx-upload',
+                        index: 'uploadSource',
+                        title: '上传资源'
+                    },
                 ]
             }
         },

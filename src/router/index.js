@@ -76,6 +76,12 @@ export default new Router({
                     meta: { title: '权限测试', permission: true }
                 },
                 {
+                    // 上传资源页面
+                    path: '/uploadSource',
+                    component: resolve => require(['../components/page/UploadSource.vue'], resolve),
+                    meta: { title: '上传资源'}
+                },
+                {
                     path: '/404',
                     component: resolve => require(['../components/page/404.vue'], resolve),
                     meta: { title: '404' }

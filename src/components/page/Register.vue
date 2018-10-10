@@ -261,7 +261,7 @@
         },
         watch:{
             'ruleForm.university':function(val){
-                // 请在这里写获取学院列表的请求，val中的参数是用户选择的学校，即university的value
+                // Evan: 请在这里写获取学院列表的请求，val中的参数是用户选择的学校，即university的value
                 // 之后将拿到的数据push进schoolOptions中，如下
                 this.schoolOptions.push({value:'1',label:'软件学院'});
                 this.schoolOptions.push({value:'2',label:'电信学院'});
@@ -305,7 +305,7 @@
                     });
                     this.loading=false;
                 }
-               
+                console.log(this.ruleForm.university);
                 this.$http.post(server.url + '/register', {
                     // Evan:这段的接口全部都是我YY的，需要和后端确定
                     uName:this.ruleForm.uName,
