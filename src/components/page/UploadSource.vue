@@ -20,40 +20,66 @@
                                 >
                                 <i class="el-icon-upload"></i>
                                 <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
-                                <div class="el-upload__tip" slot="tip">只能上传jpg/png文件，且不超过500kb</div>
+                                <!--<div class="el-upload__tip" slot="tip">只能上传jpg/png文件，且不超过500kb</div>-->
                             </el-upload>
                         </el-col>
-                        <el-col :offset='2' :span='14'>
+                        <el-col :span='14' style='padding-left: 18pt;'>
                             <el-form ref="form" :model="form" :rules='formRules' label-width="80px">
                                 <el-form-item label="资源名称" prop='name'>
-                                    <el-input v-model="form.name"></el-input>
+                                    <el-input v-model="form.name" style='width: 500px'></el-input>
                                 </el-form-item>
                                 <el-form-item label="资源类型" prop='type'>
-                                    <el-select v-model="form.type" placeholder="请选择资源类型">
+                                    <el-select filterable v-model="form.type" placeholder="请选择资源类型">
                                         <el-option v-for='item in options.type' :key='item.value' :label='item.label' :value='item.value'></el-option>
                                     </el-select>
                                 </el-form-item>
                                 <el-form-item label="所属分类" prop='category'>
-                                    <el-select v-model="form.category" placeholder="请选择所属分类">
+                                    <el-select filterable v-model="form.category" placeholder="请选择所属分类">
                                         <el-option v-for='item in options.category' :key='item.value' :label='item.label' :value='item.value'></el-option>
                                     </el-select>
                                 </el-form-item>
                                 <el-form-item label="资源分数" prop='point'>
-                                    <el-select v-model="form.point" placeholder="请选择资源分数">
+                                    <el-select filterable v-model="form.point" placeholder="请选择资源分数">
                                         <el-option v-for='item in options.point' :key='item' :label='item' :value='item'></el-option>
                                     </el-select>
                                 </el-form-item>
+                                <el-form-item label='资源描述' prop='discription'>
+                                    <el-input
+                                      style='width: 500px'
+                                      type="textarea"
+                                      :rows="5"
+                                      placeholder="请输入资源描述"
+                                      v-model="form.description">
+                                    </el-input>
+                                </el-form-item>
+                                <el-form-item label='设置标签'>
+                                    <el-select
+                                      style='width: 500px'
+                                      v-model="form.tag"
+                                      multiple
+                                      multiple-limit="5"
+                                      filterable
+                                      allow-create
+                                      default-first-option
+                                      placeholder="请选择文章标签">
+                                        <el-option
+                                            v-for="item in options.tag"
+                                            :key="item.value"
+                                            :label="item.label"
+                                            :value="item.value">
+                                        </el-option>
+                                    </el-select>
+                                </el-form-item>
+                                <el-checkbox v-model="form.agreement" style='margin-top: 8pt;margin-bottom: 18pt'>我已阅读并同意《一份根本不会看的协议》</el-checkbox>
+                                
+                                <el-row>
+                                    <el-button type="primary" @click="onSubmit">提交</el-button>
+                                </el-row>
+                                
                             </el-form>
                         </el-col>
                     </el-row>
-                    <el-row style='margin-top: 18pt'>
-                        <el-input
-                          type="textarea"
-                          :rows="10"
-                          placeholder="请输入资源描述"
-                          v-model="textarea">
-                        </el-input>
-                    </el-row>
+
                 </el-card>
             </el-col>
             <el-col :span='6'>
@@ -176,7 +202,9 @@
         }
     }
 </script>
-
+<style>
+    
+</style>
 <style scoped>
     .content-title{
         font-weight: 400;
