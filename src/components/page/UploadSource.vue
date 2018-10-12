@@ -57,11 +57,11 @@
                                       style='width: 500px'
                                       v-model="form.tag"
                                       multiple
-                                      multiple-limit="5"
                                       filterable
                                       allow-create
                                       default-first-option
-                                      placeholder="请选择文章标签">
+                                      placeholder="请选择文章标签"
+                                      no-data-text='输入标签后敲击 Enter 确认'>
                                         <el-option
                                             v-for="item in options.tag"
                                             :key="item.value"
@@ -73,7 +73,7 @@
                                 <el-checkbox v-model="form.agreement" style='margin-top: 8pt;margin-bottom: 18pt'>我已阅读并同意《一份根本不会看的协议》</el-checkbox>
                                 
                                 <el-row>
-                                    <el-button type="primary" @click="onSubmit">提交</el-button>
+                                    <el-button type="primary" icon="el-icon-lx-roundcheck" @click="onSubmit">提交</el-button>
                                 </el-row>
                                 
                             </el-form>
@@ -130,6 +130,7 @@
 
 <script>
     import VueCropper  from 'vue-cropperjs';
+    import server from '../../../config/index';
     export default {
         name: 'upload',
         data: function(){
@@ -144,7 +145,7 @@
                     agreement:false
                 },
                 formRules:{
-                    name:[{ required: true, message: '请输入资源名称', trigger: 'blur' },
+                    name:[{ required: true, message: ' ', trigger: 'blur' },
                     { min: 3, max: 5, message: '长度在 3 到 5 个字符', trigger: 'blur' }],
                     type:[{ required: true, message: '请选择资源类型', trigger: 'blur' }],
                     category:[{ required: true, message: '请选择所属分类', trigger: 'blur' }],
@@ -152,9 +153,12 @@
                 },
                 // 下拉框选项
                 options:{
-                    type:[{value:0,label:'文件'},{value:1,label:'代码'}],
-                    category:[{value:0,label:'文件'},{value:1,label:'代码'}],
+                    type:[],
+                    category:[],
                     point:[1,2,3,4,5]
+                },
+                buttonLogic:{
+                    submitBtn:false,
                 },
                 defaultSrc: './static/img/img.jpg',
                 fileList: [],
@@ -166,7 +170,42 @@
         components: {
             VueCropper
         },
+        watch:{
+            'form.agreement':function(val){
+                this.buttonLogic.submitBtn=val;
+            }
+        },
+        mounted:function(){
+            this.getCategoryList();
+            this.getTypeList();
+        },
         methods:{
+            // 提交按钮的函数
+            onSubmit(){
+                console.log(this.form)
+            },
+            // 获取资源类型列表
+            getTypeList(){
+                this.$http.get(server.url + '/registerCategories',{}).then(function(response){
+                    // 把获取回来的东西push进去
+                    for(let i=0;i<response.data.data.length;i++){
+                        this.options.type.push({value:response.data.data[i].id,label:response.data.data[i].resourceCategoryName});
+                    }
+                },function(response){  
+                    console.error("初始化获取资源类型列表错误")
+                });
+            },
+            // 获取所属分类列表
+            getCategoryList(){
+                this.$http.get(server.url + '/resourceMajors',{}).then(function(response){
+                    // 把获取回来的东西push进去
+                    for(let i=0;i<response.data.data.length;i++){
+                        this.options.category.push({value:response.data.data[i].id,label:response.data.data[i].resourceMajorName});
+                    }
+                },function(response){  
+                    console.error("初始化获取所属分类列表错误")
+                });
+            },
             setImage(e){
                 const file = e.target.files[0];
                 if (!file.type.includes('image/')) {
