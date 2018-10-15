@@ -35,25 +35,6 @@ export default new Router({
                     path: '/markdown',
                     component: resolve => require(['../components/page/Markdown.vue'], resolve),
                     meta: { title: 'markdown编辑器' }    
-                },
- 
-
-                {
-                    // 权限页面
-                    path: '/permission',
-                    component: resolve => require(['../components/page/Permission.vue'], resolve),
-                    meta: { title: '权限测试', permission: true }
-                },
-
-                {
-                    path: '/404',
-                    component: resolve => require(['../components/page/404.vue'], resolve),
-                    meta: { title: '404' }
-                },
-                {
-                    path: '/403',
-                    component: resolve => require(['../components/page/403.vue'], resolve),
-                    meta: { title: '403' }
                 }
             ]
         },

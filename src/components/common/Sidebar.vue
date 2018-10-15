@@ -79,21 +79,7 @@
 
 
                     
-                    {
-                        icon: 'el-icon-lx-warn',
-                        index: '6',
-                        title: '错误处理',
-                        subs: [
-                            {
-                                index: 'permission',
-                                title: '权限测试'
-                            },
-                            {
-                                index: '404',
-                                title: '404页面'
-                            }
-                        ]
-                    },
+                    
                 ]
             }
         },
