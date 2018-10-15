@@ -80,11 +80,7 @@
                         ]
                     },
 
-                    {
-                        icon: 'el-icon-lx-favor',
-                        index: 'charts',
-                        title: 'schart图表'
-                    },
+
                     
                     {
                         icon: 'el-icon-lx-warn',

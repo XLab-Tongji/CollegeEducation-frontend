@@ -42,12 +42,6 @@ export default new Router({
                     component: resolve => require(['../components/page/Upload.vue'], resolve),
                     meta: { title: '文件上传' }   
                 },
-                {
-                    // vue-schart组件
-                    path: '/charts',
-                    component: resolve => require(['../components/page/BaseCharts.vue'], resolve),
-                    meta: { title: 'schart图表' }
-                },
 
                 {
                     // 权限页面
