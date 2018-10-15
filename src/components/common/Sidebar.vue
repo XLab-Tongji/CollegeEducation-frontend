@@ -48,7 +48,6 @@
                         index: 'table',
                         title: '基础表格'
                     },
-                   
                     {
                         icon: 'el-icon-lx-calendar',
                         index: '3',
@@ -87,11 +86,6 @@
                         icon: 'el-icon-lx-favor',
                         index: 'charts',
                         title: 'schart图表'
-                    },
-                    {
-                        icon: 'el-icon-rank',
-                        index: 'drag',
-                        title: '拖拽列表'
                     },
                     {
                         icon: 'el-icon-lx-warn',
