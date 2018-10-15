@@ -36,12 +36,7 @@ export default new Router({
                     component: resolve => require(['../components/page/Markdown.vue'], resolve),
                     meta: { title: 'markdown编辑器' }    
                 },
-                {
-                    // 图片上传组件
-                    path: '/upload',
-                    component: resolve => require(['../components/page/Upload.vue'], resolve),
-                    meta: { title: '文件上传' }   
-                },
+ 
 
                 {
                     // 权限页面
