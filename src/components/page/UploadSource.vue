@@ -11,120 +11,85 @@
                 <el-card>
                     <div class="content-title">上传资源</div>
                     <el-row>
-                        <el-col :span='8'>
-                            <el-upload
-                                class="upload-demo"
-                                drag
-                                action="/api/posts/"
-                                style='width: 360px'
-                                >
-                                <i class="el-icon-upload"></i>
-                                <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
-                                <!--<div class="el-upload__tip" slot="tip">只能上传jpg/png文件，且不超过500kb</div>-->
-                            </el-upload>
-                        </el-col>
-                        <el-col :span='14' style='padding-left: 18pt;'>
-                            <el-form ref="form" :model="form" :rules='formRules' label-width="80px">
-                                <el-form-item label="资源名称" prop='name'>
-                                    <el-input v-model="form.name" style='width: 500px'></el-input>
-                                </el-form-item>
-                                <el-form-item label="资源类型" prop='type'>
-                                    <el-select filterable v-model="form.type" placeholder="请选择资源类型">
-                                        <el-option v-for='item in options.type' :key='item.value' :label='item.label' :value='item.value'></el-option>
-                                    </el-select>
-                                </el-form-item>
-                                <el-form-item label="所属分类" prop='category'>
-                                    <el-select filterable v-model="form.category" placeholder="请选择所属分类">
-                                        <el-option v-for='item in options.category' :key='item.value' :label='item.label' :value='item.value'></el-option>
-                                    </el-select>
-                                </el-form-item>
-                                <el-form-item label="资源分数" prop='point'>
-                                    <el-select filterable v-model="form.point" placeholder="请选择资源分数">
-                                        <el-option v-for='item in options.point' :key='item' :label='item' :value='item'></el-option>
-                                    </el-select>
-                                </el-form-item>
-                                <el-form-item label='资源描述' prop='discription'>
-                                    <el-input
-                                      style='width: 500px'
-                                      type="textarea"
-                                      :rows="5"
-                                      placeholder="请输入资源描述"
-                                      v-model="form.description">
-                                    </el-input>
-                                </el-form-item>
-                                <el-form-item label='设置标签'>
-                                    <el-select
-                                      style='width: 500px'
-                                      v-model="form.tag"
-                                      multiple
-                                      filterable
-                                      allow-create
-                                      default-first-option
-                                      placeholder="请选择文章标签"
-                                      no-data-text='输入标签后敲击 Enter 确认'>
-                                        <el-option
-                                            v-for="item in options.tag"
-                                            :key="item.value"
-                                            :label="item.label"
-                                            :value="item.value">
-                                        </el-option>
-                                    </el-select>
-                                </el-form-item>
-                                <el-checkbox v-model="form.agreement" style='margin-top: 8pt;margin-bottom: 18pt'>我已阅读并同意《一份根本不会看的协议》</el-checkbox>
-                                
-                                <el-row>
-                                    <el-button type="primary" icon="el-icon-lx-roundcheck" @click="onSubmit">提交</el-button>
-                                </el-row>
-                                
-                            </el-form>
-                        </el-col>
+                        <div style="display: inline-block; vertical-align: top;">
+                            <el-col style="margin-bottom:20pt;">
+                                <el-upload
+                                    :headers="uploadFunc.uploadHeaders"
+                                    :on-success="uploadSuccess"
+                                    class="upload-demo"
+                                    drag
+                                    action='http://yapi.demo.qunar.com/mock/20940/uploadResource'
+                                    style='width: 360px'
+                                    :beforeUpload='beforeUpload'
+                                    >
+                                    <i class="el-icon-upload"></i>
+                                    <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+                                    <!--<div class="el-upload__tip" slot="tip">只能上传jpg/png文件，且不超过500kb</div>-->
+                                </el-upload>
+                            </el-col>
+                            </div>
+                            <div style="display: inline-block;">
+                            <el-col :span='14' style='padding-left: 18pt;'>
+                                <el-form ref="form" :model="form" :rules='formRules' label-width="80px">
+                                    <el-form-item label="资源名称" prop='name'>
+                                        <el-input v-model="form.name" style='width: 500px'></el-input>
+                                    </el-form-item>
+                                    <el-form-item label="资源类型" prop='type'>
+                                        <el-select filterable v-model="form.type" placeholder="请选择资源类型">
+                                            <el-option v-for='item in options.type' :key='item.value' :label='item.label' :value='item.value'></el-option>
+                                        </el-select>
+                                    </el-form-item>
+                                    <el-form-item label="所属分类" prop='category'>
+                                        <el-select filterable v-model="form.category" placeholder="请选择所属分类">
+                                            <el-option v-for='item in options.category' :key='item.value' :label='item.label' :value='item.value'></el-option>
+                                        </el-select>
+                                    </el-form-item>
+                                    <el-form-item label="资源分数" prop='point'>
+                                        <el-select filterable v-model="form.point" placeholder="请选择资源分数">
+                                            <el-option v-for='item in options.point' :key='item' :label='item' :value='item'></el-option>
+                                        </el-select>
+                                    </el-form-item>
+                                    <el-form-item label='资源描述' prop='discription'>
+                                        <el-input
+                                          style='width: 500px'
+                                          type="textarea"
+                                          :rows="5"
+                                          placeholder="请输入资源描述"
+                                          v-model="form.description">
+                                        </el-input>
+                                    </el-form-item>
+                                    <el-form-item label='设置标签'>
+                                        <el-select
+                                          style='width: 500px'
+                                          v-model="form.tag"
+                                          multiple
+                                          filterable
+                                          allow-create
+                                          default-first-option
+                                          placeholder="请选择文章标签"
+                                          no-data-text='输入标签后敲击 Enter 确认'>
+                                            <el-option
+                                                v-for="item in options.tag"
+                                                :key="item.value"
+                                                :label="item.label"
+                                                :value="item.value">
+                                            </el-option>
+                                        </el-select>
+                                    </el-form-item>
+                                    <el-checkbox v-model="form.agreement" style='margin-top: 8pt;margin-bottom: 18pt'>我已阅读并同意《一份根本不会看的协议》</el-checkbox>
+                                    <el-row>
+                                        <el-button type="primary" icon="el-icon-lx-roundcheck" @click="onSubmit">提交</el-button>
+                                    </el-row>
+                                </el-form>
+                            </el-col>
+                        </div>
                     </el-row>
-
                 </el-card>
             </el-col>
             <el-col :span='6'>
                 <el-card></el-card>
             </el-col>
         </el-row>
-
-
-
-<!--
-        <div class="container">
-            <div class="content-title">支持拖拽</div>
-            
-            <el-upload
-                class="upload-demo"
-                drag
-                action="/api/posts/"
-                >
-                <i class="el-icon-lx-upload"></i>
-                <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
-                <div class="el-upload__tip" slot="tip">只能上传jpg/png文件，且不超过500kb</div>
-            </el-upload>
-            <div class="content-title">支持裁剪</div>
-            <div class="plugins-tips">
-                vue-cropperjs：一个封装了 cropperjs 的 Vue 组件。
-                访问地址：<a href="https://github.com/Agontuk/vue-cropperjs" target="_blank">vue-cropperjs</a>
-            </div>
-            <div class="crop-demo">
-                <img :src="cropImg" class="pre-img">
-                <div class="crop-demo-btn">选择图片
-                    <input class="crop-input" type="file" name="image" accept="image/*" @change="setImage"/>
-                </div>
-            </div>
-        
-            <el-dialog title="裁剪图片" :visible.sync="dialogVisible" width="30%">
-                <vue-cropper ref='cropper' :src="imgSrc" :ready="cropImage" :zoom="cropImage" :cropmove="cropImage" style="width:100%;height:300px;"></vue-cropper>
-                <span slot="footer" class="dialog-footer">
-                    <el-button @click="cancelCrop">取 消</el-button>
-                    <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
-                </span>
-            </el-dialog>
-        </div>
--->
-
-
     </div>
 </template>
 
@@ -142,7 +107,8 @@
                     tag:[],
                     point:'',
                     description:'',
-                    agreement:false
+                    agreement:false,
+                    fileID:''
                 },
                 formRules:{
                     name:[{ required: true, message: ' ', trigger: 'blur' },
@@ -156,6 +122,14 @@
                     type:[],
                     category:[],
                     point:[1,2,3,4,5]
+                },
+                // 上传文件的接口
+                uploadFunc:{
+                    uploadURL:server.url+"/uploadResource",
+                    uploadHeaders:{
+                        Authorization:'Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJxaWJhdHUiLCJleHAiOjE1Mzk4NTEyMzksImlhdCI6MTUzOTI0NjQzOX0.L0i_uqSjfXvcgNIyP_zKWde8FZ9nQT0xQB2pbslPuMIGDYTptthB4f4sqJLZP2bramTtWPdO1mELRy1zA_Yicw'
+                        // 这里需要更换成Authorization
+                    }
                 },
                 buttonLogic:{
                     submitBtn:false,
@@ -182,7 +156,19 @@
         methods:{
             // 提交按钮的函数
             onSubmit(){
-                console.log(this.form)
+                this.$http.post(server.url + '/registerCategories',{
+                    "resourceID": this.form.fileID,
+                    "categoryID": this.form.type,
+                    "resourceMajorID": this.form.category,
+                    "resourceName": this.form.name,
+                    "description": this.form.description,
+                    "point":this.form.point,
+                    "tag":this.form.tag
+                }).then(function(response){
+                    
+                },function(response){  
+                    console.error("初始化获取资源类型列表错误")
+                });
             },
             // 获取资源类型列表
             getTypeList(){
@@ -206,6 +192,34 @@
                     console.error("初始化获取所属分类列表错误")
                 });
             },
+            // 上传文件前判断大小（在这里可以补充上传文件的其他限制）
+            beforeUpload(file){
+                var limitRule1=(file.size/1024/1024)<128;
+                if(!limitRule1){
+                    this.$notify.error({
+                        title: '错误',
+                        position:'bottom-right',
+                        message: '上传的文件不可超过128MB'
+                    });
+                    console.error("上传文件不能超过128MB");
+                }
+                return limitRule1;
+            },
+            // 成功完成上传的返回
+            uploadSuccess(response, file, fileList){
+                console.log(response.data.data);
+                this.form.fileID=response.data.data;
+            },
+            // 点击删除后从服务器删除文件
+            uploadRemove(file, fileList){
+                var resourceID=this.fileID;
+                this.$http.get(server.url + '/deleteResource/'+resourceID,{}).then(function(response){
+                    this.fileID='';
+                },function(response){  
+                    console.error("初始化获取资源类型列表错误")
+                });
+            },
+
             setImage(e){
                 const file = e.target.files[0];
                 if (!file.type.includes('image/')) {
