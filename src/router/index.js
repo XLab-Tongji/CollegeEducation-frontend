@@ -19,13 +19,6 @@ export default new Router({
                     component: resolve => require(['../components/page/Dashboard.vue'], resolve),
                     meta: { title: '系统首页' }
                 },
-
-                {
-                    path: '/table',
-                    component: resolve => require(['../components/page/BaseTable.vue'], resolve),
-                    meta: { title: '基础表格' }
-                },
-                
                 {
                     path: '/form',
                     component: resolve => require(['../components/page/BaseForm.vue'], resolve),
@@ -62,12 +55,7 @@ export default new Router({
                     component: resolve => require(['../components/page/Permission.vue'], resolve),
                     meta: { title: '权限测试', permission: true }
                 },
-                {
-                    // 上传资源页面
-                    path: '/uploadSource',
-                    component: resolve => require(['../components/page/UploadSource.vue'], resolve),
-                    meta: { title: '上传资源'}
-                },
+
                 {
                     path: '/404',
                     component: resolve => require(['../components/page/404.vue'], resolve),
