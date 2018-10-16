@@ -261,11 +261,21 @@
         },
         watch:{
             'ruleForm.university':function(val){
-                // Evan: 请在这里写获取学院列表的请求，val中的参数是用户选择的学校，即university的value
+                //console.log(val);
+                // 请在这里写获取学院列表的请求，val中的参数是用户选择的学校，即university的value
                 // 之后将拿到的数据push进schoolOptions中，如下
-                this.schoolOptions.push({value:'1',label:'软件学院'});
-                this.schoolOptions.push({value:'2',label:'电信学院'});
-            },
+                this.$http.get(server.url + '/register/university/' + val).then(response => {
+                    var count = 0;
+                    var majorIn = JSON.parse(response.bodyText);
+                    while(count < majorIn.data.length){
+                        this.schoolOptions.push({value:majorIn.data[count].majorID,label:majorIn.data[count].majorName});
+                        count++;
+                    }
+                }, response => {
+                     console.log("error");
+                     console.log(response);
+                 });
+            }
         },
         methods: {
             toLogin(){
@@ -273,9 +283,22 @@
                 this.$router.push('/login');
             },
             getUniversityList(){
+                 //console.log("university");
                 // Evan:请在这里加入获取大学列表的接口信息
                 // 之后把get得到的大学列表push进universityOptions中，如下
-                this.universityOptions.push({value:'1',label:'同济大学'});
+                this.$http.get(server.url + '/register/university/').then(response => {
+                    //console.log(response);
+                    var count = 0;
+                    var universityList = JSON.parse(response.bodyText);
+                    while(count < universityList.data.length){
+                        this.universityOptions.push({value:universityList.data[count].universityID,label:universityList.data[count].universityName});
+                        count++;
+                    }
+                    //this.universityOptions.push({value:resppo,label:'同济大学'});
+                }, response => {
+                     console.log("error");
+                     console.log(response);
+                 });
             },
             handleAvatarSuccess(res, file) {
                 this.imageUrl = URL.createObjectURL(file.raw);
@@ -305,7 +328,7 @@
                     });
                     this.loading=false;
                 }
-                console.log(this.ruleForm.university);
+               
                 this.$http.post(server.url + '/register', {
                     // Evan:这段的接口全部都是我YY的，需要和后端确定
                     uName:this.ruleForm.uName,
