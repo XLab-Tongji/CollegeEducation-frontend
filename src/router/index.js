@@ -20,6 +20,11 @@ export default new Router({
                     meta: { title: '系统首页' }
                 },
                 {
+                    path: '/upload-source',
+                    component: resolve => require(['../components/page/UploadSource.vue'], resolve),
+                    meta: { title: '上传资源' }
+                },
+                {
                     path: '/form',
                     component: resolve => require(['../components/page/BaseForm.vue'], resolve),
                     meta: { title: '基本表单' }
@@ -46,6 +51,7 @@ export default new Router({
             path: '/register',
             component: resolve => require(['../components/page/Register.vue'], resolve)
         },
+        
         {
             path: '*',
             redirect: '/404'

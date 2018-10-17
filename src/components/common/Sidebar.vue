@@ -44,6 +44,12 @@
                         index: 'dashboard',
                         title: '系统首页'
                     },
+
+                    {
+                        icon: 'el-icon-lx-upload',
+                        index: 'upload-source',
+                        title: '上传资源'
+                    },
                     
                     {
                         icon: 'el-icon-lx-calendar',
