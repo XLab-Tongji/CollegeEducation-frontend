@@ -50,6 +50,12 @@
                         index: 'upload-source',
                         title: '上传资源'
                     },
+
+                    {
+                        icon: 'el-icon-question',
+                        index: 'topiclist',
+                        title: '问题交流'
+                    },
                     
                     {
                         icon: 'el-icon-lx-calendar',

@@ -40,6 +40,11 @@ export default new Router({
                     path: '/markdown',
                     component: resolve => require(['../components/page/Markdown.vue'], resolve),
                     meta: { title: 'markdown编辑器' }    
+                },
+                {
+                    path: '/topiclist',
+                    component: resolve => require(['../components/page/TopicList.vue'], resolve),
+                    meta: { title: '问题交流' }
                 }
             ]
         },
