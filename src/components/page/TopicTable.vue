@@ -4,6 +4,7 @@
             <div style="float: left">
                 <el-input
                     placeholder="查找内容"
+                    clearable="true"
                     prefix-icon="el-icon-search"
                     v-model="keywords"
                     style="width: 250px"
@@ -21,7 +22,7 @@
                 </el-button></div>
         </div>
 
-        <div style="padding-top: 20px">
+        <div>
             <el-table
                 ref="multipleTable"
                 :data="articles"
@@ -33,29 +34,27 @@
                     label="主题"
                     align="left"
                     width="350">
-                    <template>
-                        <p style="font-size: 15px; font-weight: bold; color: #0A9894;cursor: pointer">{{ articles._topicTitle }}</p>
-                        <p style="font-size: 12px; color: #282828">作者： {{ articles._userId}} </p>
+                    <template slot-scope="scope">
+                        <p style="font-size: 14px; font-weight: bold; color: #0A9894; padding-top: 7px;">{{ scope.row.topicTitle }}</p>
+                        <p style="font-size: 12px; color: #282828; margin-top: 4px; padding-bottom: 7px"> id： {{ scope.row.userId}} </p>
                     </template>
                 </el-table-column>
                 <el-table-column
                     label="点击数"
                     align="left" width="100">
-                    <p style="font-size: 12px">{{ articles._clickingRate}} </p>
+                    <template slot-scope="scope"><span style="font-size: 13px">{{ scope.row.clickingRate}} </span></template>
                 </el-table-column>
                 <el-table-column
                     label="回复数"
                     align="left" width="100">
-                    <template>
-                        <p style="font-size: 12px">{{ articles._replyCount}} </p>
-                    </template>
+                    <template slot-scope="scope"><span style="font-size: 13px">{{ scope.row.replyCount}} </span></template>
                 </el-table-column>
                 <el-table-column
                     label="最新回复"
                     align="left">
-                    <template>
-                        <p style="font-size: 12px">{{ articles._userId}} </p>
-                        <p style="font-size: 10px">{{ articles._topicDate | formatDateTime}}</p>
+                    <template slot-scope="scope">
+                        <p style="font-size: 13px">id: {{ scope.row.userId}} </p>
+                        <p style="font-size: 10px">{{ scope.row.topicDate | formatDateTime}}</p>
                     </template>
                 </el-table-column>
             </el-table>
@@ -68,7 +67,7 @@
                     pager-count="11"
                     layout="prev, pager, next"
                     :total="totalCount"
-                    style="color: #939393"
+                    style="color: #939393;padding-top: 20px"
                     @current-change="currentChange" v-show="this.articles.length>0">
                 </el-pagination>
             </div>
@@ -82,7 +81,6 @@
         data() {
             return {
                 articles: [],
-                selItems: [],
                 loading: false,
                 searchType: '1',
                 currentPage: 1,
@@ -116,44 +114,48 @@
                 this.loading = true;
                 this.loadBlogs(currentPage, this.pageSize);
             },
-            loadBlogs(page, count){
-                var _this = this;
-                this.$http.get(server.url + '/article/all').then(response => {
-                    _this.$message({type: 'error', message: '数据加载1'});
+            loadBlogs: function (page, count) {
+                this.articles = [];
+                var url = '/article/all';
+                this.$http.get(server.url + url, {
+                    page: page,
+                    count: count,
+                    keywords: this.keywords
+                }).then((response) => {
                     //console.log(response)
-                    _this.loading = false;
-                    if(response.status == 200){
-                        _this.$message({type: 'error', message: '数据加载1'});
+                    if (response.status == 200) {
+                        var articleList = JSON.parse(response.bodyText);
+                        this.totalCount = articleList.data.length;
                         var i = (page - 1) * count;
-                        var articleList = JSON.parse(response.data);
-                        while(i < count){
+                        var j = (page * count < this.totalCount? page * count : this.totalCount);
+                        while (i < j) {
                             this.articles.push({
-                                _userId: articleList.data[i].userId,
-                                _topicDate: articleList.data[i].topicDate,
-                                _replyCount: articleList.data[i].replyCount,
-                                _sectorId:articleList.data[i].sectorId,
-                                _topicId: articleList.data[i].topicId,
-                                _topicText: articleList.data[i].topicText,
-                                _topicTitle: articleList.data[i].topicTitle,
-                                _clickingRate: articleList.data[i].clickingRate,
-                                _sectorState: articleList.data[i].sectorState
+                                userId: articleList.data[i].userId,
+                                topicDate: articleList.data[i].topicDate,
+                                replyCount: articleList.data[i].replyCount,
+                                sectorId: articleList.data[i].sectorId,
+                                topicId: articleList.data[i].topicId,
+                                topicText: articleList.data[i].topicText,
+                                topicTitle: articleList.data[i].topicTitle,
+                                clickingRate: articleList.data[i].clickingRate,
+                                sectorState: articleList.data[i].sectorState
                             });
-                            _this.$message({type: 'error', message: '数据加载2'});
                             i++;
                         }
-                    }else {
-                        _this.$message({type: 'error', message: '数据加载失败!'});
-                    }
-                }, response=> {
-                    _this.loading = false;
-                    if (response.status == 403) {
-                        _this.$message({type: 'error', message: resp.response.data});
+                        this.loading = false;
                     } else {
-                        _this.$message({type: 'error', message: '403 not found!'});
+                        this.$message({type: 'error', message: '数据加载失败!'});
                     }
-                }).catch(response=> {
+                }, (response) => {
+                    this.loading = false;
+                    if (response.status == 403) {
+                        this.$message({type: 'error', message: response.response.data});
+                    } else {
+                        this.$message({type: 'error', message: '数据加载失败!'});
+                    }
+                }).catch((response) => {
                     _this.loading = false;
-                    _this.$message({type: 'error', message: '找不到服务器!'});
+                    this.$message({type: 'error', message: '数据加载失败!'});
                 })
             },
             handleSelectionChange(val) {
@@ -189,5 +191,6 @@
         width: 80%;
         overflow-x: hidden;
         overflow-y: hidden;
+        padding-top: 10px;
     }
 </style>

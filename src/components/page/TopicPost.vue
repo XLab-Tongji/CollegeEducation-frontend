@@ -3,7 +3,9 @@
         <el-main class="main">
             <div class="title">发表主题</div>
             <div align="left" class="topic-title">
-                <el-input v-model="article.title" size="small" placeholder="请输入标题..." style="width: 350px"></el-input>
+                <el-input v-model="article.title" size="small" maxlength="25"
+                          placeholder="请简要描述一下你的问题"
+                          style="width: 350px"></el-input>
                 <el-tag
                     :key="tag"
                     v-for="tag in article.dynamicTags"
@@ -14,17 +16,22 @@
                 </el-tag>
                 <el-input
                     class="input-new-tag"
-                    v-if="tagInputVisible"
-                    v-model="tagValue"
-                    ref="saveTagInput"
-                    size="mini"
-                    style="width: 80px"
+                    v-if="tagInputVisible" v-model="tagValue" ref="saveTagInput"
+                    size="mini" style="width: 80px" maxlength="10"
                     @keyup.enter.native="handleInputConfirm"
                     @blur="handleInputConfirm">
                 </el-input>
                 <el-button v-else class="button-new-tag" type="primary" size="mini" @click="showInput">+Tag</el-button>
             </div>
-            <div style="margin-top: 10px; font-size: 10px">此处有框</div>
+            <div id="editor">
+            <mavon-editor
+                :boxShadow="false"
+                :subfield="false"
+                :toolbars="toolBars"
+                :fontSize="12"
+                ref=md @imgAdd="$imgAdd" @imgDel="$imgDel">
+            </mavon-editor>
+            </div>
             <div class="post">
                 <el-button size="mini" class="save-btn">保存到草稿箱</el-button>
                 <el-button type="primary" size="mini" class="post-btn">发布</el-button>
@@ -33,22 +40,31 @@
     </el-container>
 </template>
 <script>
-    // Local Registration
-    import {mavonEditor} from 'mavon-editor'
-    // 可以通过 mavonEditor.markdownIt 获取解析器markdown-it对象
+    import { mavonEditor} from 'mavon-editor'
     import 'mavon-editor/dist/css/index.css'
 
     export default {
+        name: 'editor',
         components: {
-            mavonEditor
+            'mavon-editor': mavonEditor
         },
         methods: {
-            imgAdd(pos, $file){
-
+            $imgAdd(pos, $file){
+                // 第一步.将图片上传到服务器.
+                var formdata = new FormData();
+                formdata.append('image', $file);
+                axios({
+                    url: 'server url',
+                    method: 'post',
+                    data: formdata,
+                    headers: { 'Content-Type': 'multipart/form-data' },
+                }).then((url) => {
+                    // 第二步.将返回的url替换到文本原位置![...](0) -> ![...](url)
+                    // $vm.$img2Url 将md源码中图片文件名替换为url
+                    $vm.$img2Url(pos, url);
+                })
             },
-            imgDel(pos){
-
-            },
+            imgDel(pos) {},
             handleClose(tag) {
                 this.article.dynamicTags.splice(this.article.dynamicTags.indexOf(tag), 1);
             },
@@ -72,13 +88,25 @@
                 tagInputVisible: false,
                 tagValue: '',
                 loading: false,
-                from: '',
                 article: {
                     id: '-1',
                     dynamicTags: [],
                     title: '',
                     mdContent: '',
                     cid: ''
+                },
+                toolBars: {
+                    superscript: true, // 上角标
+                    subscript: true, // 下角标
+                    quote: true, // 引用
+                    link: true, // 链接
+                    imagelink: true, // 图片链接
+                    code: true, // code
+                    htmlcode: true, // 展示html源码
+                    undo: true, // 上一步
+                    redo: true, // 下一步
+                    trash: true, // 清空
+                    subfield: true, // 单双栏模式
                 }
             }
         }
@@ -88,9 +116,9 @@
     .topic-post > .main > #editor {
         width: 70%;
         height: 100px;
+        padding-left: 0px;
         text-align: left;
-        margin-bottom: 0px;
-        padding-bottom: 0px;
+        margin-top: 10px;
     }
 
     .topic-post > .main {
@@ -105,7 +133,7 @@
     }
 
     .topic-post > .main > .topic-title {
-        margin-top: 0px
+        margin-top: 10px
     }
 
     .topic-post > .main > .topic-title tag {
