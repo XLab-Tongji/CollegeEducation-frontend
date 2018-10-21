@@ -26,35 +26,33 @@
             <el-table
                 ref="multipleTable"
                 :data="articles"
-                stripe
                 tooltip-effect="dark"
                 class="topic-table"
                 @selection-change="handleSelectionChange" v-loading="loading">
                 <el-table-column
                     label="主题"
-                    align="left"
-                    width="350">
+                    width="350" style="text-align: center">
                     <template slot-scope="scope">
                         <p style="font-size: 14px; font-weight: bold; color: #0A9894; padding-top: 7px;">{{ scope.row.topicTitle }}</p>
-                        <p style="font-size: 12px; color: #282828; margin-top: 4px; padding-bottom: 7px"> id： {{ scope.row.userId}} </p>
+                        <p class="topic-content"> {{ scope.row.topicText}} </p>
                     </template>
                 </el-table-column>
                 <el-table-column
                     label="点击数"
-                    align="left" width="100">
-                    <template slot-scope="scope"><span style="font-size: 13px">{{ scope.row.clickingRate}} </span></template>
+                    align="center" width="100">
+                    <template slot-scope="scope"><span style="font-size: 13px; color: #6A6A6A">{{ scope.row.clickingRate}} </span></template>
                 </el-table-column>
                 <el-table-column
                     label="回复数"
-                    align="left" width="100">
-                    <template slot-scope="scope"><span style="font-size: 13px">{{ scope.row.replyCount}} </span></template>
+                    align="center" width="100">
+                    <template slot-scope="scope"><span style="font-size: 13px; color: #6A6A6A">{{ scope.row.replyCount}} </span></template>
                 </el-table-column>
                 <el-table-column
                     label="最新回复"
-                    align="left">
+                    align="center">
                     <template slot-scope="scope">
-                        <p style="font-size: 13px">id: {{ scope.row.userId}} </p>
-                        <p style="font-size: 10px">{{ scope.row.topicDate | formatDateTime}}</p>
+                        <p style="font-size: 13px; color: #6A6A6A">id: {{ scope.row.userId}} </p>
+                        <p style="font-size: 10px; color: #6A6A6A">{{ scope.row.topicDate | formatDateTime}}</p>
                     </template>
                 </el-table-column>
             </el-table>
@@ -67,7 +65,7 @@
                     pager-count="11"
                     layout="prev, pager, next"
                     :total="totalCount"
-                    style="color: #939393;padding-top: 20px"
+                    class="page-change"
                     @current-change="currentChange" v-show="this.articles.length>0">
                 </el-pagination>
             </div>
@@ -85,7 +83,7 @@
                 searchType: '1',
                 currentPage: 1,
                 totalCount: -1,
-                pageSize: 2,
+                pageSize: 3,
                 keywords: '',
                 searchOptions: [{
                     value: '1',
@@ -117,12 +115,9 @@
             loadBlogs: function (page, count) {
                 this.articles = [];
                 var url = '/article/all';
-                this.$http.get(server.url + url, {
-                    page: page,
-                    count: count,
-                    keywords: this.keywords
-                }).then((response) => {
-                    //console.log(response)
+                var param = new URLSearchParams();
+                param.append('keywords', this.keywords);
+                this.$http.get(server.url + url, param).then((response) => {
                     if (response.status == 200) {
                         var articleList = JSON.parse(response.bodyText);
                         this.totalCount = articleList.data.length;
@@ -161,19 +156,19 @@
             handleSelectionChange(val) {
                 this.selItems = val;
             },
-            handleEdit(index, row) {
-                this.$router.push({path: '/editBlog', query: {from: this.activeName,id:row.id}});
-            },
         },
-        props: ['state', 'showEdit', 'showDelete', 'activeName']
+        props: ['state']
     }
 </script>
 
 <style type="text/css">
-    .topic_table-footer {
+    .topic-table-footer {
         box-sizing: content-box;
         margin-top: 20px;
-        text-emphasis-color: #1ac7c3;
+    }
+
+    .page-change {
+        color: #939393;
     }
 
     .type-select {
@@ -192,5 +187,15 @@
         overflow-x: hidden;
         overflow-y: hidden;
         padding-top: 10px;
+    }
+
+    .topic-content {
+        white-space: nowrap;
+        text-overflow:ellipsis;
+        overflow:hidden;
+        font-size: 12px;
+        color: #B0B0B0;
+        margin-top: 4px;
+        padding-bottom: 7px;
     }
 </style>

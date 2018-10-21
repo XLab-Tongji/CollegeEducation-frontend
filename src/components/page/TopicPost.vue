@@ -4,7 +4,7 @@
             <div class="title">发表主题</div>
             <div align="left" class="topic-title">
                 <el-input v-model="article.title" size="small" maxlength="25"
-                          placeholder="请简要描述一下你的问题"
+                          placeholder="请输入标题..."
                           style="width: 350px"></el-input>
                 <el-tag
                     :key="tag"
@@ -21,7 +21,7 @@
                     @keyup.enter.native="handleInputConfirm"
                     @blur="handleInputConfirm">
                 </el-input>
-                <el-button v-else class="button-new-tag" type="primary" size="mini" @click="showInput">+Tag</el-button>
+                <el-button v-else type="primary" size="mini" @click="showInput">+Tag</el-button>
             </div>
             <div id="editor">
             <mavon-editor
