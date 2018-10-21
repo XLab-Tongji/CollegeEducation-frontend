@@ -45,6 +45,11 @@ export default new Router({
                     path: '/topiclist',
                     component: resolve => require(['../components/page/TopicList.vue'], resolve),
                     meta: { title: '问题交流' }
+                },
+                {
+                    path: '/source-list',
+                    component: resolve => require(['../components/page/SourceList.vue'], resolve),
+                    meta: { title: '下载资源' }
                 }
             ]
         },

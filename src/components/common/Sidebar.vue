@@ -52,6 +52,12 @@
                     },
 
                     {
+                        icon: 'el-icon-tickets',
+                        index: 'source-list',
+                        title: '下载资源'
+                    },
+
+                    {
                         icon: 'el-icon-question',
                         index: 'topiclist',
                         title: '问题交流'
