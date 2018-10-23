@@ -39,7 +39,7 @@
                 </el-table-column>
                 <el-table-column
                     label="点击数"
-                    align="center" width="100">
+                    align="center" width="100" min-width='200'>
                     <template slot-scope="scope"><span style="font-size: 13px; color: #6A6A6A">{{ scope.row.clickingRate}} </span></template>
                 </el-table-column>
                 <el-table-column

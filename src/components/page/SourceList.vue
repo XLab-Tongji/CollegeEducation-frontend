@@ -29,6 +29,7 @@
                         multiple
                         filterable
                         allow-create
+                        default-first-option
                         placeholder='请输入要检索的关键字'
                         no-data-text='请输入要检索的关键字'>
                     </el-select>
@@ -71,7 +72,7 @@
                 model:{
                     radioTypeList:'',
                     selectCategoryList:'',
-                    selectKeyword:''
+                    selectKeyword:[]
                 },
                 typeList:[],
                 categoryList:[],
@@ -120,88 +121,6 @@
             },
 
 
-
-
-
-
-
-
-
-
-
-            // 提交按钮的函数
-            onSubmit(){
-                this.$http.post(server.url + '/registerCategories',{
-                    "resourceID": this.form.fileID,
-                    "categoryID": this.form.type,
-                    "resourceMajorID": this.form.category,
-                    "resourceName": this.form.name,
-                    "description": this.form.description,
-                    "point":this.form.point,
-                    "tag":this.form.tag
-                }).then(function(response){
-                    
-                },function(response){  
-                    console.error("初始化获取资源类型列表错误")
-                });
-            },
-
-            // 上传文件前判断大小（在这里可以补充上传文件的其他限制）
-            beforeUpload(file){
-                var limitRule1=(file.size/1024/1024)<128;
-                if(!limitRule1){
-                    this.$notify.error({
-                        title: '错误',
-                        position:'bottom-right',
-                        message: '上传的文件不可超过128MB'
-                    });
-                    console.error("上传文件不能超过128MB");
-                }
-                return limitRule1;
-            },
-            // 成功完成上传的返回
-            uploadSuccess(response, file, fileList){
-                console.log(response.data.data);
-                this.form.fileID=response.data.data;
-            },
-            // 点击删除后从服务器删除文件
-            uploadRemove(file, fileList){
-                var resourceID=this.fileID;
-                this.$http.get(server.url + '/deleteResource/'+resourceID,{}).then(function(response){
-                    this.fileID='';
-                },function(response){  
-                    console.error("初始化获取资源类型列表错误")
-                });
-            },
-            setImage(e){
-                const file = e.target.files[0];
-                if (!file.type.includes('image/')) {
-                    return;
-                }
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    this.dialogVisible = true;
-                    this.imgSrc = event.target.result;
-                    this.$refs.cropper && this.$refs.cropper.replace(event.target.result);
-                };
-                reader.readAsDataURL(file);
-            },
-            cropImage () {
-                this.cropImg = this.$refs.cropper.getCroppedCanvas().toDataURL();
-            },
-            cancelCrop(){
-                this.dialogVisible = false;
-                this.cropImg = this.defaultSrc;
-            },
-            imageuploaded(res) {
-                console.log(res)
-            },
-            handleError(){
-                this.$notify.error({
-                    title: '上传失败',
-                    message: '图片上传接口上传失败，可更改为自己的服务器接口'
-                });
-            }
         },
         created(){
             this.cropImg = this.defaultSrc;

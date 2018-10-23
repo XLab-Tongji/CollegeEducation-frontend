@@ -50,6 +50,11 @@ export default new Router({
                     path: '/source-list',
                     component: resolve => require(['../components/page/SourceList.vue'], resolve),
                     meta: { title: '下载资源' }
+                },
+                {
+                    path: '/source-page',
+                    component: resolve => require(['../components/page/SourcePage.vue'], resolve),
+                    meta: { title: '资源详情' }
                 }
             ]
         },
