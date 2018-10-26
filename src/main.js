@@ -8,10 +8,11 @@ import 'element-ui/lib/theme-chalk/index.css';    // 默认主题
 import '../static/css/icon.css';
 import "babel-polyfill";
 import VueResource from 'vue-resource';
-import 'mavon-editor/dist/css/index.css'
+import mavonEditor from 'mavon-editor'
 
 Vue.use(ElementUI, { size: 'small' });
 Vue.use(VueResource);
+Vue.use(mavonEditor);
 Vue.prototype.$axios = axios;
 
 //使用钩子函数对路由进行权限跳转

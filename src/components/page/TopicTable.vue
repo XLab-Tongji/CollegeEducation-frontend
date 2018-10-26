@@ -57,6 +57,13 @@
                 </el-table-column>
             </el-table>
         </div>
+        <div style="float: right">
+            <el-card class="tag-card" shadow="never">
+                <div v-for="o in 4" :key="o">
+                    {{'tag ' + o }}
+                </div>
+            </el-card>
+        </div>
         <div>
             <div class="topic-table-footer">
                 <el-pagination
@@ -197,5 +204,11 @@
         color: #B0B0B0;
         margin-top: 4px;
         padding-bottom: 7px;
+    }
+
+    .tag-card {
+        width: 120px;
+        margin-top: 0px;
+        margin-right: 10px;
     }
 </style>

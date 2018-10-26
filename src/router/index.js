@@ -42,9 +42,26 @@ export default new Router({
                     meta: { title: 'markdown编辑器' }    
                 },
                 {
-                    path: '/topiclist',
+                    path: '/topic',
                     component: resolve => require(['../components/page/TopicList.vue'], resolve),
-                    meta: { title: '问题交流' }
+                    meta: { title: '问题交流' },
+                    children:[
+                        {
+                            path: '/topic/list',
+                            component: resolve => require(['../components/page/TopicTable.vue'], resolve),
+                            meta: { title: '话题列表' }
+                        },
+                        {
+                            path: '/topic/post',
+                            component: resolve => require(['../components/page/TopicPost.vue'], resolve),
+                            meta: { title: '发表文章'}
+                        },
+                        {
+                            path: '/topic/blackboard',
+                            component: resolve => require(['../components/page/Blackboard.vue'], resolve),
+                            meta: { title: '黑板报'}
+                        }
+                    ]
                 },
                 {
                     path: '/source-list',
