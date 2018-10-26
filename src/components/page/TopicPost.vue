@@ -130,12 +130,13 @@
     .topic-post > .main > .topic-title .tag {
         background-color: #f7ffff;
         color: #0a9894;
-        margin-left: 20px;
+        margin-left: 5px;
     }
 
     .topic-post > .main > .topic-title button {
         background-color: #1ac7c3;
         border-color: #1ac7c3;
+        margin-left: 10px;
     }
 
     .topic-post > .main > .post {

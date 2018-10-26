@@ -45,19 +45,20 @@ export default new Router({
                     path: '/topic',
                     component: resolve => require(['../components/page/TopicList.vue'], resolve),
                     meta: { title: '问题交流' },
+                    redirect: '/topic-list',
                     children:[
                         {
-                            path: '/topic/list',
+                            path: '/topic-list',
                             component: resolve => require(['../components/page/TopicTable.vue'], resolve),
                             meta: { title: '话题列表' }
                         },
                         {
-                            path: '/topic/post',
+                            path: '/topic-post',
                             component: resolve => require(['../components/page/TopicPost.vue'], resolve),
                             meta: { title: '发表文章'}
                         },
                         {
-                            path: '/topic/blackboard',
+                            path: '/blackboard',
                             component: resolve => require(['../components/page/Blackboard.vue'], resolve),
                             meta: { title: '黑板报'}
                         }

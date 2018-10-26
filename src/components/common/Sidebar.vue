@@ -65,7 +65,7 @@
 
                     {
                         icon: 'el-icon-question',
-                        index: 'topic/list',
+                        index: 'topic',
                         title: '问题交流'
                     },
                     
