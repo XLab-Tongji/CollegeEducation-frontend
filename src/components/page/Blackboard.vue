@@ -1,67 +1,112 @@
 <template>
-    <el-container v-loading="loading" class="topic-post">
+    <el-container class="topic-post">
         <link rel="stylesheet" href="../../../node_modules/mavon-editor/dist/css/index.css">
-        <el-main class="main">
+        <el-main class="main" v-loading="loading">
             <div align="left" class="topic-title">
-                <el-input v-model="article.title" size="small" maxlength="25"
+                <el-input v-model="article.topicTitle" size="small" maxlength="25"
                           placeholder="请输入标题..."
-                          style="width: 350px"></el-input>
-                <el-tag
-                    :key="tag"
-                    v-for="tag in article.dynamicTags"
-                    closable
-                    :disable-transitions="false"
-                    class="tag"
-                    @close="handleClose(tag)">
-                    {{tag}}
-                </el-tag>
-                <el-input
-                    class="input-new-tag"
-                    v-if="tagInputVisible" v-model="tagValue" ref="saveTagInput"
-                    size="mini" style="width: 80px" maxlength="10"
-                    @keyup.enter.native="handleInputConfirm"
-                    @blur="handleInputConfirm">
+                          style="width: 350px">
                 </el-input>
-                <el-button v-else type="primary" size="mini" @click="showInput">+Tag</el-button>
             </div>
-            <div style="margin-top: 20px">
-                <mavon-editor
-                    :boxShadow="false"
-                    :toolbars="toolBars"
-                    :fontSize="12"
-                    ref=md @imgAdd="$imgAdd" @imgDel="$imgDel">
-                </mavon-editor>
+            <div id="editor" style="margin-top: 20px"></div>
+            <div align="right" style="font-size: 12px;color: #A6A6A6;">{{count}} / 200</div>
+            <div class="select">
+            <el-select value="" v-model="article.SectorState" size="mini" style="width: 200px" placeholder="请选择分类">
+                <el-option
+                    v-for="item in sectorStates"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value">
+                </el-option>
+            </el-select>
+            <el-tag
+                :key="tag"
+                v-for="tag in article.SectorName"
+                closable
+                :disable-transitions="false"
+                class="tag"
+                @close="handleClose(tag)">
+                {{tag}}
+            </el-tag>
+            <el-input
+                v-if="tagInputVisible" v-model="tagValue" ref="saveTagInput"
+                size="mini" style="width: 80px" maxlength="10"
+                @keyup.enter.native="handleInputConfirm"
+                @blur="handleInputConfirm">
+            </el-input>
+            <el-button v-else type="primary" size="mini" @click="showInput">+Tag</el-button>
             </div>
             <div class="post">
-                <el-button size="mini" class="save-btn">保存到草稿箱</el-button>
-                <el-button type="primary" size="mini" class="post-btn">发布</el-button>
+                <el-button size="mini" class="save-btn" @click="saveInDrafts">保存到草稿箱</el-button>
+                <el-button type="primary" size="mini" class="post-btn" @click="postOn">发布</el-button>
             </div>
         </el-main>
     </el-container>
 </template>
 <script>
-
+    import WangEditor from 'wangeditor';
+    import data from '../../data/sina-data.js'
+    import server from '../../../config/index';
+    import {UPLOADER} from '../../tools/utils'
     export default {
         name: 'editor',
+        mounted(){
+            for(var i = 0;i < data.length;i++){
+                this.sinaData.push({alt: data[i].phrase, src: data[i].icon});
+            }
+            this.editor.customConfig.onchange = () => {
+                var t = this.editor.txt.text();
+                if(this.count > 200) {
+                    this.$message({type: 'error', message: '字数超出范围！'});
+                    var str = t.substring(0, 200);
+                    this.editor.txt.text(str);
+                }
+                this.count = t.length;
+                this.article.topicText = this.editor.txt.html();
+                // 文章再次修改
+                this.isSaved = false;
+            };
+            this.editor.customConfig.menus = [
+                'head',  // 标题
+                'bold',  // 粗体
+                'fontSize',  // 字号
+                'fontName',  // 字体
+                'italic',  // 斜体
+                'underline',  // 下划线
+                'foreColor',  // 文字颜色
+                'link',  // 插入链接
+                'list',  // 列表
+                'justify',  // 对齐方式
+                'quote',  // 引用
+                'emoticon',  // 表情
+                'image',  // 插入图片
+                'table',  // 表格
+                'code',  // 插入代码
+                'undo',  // 撤销
+                'redo'  // 重复
+            ];
+            this.editor.customConfig.emotions = [
+                {
+                    // tab 的标题
+                    title: '新浪',
+                    // type -> 'emoji' / 'image'
+                    type: 'image',
+                    // content -> 数组
+                    content: this.sinaData
+                },
+                {
+                    title: 'emoji',
+                    type: 'emoji',
+                    content: this.emojiData
+                }];
+            this.editor.customConfig.debug = location.href.indexOf('wangeditor_debug_mode=1') > 0; // 开启debug模式
+            this.editor.create();
+            this.editor.config.customUploadInit = this.UPLOADER(this.editor).init();
+        },
         methods: {
-            $imgAdd(pos, $file){
-                // 第一步.将图片上传到服务器.
-                var formdata = new FormData();
-                formdata.append('image', $file);
-                axios({
-                    url: 'server url',
-                    method: 'post',
-                    data: formdata,
-                    headers: { 'Content-Type': 'multipart/form-data' },
-                }).then((url) => {
-                    // 第二步.将返回的url替换到文本原位置![...](0) -> ![...](url)
-                    // $vm.$img2Url 将md源码中图片文件名替换为url
-                    $vm.$img2Url(pos, url);
-                })
-            },
-            imgDel(pos) {},
+            // 添加标签
             handleClose(tag) {
-                this.article.dynamicTags.splice(this.article.dynamicTags.indexOf(tag), 1);
+                this.article.SectorName.splice(this.article.SectorName.indexOf(tag), 1);
             },
             showInput() {
                 this.tagInputVisible = true;
@@ -71,61 +116,155 @@
             },
             handleInputConfirm() {
                 let tagValue = this.tagValue;
-                if (tagValue) {
-                    this.article.dynamicTags.push(tagValue);
+                for(var i in this.article.SectorName){
+                    if(this.article.SectorName[i] === tagValue) {
+                        this.$message({type: 'error', message: '该标签已添加'});
+                        return;
+                    }
                 }
+                this.article.SectorName.push(tagValue);
                 this.tagInputVisible = false;
                 this.tagValue = '';
+            },
+            // 读取版块名称
+            /*
+            loadSectorState(){
+                var url = '';
+                this.$http.get(server.url + url).then((response) => {
+                    if (response.status == 200) {
+                        var stateList = JSON.parse(response.bodyText);
+                        var i = 0;
+                        while(i < stateList.length) {
+                        sectorStates.push({});
+                        i++;
+                        }
+                    } else {
+                        this.$message({type: 'error', message: '数据加载失败!'});
+                    }
+                }, (response) => {
+                    this.loading = false;
+                    if (response.status == 403) {
+                        this.$message({type: 'error', message: response.response.data});
+                    } else {
+                        this.$message({type: 'error', message: '数据加载失败!'});
+                    }
+                }).catch((response) => {
+                    _this.loading = false;
+                    this.$message({type: 'error', message: '数据加载失败!'});
+                })
+            },
+            */
+            // 存入草稿箱
+            saveInDrafts(){
+                this.loading = true;
+                this.$http.post(server.url, {
+                    // 接口未确定
+                    tag:this.article.SectorName,
+                    title:this.article.topicTitle,
+                    sector:this.article.SectorState,
+                    content:this.article.topicText,
+                    userName: this.username,
+                    state: '2'
+                }).then(response => {
+                    this.loading = false;
+                    this.isSaved = true;
+                    this.$notify({
+                        title: '保存成功',
+                    });
+                    this.$router.push('/topic-list');
+                }, response => {
+                    this.loading = false;
+                    console.log("error");
+                    console.log(response);
+                    this.$notify.error({
+                        title: '保存失败',
+                        message: '请稍后重试'
+                    });
+                });
+            },
+            // 发布
+            postOn(){
+                this.loading = true;
+                this.$http.post(server.url, {
+                    // 接口未确定
+                    tag:this.article.SectorName,
+                    title:this.article.topicTitle,
+                    sector:this.article.SectorState,
+                    content:this.article.topicText,
+                    userName: this.username,
+                    state: '1'
+                }).then(response => {
+                    this.loading = false;
+                    this.$notify({
+                        title: '发表成功',
+                        message: '跳转至话题列表...',
+                        type: 'success'
+                    });
+                    this.$router.push('/topic-list');
+                }, response => {
+                    this.loading = false;
+                    console.log("error");
+                    console.log(response);
+                    this.$notify.error({
+                        title: '发表失败',
+                        message: '请稍后重试'
+                    });
+                });
             }
         },
         data() {
             return {
+                objectName: '',
+                editor: new WangEditor('#editor'),
+                sinaData: [],
+                emojiData: ['😀','😃','😄','😁','😆','😅','😂','🤣','😇','😊','🙂','🙃','😉','😌','😍','😘','😗','😙','😚','😋','😛','😝','😜','🤪','🤨','🧐','🤓','😎','🤩','😏','😒','😞','😔','😟','😕','🙁','☹️','😣','😖','😫','😩','😢','😭','😤','😠','😡','🤬','🤯','😳','😱','😨','😰','😥','😓','🤗','🤔','🤭','🤫','🤥','😶','😐','😑','😬','🙄','😯','😦','😧','😮','😲','😴','😪','😵','🤐','🤧','😷','😈','👿','💩','👻','🤲','🙌','👏','🤝','👍','👎','👊','✊','🤛','🤜','🤞','✌','🤟','👌','👈','👉','👆','👇','👋','🤙','💪','🙏','👀','🙇‍','🙅‍','🙆‍','🙋‍','🤦‍','🤷‍','💅','🌝','🌚','❤️','💔','❣️','💕','💓','💗','💖','❌','✅','⭕️','💯','❗️','❓','⁉️','📝'],
                 tagInputVisible: false,
                 tagValue: '',
+                count: 0,
                 loading: false,
+                isSaved: false,
+                sectorStates: [{value: '1', label: '信息技术'}],
                 article: {
-                    id: '-1',
-                    dynamicTags: [],
-                    title: '',
-                    mdContent: '',
-                    cid: ''
+                    SectorState: '',
+                    SectorName: [],
+                    topicTitle: '',
+                    topicText: ''
                 },
-                toolBars: {
-                    bold: true, // 粗体
-                    italic: true, // 斜体
-                    header: true, // 标题
-                    underline: true, // 下划线
-                    superscript: true, // 上角标
-                    subscript: true, // 下角标
-                    quote: true, // 引用
-                    link: true, // 链接
-                    imagelink: true, // 图片链接
-                    code: true, // code
-                    table: true, // 表格
-                    htmlcode: true, // 展示html源码
-                    help: true, // 帮助
-                    alignleft: true, // 左对齐
-                    aligncenter: true, // 居中
-                    alignright: true, // 右对齐
-                    undo: true, // 上一步
-                    redo: true, // 下一步
-                    trash: true, // 清空
-                    navigation: true, // 导航目录
-                    subfield: true, // 单双栏模式
-                }
+                UPLOADER
+            }
+        },
+        computed:{
+            username(){
+                let username = localStorage.getItem('ms_username');
+                return username ? username : this.name;
+            }
+        },
+        /*
+        beforeRouteLeave: function(to, from , next){
+            if(!this.isSaved){
+                this.$confirm('内容已编辑，是否存入草稿箱?', '', {
+                    confirmButtonText: '保存',
+                    cancelButtonText: '不保存',
+                    type: 'warning'
+                }).then(() => {
+                    this.$message({
+                        type: 'success',
+                        message: '已保存!'
+                    });
+                    next();
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '未保存'
+                    });
+                    next();
+                });
             }
         }
+        */
     }
 </script>
 <style>
-    .topic-post > .main > .editor {
-        width: 70%;
-        height: 100px;
-        padding-left: 0;
-        text-align: left;
-        margin-top: 10px;
-    }
-
     .topic-post > .main {
         /*justify-content: flex-start;*/
         flex-direction: column;
@@ -136,21 +275,22 @@
         padding-left: 0;
     }
 
-    .topic-post > .main > .topic-title .tag {
+    .topic-post > .main > .select .tag {
         background-color: #f7ffff;
         color: #0a9894;
-        margin-left: 20px;
+        margin-left: 5px;
     }
 
-    .topic-post > .main > .topic-title button {
+    .topic-post > .main > .select button {
         background-color: #1ac7c3;
         border-color: #1ac7c3;
+        margin-left: 10px;
     }
 
     .topic-post > .main > .post {
         display: flex;
-        margin-top: 15px;
         justify-content: flex-start;
+        margin-top: 15px;
     }
 
     .topic-post > .main > .post .save-btn {

@@ -52,7 +52,7 @@
                     align="center">
                     <template slot-scope="scope">
                         <p style="font-size: 13px; color: #6A6A6A">id: {{ scope.row.userId}} </p>
-                        <p style="font-size: 10px; color: #6A6A6A">{{ scope.row.topicDate | formatDateTime}}</p>
+                        <p style="font-size: 10px; color: #6A6A6A">{{ scope.row.topicDate.replace(/^([-\d]*)T([\d:]*)\..*$/, '$1 $2')}}</p>
                     </template>
                 </el-table-column>
             </el-table>
@@ -85,13 +85,13 @@
     export default{
         data() {
             return {
-                articles: [],
-                loading: false,
-                searchType: '1',
-                currentPage: 1,
-                totalCount: -1,
-                pageSize: 3,
-                keywords: '',
+                articles: [], // 存储文章信息
+                loading: false, // 加载状态
+                searchType: '1', // 搜索类型
+                currentPage: 1, // 当前位于第几页
+                totalCount: -1, // 文章总数
+                pageSize: 3, // 每页显示多少文章
+                keywords: '', // 搜索关键词
                 searchOptions: [{
                     value: '1',
                     label: '全部'
@@ -113,16 +113,18 @@
             searchClick(){
                 this.loadBlogs(1, this.pageSize);
             },
-            //翻页
+            // 翻页
             currentChange(currentPage){
                 this.currentPage = currentPage;
                 this.loading = true;
                 this.loadBlogs(currentPage, this.pageSize);
             },
+            // 加载文章
             loadBlogs: function (page, count) {
                 this.articles = [];
                 var url = '/article/all';
                 var param = new URLSearchParams();
+                // 未做搜索类别处理
                 param.append('keywords', this.keywords);
                 this.$http.get(server.url + url, param).then((response) => {
                     if (response.status == 200) {
@@ -159,12 +161,8 @@
                     _this.loading = false;
                     this.$message({type: 'error', message: '数据加载失败!'});
                 })
-            },
-            handleSelectionChange(val) {
-                this.selItems = val;
-            },
-        },
-        props: ['state']
+            }
+        }
     }
 </script>
 

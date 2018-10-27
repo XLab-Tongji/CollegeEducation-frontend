@@ -8,7 +8,7 @@ import 'element-ui/lib/theme-chalk/index.css';    // 默认主题
 import '../static/css/icon.css';
 import "babel-polyfill";
 import VueResource from 'vue-resource';
-import mavonEditor from 'mavon-editor'
+import mavonEditor from 'mavon-editor';
 
 Vue.use(ElementUI, { size: 'small' });
 Vue.use(VueResource);
