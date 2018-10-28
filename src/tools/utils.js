@@ -1,6 +1,6 @@
 var accessid = 'LTAICW4ajkAHlmUJ'; // 你阿里云的accessid
 var accesskey = 'tZbBFQ0DjG1wXNEuXW1VZBHdyUueIL'; // 你阿里云的accesskey
-var host = 'https://tjce-image.oss-cn-beijing.aliyuncs.com'; // 你阿里云的blockname和地区请对应更改
+var host = 'http://tjce-image.oss-cn-beijing.aliyuncs.com'; // 你阿里云的blockname和地区请对应更改
 
 var objectNname = ' ';
 var policyText = {
@@ -38,10 +38,9 @@ function get_suffix(filename) {
 function set_upload_param(up, filename, ret) {
     objectNname = '';
     if (filename !== '') {
-        var suffix = get_suffix(filename)
+        var suffix = get_suffix(filename);
         objectNname = getNewTime(new Date()) + 'web' + suffix;
     }
-    alert(objectNname)
     var new_multipart_params = {
         'key': objectNname,
         'policy': policyBase64,
@@ -62,9 +61,9 @@ var UPLOADER = editor => {
         browse_button: editor.imgMenuId,
         containerId: editor.toolbarElemId,
         multi_selection: true,
-        //flash_swf_url: '../../static/lib/plupload-2.1.2/js/Moxie.swf',
-        //silverlight_xap_url: '../../static/lib/plupload-2.1.2/js/Moxie.xap',
-        url: host,
+        flash_swf_url: '../../static/lib/plupload-2.1.2/js/Moxie.swf',
+        silverlight_xap_url: '../../static/lib/plupload-2.1.2/js/Moxie.xap',
+        url: 'https://oss.aliyuncs.com',
 
         filters: {
             mime_types: [
@@ -89,20 +88,15 @@ var UPLOADER = editor => {
                 uploader.start()
             },
 
-            UploadProgress: function (up, file) {
-                alert(file.percent);
-            },
-
             FileUploaded: function(up, file, info) {
-                alert('222');
-                if (info.status === '200') {
+                if (info.status === 200) {
                     var url = host + '/' + objectNname;
                     console.log('上传成功 ', url);
                     // 插入到编辑器中
-                    editor.command(null, 'insertHtml', '<img src="' + url + '?x-oss-process=style/img_800_x" style="max-width:100%;"/>');
+                    editor.cmd.do('insertHTML', '<img src="'+url+'" />');
                 }
                 else {
-                    alert(info.status)
+                    alert('上传失败！')
                 }
             },
 
@@ -112,7 +106,7 @@ var UPLOADER = editor => {
             },
 
             Error: function(up, err) {
-                alert(err.message)
+                //alert(err.message)
             },
         },
     });

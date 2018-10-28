@@ -105,7 +105,6 @@
             }
         },
         mounted: function () {
-            var _this = this;
             this.loading = true;
             this.loadBlogs(1, this.pageSize);
         },
@@ -127,6 +126,7 @@
                 // 未做搜索类别处理
                 param.append('keywords', this.keywords);
                 this.$http.get(server.url + url, param).then((response) => {
+                    this.loading = false;
                     if (response.status == 200) {
                         var articleList = JSON.parse(response.bodyText);
                         this.totalCount = articleList.data.length;
@@ -146,19 +146,20 @@
                             });
                             i++;
                         }
-                        this.loading = false;
                     } else {
+                        this.loading = false;
                         this.$message({type: 'error', message: '数据加载失败!'});
                     }
                 }, (response) => {
-                    this.loading = false;
                     if (response.status == 403) {
+                        this.loading = false;
                         this.$message({type: 'error', message: response.response.data});
                     } else {
+                        this.loading = false;
                         this.$message({type: 'error', message: '数据加载失败!'});
                     }
                 }).catch((response) => {
-                    _this.loading = false;
+                    this.loading = false;
                     this.$message({type: 'error', message: '数据加载失败!'});
                 })
             }

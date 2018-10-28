@@ -3,7 +3,7 @@
         <link rel="stylesheet" href="../../../node_modules/mavon-editor/dist/css/index.css">
         <el-main class="main" v-loading="loading">
             <div align="left" class="topic-title">
-                <el-input v-model="article.topicTitle" size="small" maxlength="25"
+                <el-input v-model="blackboard.blackboard_name" size="small" maxlength="25"
                           placeholder="请输入标题..."
                           style="width: 350px">
                 </el-input>
@@ -11,7 +11,7 @@
             <div id="editor" style="margin-top: 20px"></div>
             <div align="right" style="font-size: 12px;color: #A6A6A6;">{{count}} / 200</div>
             <div class="select">
-            <el-select value="" v-model="article.SectorState" size="mini" style="width: 200px" placeholder="请选择分类">
+            <el-select value="" v-model="sid" size="mini" style="width: 200px" placeholder="请选择类别">
                 <el-option
                     v-for="item in sectorStates"
                     :key="item.value"
@@ -21,8 +21,8 @@
             </el-select>
             <el-tag
                 :key="tag"
-                v-for="tag in article.SectorName"
-                closable
+                v-for="tag in SectorName"
+                closable、
                 :disable-transitions="false"
                 class="tag"
                 @close="handleClose(tag)">
@@ -62,7 +62,7 @@
                     this.editor.txt.text(str);
                 }
                 this.count = t.length;
-                this.article.topicText = this.editor.txt.html();
+                this.blackboard.blackboard_text = this.editor.txt.html();
                 // 文章再次修改
                 this.isSaved = false;
             };
@@ -106,7 +106,7 @@
         methods: {
             // 添加标签
             handleClose(tag) {
-                this.article.SectorName.splice(this.article.SectorName.indexOf(tag), 1);
+                this.Sectorname.splice(this.SectorName.indexOf(tag), 1);
             },
             showInput() {
                 this.tagInputVisible = true;
@@ -116,13 +116,13 @@
             },
             handleInputConfirm() {
                 let tagValue = this.tagValue;
-                for(var i in this.article.SectorName){
-                    if(this.article.SectorName[i] === tagValue) {
+                for(var i in this.SectorName){
+                    if(this.SectorName[i] === tagValue) {
                         this.$message({type: 'error', message: '该标签已添加'});
                         return;
                     }
                 }
-                this.article.SectorName.push(tagValue);
+                this.SectorName.push(tagValue);
                 this.tagInputVisible = false;
                 this.tagValue = '';
             },
@@ -157,58 +157,98 @@
             // 存入草稿箱
             saveInDrafts(){
                 this.loading = true;
-                this.$http.post(server.url, {
-                    // 接口未确定
-                    tag:this.article.SectorName,
-                    title:this.article.topicTitle,
-                    sector:this.article.SectorState,
-                    content:this.article.topicText,
-                    userName: this.username,
-                    state: '2'
-                }).then(response => {
-                    this.loading = false;
-                    this.isSaved = true;
-                    this.$notify({
-                        title: '保存成功',
-                    });
-                    this.$router.push('/topic-list');
+                this.editor.$textElem.attr('contenteditable', false);
+                this.draft.draft_name = this.blackboard.blackboard_name;
+                this.draft.draft_text = this.blackboard.blackboard_text;
+                if(this.sid !== '') this.draft.sector_id = Number(this.sid);
+                this.draft.write_date = new Date();
+                var param = new URLSearchParams();
+                param.append('draft', this.draft);
+                this.$axios.post(server.url + '/draft/save', param).then(response => {
+                    if (response.status == 200){
+                        this.editor.$textElem.attr('contenteditable', true);
+                        this.loading = false;
+                        this.isSaved = true;
+                        this.$message({type: 'success', message: '文章已保存'});
+                    }
+                    else{
+                        this.loading = false;
+                        this.editor.$textElem.attr('contenteditable', true);
+                        this.$notify.error({
+                            title: '保存失败',
+                            message: 'status='+response.status
+                        })
+                    }
                 }, response => {
+                    this.editor.$textElem.attr('contenteditable', true);
                     this.loading = false;
                     console.log("error");
                     console.log(response);
                     this.$notify.error({
                         title: '保存失败',
-                        message: '请稍后重试'
-                    });
+                        message: 'status='+response.status
+                    })
+                }).catch((response) => {
+                    alert(response.status);
+                    this.loading = false;
+                    this.$notify.error({
+                        title: '保存失败',
+                        message: 'status='+response.status
+                    })
                 });
             },
             // 发布
             postOn(){
+                if(this.blackboard.blackboard_name === '') {
+                    this.$message({type: 'error', message: '请输入标题！'});
+                    return
+                }
+                if(this.blackboard.blackboard_text === '') {
+                    this.$message({type: 'error', message: '请输入内容！'});
+                    return
+                }
+                if(this.sid === '') {
+                    this.$message({type: 'error', message: '请选择分类！'});
+                    return
+                }
                 this.loading = true;
-                this.$http.post(server.url, {
-                    // 接口未确定
-                    tag:this.article.SectorName,
-                    title:this.article.topicTitle,
-                    sector:this.article.SectorState,
-                    content:this.article.topicText,
-                    userName: this.username,
-                    state: '1'
-                }).then(response => {
-                    this.loading = false;
-                    this.$notify({
-                        title: '发表成功',
-                        message: '跳转至话题列表...',
-                        type: 'success'
-                    });
-                    this.$router.push('/topic-list');
+                this.editor.$textElem.attr('contenteditable', false);
+                this.blackboard.sector_id = Number(this.sid);
+                this.blackboard.blackboard_date = new Date();
+                var param = new URLSearchParams();
+                param.append('blackboard', this.blackboard);
+                this.$axios.post(server.url + '/blackboard/save', param).then(response => {
+                    if (response.status == 200){
+                        this.editor.$textElem.attr('contenteditable', true);
+                        this.loading = false;
+                        this.isSaved = true;
+                        this.$message({type: 'success', message: '已发表，页面即将跳转'});
+                        this.$router.push('/topic-list');
+                    }
+                    else{
+                        this.loading = false;
+                        this.editor.$textElem.attr('contenteditable', true);
+                        this.$notify.error({
+                            title: '发表失败',
+                            message: 'status='+response.status
+                        })
+                    }
                 }, response => {
+                    this.editor.$textElem.attr('contenteditable', true);
                     this.loading = false;
                     console.log("error");
                     console.log(response);
                     this.$notify.error({
-                        title: '发表失败',
-                        message: '请稍后重试'
-                    });
+                        title: '保存失败',
+                        message: 'status='+response.status
+                    })
+                }).catch((response) => {
+                    alert(response.status);
+                    this.loading = false;
+                    this.$notify.error({
+                        title: '保存失败',
+                        message: 'status='+response.status
+                    })
                 });
             }
         },
@@ -224,11 +264,26 @@
                 loading: false,
                 isSaved: false,
                 sectorStates: [{value: '1', label: '信息技术'}],
-                article: {
-                    SectorState: '',
-                    SectorName: [],
-                    topicTitle: '',
-                    topicText: ''
+                SectorName: [],
+                sid: '',
+                blackboard: {
+                    sector_id: 0,
+                    blackboard_name: '',
+                    blackboard_text: '',
+                    blackboard_date: new Date(),
+                    user_id: 33, // 不知道如何获取
+                    reply_count: 0,
+                    clicking_rate: 0,
+                    praise_count: 0,
+                    favorite_count: 0
+                },
+                draft: {
+                    user_id: 33,
+                    publish_type_id: 1,
+                    sector_id: 0,
+                    draft_name: '',
+                    draft_text: '',
+                    write_date: new Date()
                 },
                 UPLOADER
             }

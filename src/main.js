@@ -14,6 +14,8 @@ Vue.use(ElementUI, { size: 'small' });
 Vue.use(VueResource);
 Vue.use(mavonEditor);
 Vue.prototype.$axios = axios;
+// 获得本地token
+//axios.defaults.headers.common['Authorization'] = localStorage.getItem('token');
 
 //使用钩子函数对路由进行权限跳转
 router.beforeEach((to, from, next) => {

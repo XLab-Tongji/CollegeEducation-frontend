@@ -3,14 +3,14 @@
         <link rel="stylesheet" href="../../../node_modules/wangeditor/release/wangEditor.min.css">
         <el-main class="main" v-loading="loading">
             <div align="left" class="topic-title">
-                <el-input v-model="article.topicTitle" size="small" maxlength="25"
+                <el-input v-model="article.TopicTitle" size="small" maxlength="25"
                           placeholder="请输入标题..."
                           style="width: 350px">
                 </el-input>
             </div>
             <div id="editor" style="margin-top: 20px"></div>
             <div class="selectp">
-                <el-select value="" v-model="article.SectorState" size="mini" style="width: 200px" placeholder="请选择分类">
+                <el-select value="" v-model="sid" size="mini" style="width: 200px" placeholder="请选择分类">
                     <el-option
                         v-for="item in sectorStates"
                         :key="item.value"
@@ -20,7 +20,7 @@
                 </el-select>
                 <el-tag
                     :key="tag"
-                    v-for="tag in article.SectorName"
+                    v-for="tag in SectorName"
                     closable
                     :disable-transitions="false"
                     class="tag"
@@ -46,8 +46,8 @@
 <script >
     import WangEditor from 'wangeditor';
     import data from '../../data/sina-data.js'
-    import server from '../../../config/index';
-    import {UPLOADER} from '../../tools/utils'
+    import server from '../../../config/index.js';
+    import {UPLOADER} from '../../tools/utils.js'
     export default {
         name: 'editor',
         mounted(){
@@ -63,6 +63,11 @@
                 'undo',  // 撤销
                 'redo'  // 重复
             ];
+            this.editor.customConfig.onchange = () => {
+                this.article.TopicText = this.editor.txt.html();
+                // 文章再次修改
+                this.isSaved = false;
+            };
             this.editor.customConfig.emotions = [
                 {
                     // tab 的标题
@@ -84,7 +89,7 @@
         methods: {
             // 删除tag
             handleClose(tag) {
-                this.article.SectorName.splice(this.article.SectorName.indexOf(tag), 1);
+                this.SectorName.splice(this.SectorName.indexOf(tag), 1);
             },
             // 添加tag
             showInput() {
@@ -96,25 +101,114 @@
             // 失去焦点时确认添加tag
             handleInputConfirm() {
                 let tagValue = this.tagValue;
-                for(var i in this.article.SectorName){
-                    if(this.article.SectorName[i] === tagValue) {
+                for(var i in this.SectorName){
+                    if(this.SectorName[i] === tagValue) {
                         this.$message({type: 'error', message: '该标签已添加'});
                         return;
                     }
                 }
                 if (tagValue) {
-                    this.article.SectorName.push(tagValue);
+                    this.SectorName.push(tagValue);
                 }
                 this.tagInputVisible = false;
                 this.tagValue = '';
             },
             // 存入草稿箱
             saveInDrafts(){
-
+                this.loading = true;
+                this.editor.$textElem.attr('contenteditable', false);
+                this.draft.draft_name = this.article.TopicTitle;
+                this.draft.draft_text = this.article.TopicText;
+                if(this.sid !== '') this.draft.sector_id = Number(this.sid);
+                this.draft.write_date = new Date();
+                var param = new URLSearchParams();
+                param.append('draft', this.draft);
+                this.$axios.post(server.url + '/draft/save', param).then(response => {
+                    if (response.status == 200){
+                        this.editor.$textElem.attr('contenteditable', true);
+                        this.loading = false;
+                        this.isSaved = true;
+                        this.$message({type: 'success', message: '文章已保存'});
+                    }
+                    else{
+                        this.loading = false;
+                        this.editor.$textElem.attr('contenteditable', true);
+                        this.$notify.error({
+                            title: '保存失败',
+                            message: 'status='+response.status
+                        })
+                    }
+                }, response => {
+                    this.editor.$textElem.attr('contenteditable', true);
+                    this.loading = false;
+                    console.log("error");
+                    console.log(response);
+                    this.$notify.error({
+                        title: '保存失败',
+                        message: 'status='+response.status
+                    })
+                }).catch((response) => {
+                    alert(response.status);
+                    this.loading = false;
+                    this.$notify.error({
+                        title: '保存失败',
+                        message: 'status='+response.status
+                    })
+                });
             },
             // 发布
             postOn(){
-
+                if(this.article.TopicTitle === '') {
+                    this.$message({type: 'error', message: '请输入标题！'});
+                    return
+                }
+                if(this.article.TopicText === '') {
+                    this.$message({type: 'error', message: '请输入内容！'});
+                    return
+                }
+                if(this.sid === '') {
+                    this.$message({type: 'error', message: '请选择分类！'});
+                    return
+                }
+                this.loading = true;
+                this.editor.$textElem.attr('contenteditable', false);
+                this.article.SectorId = Number(this.sid);
+                this.article.TopicDate = new Date();
+                var param = new URLSearchParams();
+                param.append('article', this.article);
+                this.$axios.post(server.url + '/article/save', param).then(response => {
+                    if (response.status == 200){
+                        this.editor.$textElem.attr('contenteditable', true);
+                        this.loading = false;
+                        this.isSaved = true;
+                        this.$message({type: 'success', message: '已发表，页面即将跳转'});
+                        this.$router.push('/topic-list');
+                    }
+                    else{
+                        this.loading = false;
+                        this.editor.$textElem.attr('contenteditable', true);
+                        this.$notify.error({
+                            title: '发表失败',
+                            message: 'status='+response.status
+                        })
+                    }
+                }, response => {
+                    this.editor.$textElem.attr('contenteditable', true);
+                    this.loading = false;
+                    console.log("error");
+                    console.log(response);
+                    this.$notify.error({
+                        title: '保存失败',
+                        message: 'status='+response.status
+                    })
+                }).catch((response) => {
+                    alert(response.status);
+                    this.loading = false;
+                    this.$notify.error({
+                        title: '保存失败',
+                        message: 'status='+response.status
+                    })
+                });
             }
         },
         data() {
@@ -125,12 +219,28 @@
                 tagInputVisible: false,
                 tagValue: '',
                 loading: false,
+                isSaved: false,
                 sectorStates: [{value: '1', label: '信息技术'}],
+                SectorName: [],
+                sid: '',
                 article: {
-                    SectorState: '',
-                    SectorName: [],
-                    topicTitle: '',
-                    topicText: ''
+                    SectorId: 0,
+                    TopicTitle: '',
+                    TopicText: '',
+                    TopicDate: new Date(),
+                    UserId: 33, // 不知道如何获取
+                    ReplyCount: 0,
+                    ClickingRate: 0,
+                    PraiseCount: 0,
+                    favorite_count: 0
+                },
+                draft: {
+                    user_id: 33,
+                    publish_type_id: 0,
+                    sector_id: 0,
+                    draft_name: '',
+                    draft_text: '',
+                    write_date: new Date()
                 },
                 UPLOADER
             }
@@ -144,6 +254,16 @@
     }
 </script>
 <style>
+    .topic-post > .main {
+        /*justify-content: flex-start;*/
+        flex-direction: column;
+        background-color: #fff;
+        display: flex;
+        justify-content: flex-start;
+        padding-top: 0;
+        padding-left: 0;
+    }
+
     .topic-post > .main > .selectp {
         margin-top: 17px;
     }
@@ -158,5 +278,21 @@
         background-color: #1ac7c3;
         border-color: #1ac7c3;
         margin-left: 10px;
+    }
+
+    .topic-post > .main > .post {
+        display: flex;
+        justify-content: flex-start;
+        margin-top: 15px;
+    }
+
+    .topic-post > .main > .post .save-btn {
+        border-color: #1ac7c3;
+        color: #1ac7c3;
+    }
+
+    .topic-post > .main > .post .post-btn {
+        background-color: #1ac7c3;
+        border-color: #1ac7c3;
     }
 </style>
