@@ -123,7 +123,7 @@
                 this.draft.write_date = new Date();
                 var param = new URLSearchParams();
                 param.append('draft', this.draft);
-                this.$axios.post(server.url + '/draft/save', param).then(response => {
+                this.$http.post(server.url + '/draft/save', param).then(response => {
                     if (response.status == 200){
                         this.editor.$textElem.attr('contenteditable', true);
                         this.loading = false;
@@ -176,7 +176,7 @@
                 this.article.TopicDate = new Date();
                 var param = new URLSearchParams();
                 param.append('article', this.article);
-                this.$axios.post(server.url + '/article/save', param).then(response => {
+                this.$http.post(server.url + '/article/save', param).then(response => {
                     if (response.status == 200){
                         this.editor.$textElem.attr('contenteditable', true);
                         this.loading = false;

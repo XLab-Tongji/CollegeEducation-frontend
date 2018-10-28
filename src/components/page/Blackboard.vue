@@ -164,7 +164,7 @@
                 this.draft.write_date = new Date();
                 var param = new URLSearchParams();
                 param.append('draft', this.draft);
-                this.$axios.post(server.url + '/draft/save', param).then(response => {
+                this.$http.post(server.url + '/draft/save', param).then(response => {
                     if (response.status == 200){
                         this.editor.$textElem.attr('contenteditable', true);
                         this.loading = false;
@@ -217,7 +217,7 @@
                 this.blackboard.blackboard_date = new Date();
                 var param = new URLSearchParams();
                 param.append('blackboard', this.blackboard);
-                this.$axios.post(server.url + '/blackboard/save', param).then(response => {
+                this.$http.post(server.url + '/blackboard/save', param).then(response => {
                     if (response.status == 200){
                         this.editor.$textElem.attr('contenteditable', true);
                         this.loading = false;
