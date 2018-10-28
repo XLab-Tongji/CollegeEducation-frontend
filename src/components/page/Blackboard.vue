@@ -162,9 +162,7 @@
                 this.draft.draft_text = this.blackboard.blackboard_text;
                 if(this.sid !== '') this.draft.sector_id = Number(this.sid);
                 this.draft.write_date = new Date();
-                var param = new URLSearchParams();
-                param.append('draft', this.draft);
-                this.$axios.post(server.url + '/draft/save', param).then(response => {
+                this.$http.post(server.url + '/draft/save', this.draft).then(response => {
                     if (response.status == 200){
                         this.editor.$textElem.attr('contenteditable', true);
                         this.loading = false;
@@ -215,9 +213,7 @@
                 this.editor.$textElem.attr('contenteditable', false);
                 this.blackboard.sector_id = Number(this.sid);
                 this.blackboard.blackboard_date = new Date();
-                var param = new URLSearchParams();
-                param.append('blackboard', this.blackboard);
-                this.$axios.post(server.url + '/blackboard/save', param).then(response => {
+                this.$http.post(server.url + '/blackboard/save', this.blackboard).then(response => {
                     if (response.status == 200){
                         this.editor.$textElem.attr('contenteditable', true);
                         this.loading = false;
@@ -271,14 +267,14 @@
                     blackboard_name: '',
                     blackboard_text: '',
                     blackboard_date: new Date(),
-                    user_id: 33, // 不知道如何获取
+                    user_id: 1, // 不知道如何获取
                     reply_count: 0,
                     clicking_rate: 0,
                     praise_count: 0,
                     favorite_count: 0
                 },
                 draft: {
-                    user_id: 33,
+                    user_id: 1,
                     publish_type_id: 1,
                     sector_id: 0,
                     draft_name: '',

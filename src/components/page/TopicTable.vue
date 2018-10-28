@@ -34,7 +34,7 @@
                     width="350" style="text-align: center">
                     <template slot-scope="scope">
                         <p style="font-size: 14px; font-weight: bold; color: #0A9894; padding-top: 7px;">{{ scope.row.topicTitle }}</p>
-                        <p class="topic-content"> {{ scope.row.topicText}} </p>
+                        <p class="topic-content"> {{ scope.row.topicText | filterHtml | htmlDecode}}</p>
                     </template>
                 </el-table-column>
                 <el-table-column
@@ -109,11 +109,11 @@
             this.loadBlogs(1, this.pageSize);
         },
         methods: {
-            searchClick(){
+            searchClick() {
                 this.loadBlogs(1, this.pageSize);
             },
             // 翻页
-            currentChange(currentPage){
+            currentChange(currentPage) {
                 this.currentPage = currentPage;
                 this.loading = true;
                 this.loadBlogs(currentPage, this.pageSize);
@@ -123,15 +123,29 @@
                 this.articles = [];
                 var url = '/article/all';
                 var param = new URLSearchParams();
-                // 未做搜索类别处理
-                param.append('keywords', this.keywords);
-                this.$http.get(server.url + url, param).then((response) => {
+                // 搜索类别处理未完成
+                switch (this.searchType) {
+                    case '1': {
+                        param.append('keywords', this.keywords);
+                        break;
+                    }
+                    case '2': {
+                        param.append('keywords', this.keywords);
+                        break;
+                    }
+                    case '3': {
+                        break;
+                    }
+                    default:
+                        break;
+                }
+                this.$http.get(server.url + url + '?' + param, param).then((response) => {
                     this.loading = false;
                     if (response.status == 200) {
                         var articleList = JSON.parse(response.bodyText);
                         this.totalCount = articleList.data.length;
                         var i = (page - 1) * count;
-                        var j = (page * count < this.totalCount? page * count : this.totalCount);
+                        var j = (page * count < this.totalCount ? page * count : this.totalCount);
                         while (i < j) {
                             this.articles.push({
                                 userId: articleList.data[i].userId,
@@ -162,6 +176,21 @@
                     this.loading = false;
                     this.$message({type: 'error', message: '数据加载失败!'});
                 })
+            }
+        },
+        filters:{
+            filterHtml: function(val) {
+                return val.replace(/<[^>]*>/g, "");//去除文字的<...></...>标签
+            },
+            htmlDecode: function(val) {
+                //1.首先动态创建一个容器标签元素，如DIV
+                var temp = document.createElement("div");
+                //2.然后将要转换的字符串设置为这个元素的innerHTML(ie，火狐，google都支持)
+                temp.innerHTML = val;
+                //3.最后返回这个元素的innerText(ie支持)或者textContent(火狐，google支持)，即得到经过HTML解码的字符串了。
+                var output = temp.innerText || temp.textContent;
+                temp = null;
+                return output;
             }
         }
     }
