@@ -73,7 +73,7 @@
 
                         <!--弹出填写评论对话框-->
                         <el-dialog title="发布评论" :visible.sync="commentPublish.dialogFormVisible">
-                          <el-form ref="form" :model="form" style='width: 98%;margin:auto'>
+                          <el-form ref="commentPublish" :model="commentPublish" style='width: 98%;margin:auto'>
                             <el-form-item>
                                 <el-input v-model="commentPublish.title" placeholder="请输入评论标题" prefix-icon='el-icon-lx-edit'></el-input>
                             </el-form-item>
@@ -146,9 +146,7 @@
             }
         },
         watch:{
-            'form.agreement':function(val){
-                this.buttonLogic.submitBtn=val;
-            }
+            
         },
         mounted:function(){
         	
