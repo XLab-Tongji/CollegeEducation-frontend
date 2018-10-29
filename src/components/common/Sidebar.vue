@@ -56,13 +56,7 @@
                         index: 'source-list',
                         title: '下载资源'
                     },
-
-                    {
-                        icon: 'el-icon-tickets',
-                        index: 'source-page',
-                        title: '资源详情（调试后移除）'
-                    },
-
+                    
                     {
                         icon: 'el-icon-question',
                         index: 'topic',
