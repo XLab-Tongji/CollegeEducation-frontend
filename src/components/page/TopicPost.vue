@@ -121,9 +121,7 @@
                 this.draft.draft_text = this.article.TopicText;
                 if(this.sid !== '') this.draft.sector_id = Number(this.sid);
                 this.draft.write_date = new Date();
-                var param = new URLSearchParams();
-                param.append('draft', this.draft);
-                this.$http.post(server.url + '/draft/save', param).then(response => {
+                this.$http.post(server.url + '/draft/save', this.draft).then(response => {
                     if (response.status == 200){
                         this.editor.$textElem.attr('contenteditable', true);
                         this.loading = false;
@@ -174,15 +172,13 @@
                 this.editor.$textElem.attr('contenteditable', false);
                 this.article.SectorId = Number(this.sid);
                 this.article.TopicDate = new Date();
-                var param = new URLSearchParams();
-                param.append('article', this.article);
-                this.$http.post(server.url + '/article/save', param).then(response => {
+                this.$http.post(server.url + '/article/save', this.article).then(response => {
                     if (response.status == 200){
                         this.editor.$textElem.attr('contenteditable', true);
                         this.loading = false;
                         this.isSaved = true;
                         this.$message({type: 'success', message: '已发表，页面即将跳转'});
-                        this.$router.push('/topic-list');
+                        this.$router.push('/topic');
                     }
                     else{
                         this.loading = false;
@@ -228,14 +224,14 @@
                     TopicTitle: '',
                     TopicText: '',
                     TopicDate: new Date(),
-                    UserId: 33, // 不知道如何获取
+                    UserId: 1, // 不知道如何获取
                     ReplyCount: 0,
                     ClickingRate: 0,
                     PraiseCount: 0,
                     favorite_count: 0
                 },
                 draft: {
-                    user_id: 33,
+                    user_id: 1,
                     publish_type_id: 0,
                     sector_id: 0,
                     draft_name: '',
