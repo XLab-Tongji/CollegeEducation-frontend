@@ -195,6 +195,8 @@
             // 获取资源列表
             getResourceList(resourceMajorID,categoryID,pageID,keyword){
                 this.$http.get(server.url+'/searchResource/'+resourceMajorID+'/'+categoryID+'/'+pageID+'?keyword='+keyword,{}).then(function(response){
+                    //清空数组，在调试后移除
+                    //this.sourceList.splice(0,this.sourceList.length)
                     console.log(response)
                     for(let i=0;i<response.data.length;i++){
                         this.sourceList.push(response.data[i]);
