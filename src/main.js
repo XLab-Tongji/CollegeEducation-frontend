@@ -41,3 +41,10 @@ new Vue({
     router,
     render: h => h(App)
 }).$mount('#app');
+
+Vue.http.options.root='/article/all';
+Vue.http.post.root='/draft/save';
+Vue.http.post.root='/blackboard/save';
+Vue.http.post.root='/article/save';
+Vue.http.headers.common['Authorization']='Bearer '+localStorage.getItem('token');
+
