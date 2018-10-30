@@ -115,6 +115,8 @@
 
 <script>
     import VueCropper  from 'vue-cropperjs';
+    import Vue from 'vue';
+    import axios from 'axios';
     import server from '../../../config/index';
     export default {
         name: 'download',
@@ -171,14 +173,17 @@
                 console.log(tab,event)
             },
             // 监听下载按钮
+            // TODO: 下载文件类型需要做判断，目前只能下载PDF Version
             downloadBtn(){
-            	this.$http.get(server.url+'/downloadResource/'+this.$route.params.resourceID,{}).then(function(response){
-            		this.$message({
-            			message:'下载即将开始',
-            			type:'success',
-            			showClose:true
-            		})
-            	})
+                console.error('Bearer '+localStorage.getItem('token'))
+                axios.get(server.url+'/downloadResource/'+this.$route.params.resourceID,{
+                    headers:{Authorization:'Bearer '+localStorage.getItem('token')}
+                },{responseType:'arraybuffer'}).then((res)=>{
+                    let blob = new Blob([res.data],{type:'application/pdf'});
+                    let objectUrl=URL.createObjectURL(blob);
+                    window.location.href=objectUrl;
+                }).catch(function(res){});
+                
             }
 
 

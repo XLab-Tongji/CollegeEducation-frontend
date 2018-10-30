@@ -78,7 +78,7 @@
                                     </el-form-item>
                                     <el-checkbox v-model="form.agreement" style='margin-top: 8pt;margin-bottom: 18pt'>我已阅读并同意《一份根本不会看的协议》</el-checkbox>
                                     <el-row>
-                                        <el-button type="primary" icon="el-icon-lx-roundcheck" @click="onSubmit">提交</el-button>
+                                        <el-button type="primary" icon="el-icon-lx-roundcheck" @click="onSubmit" v-loading.fullscreen.lock="fullscreenLoading" >提交</el-button>
                                     </el-row>
                                 </el-form>
                             </el-col>
@@ -87,7 +87,14 @@
                 </el-card>
             </el-col>
             <el-col :span='6'>
-                <el-card></el-card>
+                <el-card>
+                    <div class="subtitle">上传须知</div>
+                    <div class="content">• 如涉及侵权内容,您的资源将被移除</div>
+                    <div class="content">• 请勿上传小说、mp3、图片等与技术无关的内容.一旦发现将被删除</div>
+                    <div class="content">• 请勿在未经授权的情况下上传任何涉及著作权侵权的资源，除非该资源完全由您个人创作</div>
+                    <div class="content">• 点击上传资源即表示您确认该资源不违反资源分享的使用条款，并且您拥有该资源的所有版权或者上传资源的授权</div>
+                    <div class="content">• 您上传的资源如果因版权、使用、内容完整度 等原因被举报并通过官方审核，将扣除通过该资源获得的全部积分</div>
+                </el-card>
             </el-col>
         </el-row>
     </div>
@@ -139,6 +146,7 @@
                 imgSrc: '',
                 cropImg: '',
                 dialogVisible: false,
+                fullscreenLoading:false,
             }
         },
         components: {
@@ -156,7 +164,8 @@
         methods:{
             // 提交按钮的函数
             onSubmit(){
-                this.$http.post(server.url + '/registerCategories',{
+                this.fullscreenLoading = true;
+                this.$http.post(server.url + '/resourceCategories',{
                     "resourceID": this.form.fileID,
                     "categoryID": this.form.type,
                     "resourceMajorID": this.form.category,
@@ -165,9 +174,10 @@
                     "point":this.form.point,
                     "tag":this.form.tag
                 }).then(function(response){
-                    
+                    this.fullscreenLoading = false;
                 },function(response){  
                     console.error("初始化获取资源类型列表错误")
+                    this.fullscreenLoading = false;
                 });
             },
             // 获取资源类型列表
@@ -297,5 +307,22 @@
         top: 0;
         opacity: 0;
         cursor: pointer;
+    }
+    .subtitle{
+        font-weight: 600;
+        line-height: 30x;
+        margin: 5px 0;
+        font-size: 18px;
+        color: #1f2f3d;
+    }
+    .content{
+        font-weight: 400;
+        line-height: 25px;
+        font-size: 14px;
+        color: #1f2f3d;
+        overflow:scroll;
+        overflow-y:hidden;
+        overflow-x:hidden;
+        margin-bottom: -15px
     }
 </style>

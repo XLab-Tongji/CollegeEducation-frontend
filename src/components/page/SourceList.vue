@@ -167,7 +167,7 @@
             },
             // 获取资源类型列表
             getTypeList(){
-                this.$http.get(server.url + '/registerCategories',{}).then(function(response){
+                this.$http.get(server.url + '/resourceCategories',{}).then(function(response){
                     // 把获取回来的东西push进去
                     for(let i=0;i<response.data.data.length;i++){
                         this.typeList.push({value:response.data.data[i].id,label:response.data.data[i].resourceCategoryName});
@@ -185,6 +185,7 @@
                         this.categoryList.push({value:response.data.data[i].id,label:response.data.data[i].resourceMajorName});
                     }
                     this.model.selectCategoryList=this.categoryList[0].value;
+                    console.log(response.data)
                 },function(response){  
                     console.error("初始化获取所属分类列表错误")
                 });
@@ -196,10 +197,10 @@
             getResourceList(resourceMajorID,categoryID,pageID,keyword){
                 this.$http.get(server.url+'/searchResource/'+resourceMajorID+'/'+categoryID+'/'+pageID+'?keyword='+keyword,{}).then(function(response){
                     //清空数组，在调试后移除
-                    //this.sourceList.splice(0,this.sourceList.length)
-                    console.log(response)
-                    for(let i=0;i<response.data.length;i++){
-                        this.sourceList.push(response.data[i]);
+                    this.sourceList.splice(0,this.sourceList.length)
+                    console.error(response.data.data)
+                    for(let i=0;i<response.data.data.length;i++){
+                        this.sourceList.push(response.data.data[i]);
                     }
                 })
             }

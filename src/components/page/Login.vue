@@ -51,8 +51,10 @@
                 this.$router.push('/register');
             },
             submitForm() {
+                localStorage.setItem('token','eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJxaWJhdHUiLCJleHAiOjE1NDE0OTQyODIsImlhdCI6MTU0MDg4OTQ4Mn0.pOc2dtnVS5io2ZugU-KYdxHxIt0-C1ic-9f-K34fiTsrQrKbygRO0vZ_YFfVsijFf44LrhlwoJNfxN2EYGPpxg')
                 this.$http.post(server.url + '/auth', {username:this.ruleForm.username,password:this.ruleForm.password}).then(response => {
                     localStorage.setItem('token',response.data.token);
+                    console.log(response.data.token)
                     localStorage.setItem('ms_username',this.ruleForm.username);
                     this.$router.push('/');
                    }, response => {
