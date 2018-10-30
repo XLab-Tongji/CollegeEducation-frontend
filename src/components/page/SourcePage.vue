@@ -59,7 +59,7 @@
                          align='center'
                         >
                           <template slot-scope="scope">
-                            <a v-for="item in 4" style="color:#EBB563;font-size: 12pt">★</a>
+                            <a v-for="item in 4" :key="abc1" style="color:#EBB563;font-size: 12pt">★</a>
                           </template>
                         </el-table-column>
                     </el-table>
@@ -88,7 +88,7 @@
                     </div>
                 </el-tab-pane>
                 <el-tab-pane label="相关推荐">
-                    <el-card class='listCard' shadow='hover' v-for='item in sourceList'>
+                    <el-card class='listCard' shadow='hover' v-for='item in sourceList' :key="abc2">
                         <el-row>
                             <el-col :span='2' style="display:inline-block;max-width: 60px">
                                 <i class="el-icon-upload" style="font-size: 40px;text-align: center;color:#449CFA;padding-top: 4pt"></i>

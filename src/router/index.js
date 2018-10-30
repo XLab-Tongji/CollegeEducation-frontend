@@ -20,6 +20,11 @@ export default new Router({
                     meta: { title: '系统首页' }
                 },
                 {
+                    path: '/collection',
+                    component: resolve => require(['../components/page/Collection.vue'], resolve),
+                    meta: { title: '我的收藏' }
+                },
+                {
                     path: '/upload-source',
                     component: resolve => require(['../components/page/UploadSource.vue'], resolve),
                     meta: { title: '上传资源' }

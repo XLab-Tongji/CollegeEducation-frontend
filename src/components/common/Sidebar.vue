@@ -44,7 +44,11 @@
                         index: 'dashboard',
                         title: '系统首页'
                     },
-
+                    {
+                        icon: 'el-icon-lx-favor',
+                        index: 'collection',
+                        title: '我的收藏'
+                    },
                     {
                         icon: 'el-icon-lx-upload',
                         index: 'upload-source',
