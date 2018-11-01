@@ -7,25 +7,25 @@
         </div>
         <el-card style='margin-bottom: 8pt'>
             <el-row>
-                <el-col span='2' style='display: inline-block; max-width: 84pt'>
+                <el-col :span='2' style='display: inline-block; max-width: 84pt'>
                     <i class="el-icon-upload" style="font-size: 60pt;text-align: center;color:#449CFA;padding-top: 4pt;padding-left: 8pt;padding-right: 16pt"></i>
                 </el-col>
-                <el-col span='22' style="display: inline-block;vertical-align: top;">
+                <el-col :span='22' style="display: inline-block;vertical-align: top;">
                     <div style="margin-bottom: 4pt">
-                        <div class="sourceTitle" style="display: inline-block;">QuantumdataDP1.4产品技术资料</div>
+                        <div class="sourceTitle" style="display: inline-block;">{{this.$route.params.resourceName}}</div>
                         <div style="display: inline-block;vertical-align: top;padding-top: 2pt;margin-left: 4pt">
                             <el-tag>标签1</el-tag>
                             <el-tag>标签2</el-tag>
                         </div>
                     </div>
-                    <div class="context">Teledyne LeCroy quantumdata 980 48G 用于HDMI 测试的协议分析 仪/发生器模块配备了HDMI Tx 和Rx 端口，支持HDMI 2.1 固定速率链 路和FEC 捕获分析和解码，最高可达48Gbps（12Gbps /通道）。 HDMI Rx 分析端口可提供固定速率链路的打包-超级模块，字符模块和 FRL 数据包以及底层TMDS 视频，协议，控制和元数据的可视性。</div>
+                    <div class="context">{{this.$route.params.description}}</div>
                     <div style="margin-top: 12pt">
                         <el-button size='mini' icon='el-icon-lx-group'>分享</el-button>
                         <el-button-group style="display: inline-block;">
                           <el-button size='mini'>赞</el-button>
                           <el-button size='mini'>踩</el-button>
                         </el-button-group>
-                        <el-button size='mini'>下载 (12.1Mb)</el-button>
+                        <el-button size='mini' @click='downloadBtn'>下载 (12.1Mb)</el-button>
                         <el-button size='mini' style='margin-left: 1pt' @click='editComment'>发表评论</el-button>
 
                     </div>
@@ -59,7 +59,7 @@
                          align='center'
                         >
                           <template slot-scope="scope">
-                            <a v-for="item in 4" style="color:#EBB563;font-size: 12pt">★</a>
+                            <a v-for="item in 4" :key="abc1" style="color:#EBB563;font-size: 12pt">★</a>
                           </template>
                         </el-table-column>
                     </el-table>
@@ -72,8 +72,8 @@
                         -->
 
                         <!--弹出填写评论对话框-->
-                        <el-dialog title="收货地址" :visible.sync="commentPublish.dialogFormVisible">
-                          <el-form ref="form" :model="form" style='width: 98%;margin:auto'>
+                        <el-dialog title="发布评论" :visible.sync="commentPublish.dialogFormVisible">
+                          <el-form ref="commentPublish" :model="commentPublish" style='width: 98%;margin:auto'>
                             <el-form-item>
                                 <el-input v-model="commentPublish.title" placeholder="请输入评论标题" prefix-icon='el-icon-lx-edit'></el-input>
                             </el-form-item>
@@ -88,12 +88,12 @@
                     </div>
                 </el-tab-pane>
                 <el-tab-pane label="相关推荐">
-                    <el-card class='listCard' shadow='hover' v-for='item in sourceList'>
+                    <el-card class='listCard' shadow='hover' v-for='item in sourceList' :key="abc2">
                         <el-row>
-                            <el-col span='2' style="display:inline-block;max-width: 60px">
+                            <el-col :span='2' style="display:inline-block;max-width: 60px">
                                 <i class="el-icon-upload" style="font-size: 40px;text-align: center;color:#449CFA;padding-top: 4pt"></i>
                             </el-col>
-                            <el-col span='22' style="display: inline-block;vertical-align: top;">
+                            <el-col :span='22' style="display: inline-block;vertical-align: top;">
                                 <div class="title">{{item.title}}</div>       
                                 <div class="context">{{item.description}}</div>
                                 <div class="subtitle">{{item.date}}</div>
@@ -115,6 +115,8 @@
 
 <script>
     import VueCropper  from 'vue-cropperjs';
+    import Vue from 'vue';
+    import axios from 'axios';
     import server from '../../../config/index';
     export default {
         name: 'download',
@@ -146,16 +148,13 @@
             }
         },
         watch:{
-            'form.agreement':function(val){
-                this.buttonLogic.submitBtn=val;
-            }
+            
         },
         mounted:function(){
-            this.getCategoryList();
-            this.getTypeList();
+        	
         },
         methods:{
-            // 评论评分选择器
+        	// 评论评分选择器
             filterRate(value, row){
                 return row.rate === value;
             },
@@ -169,31 +168,23 @@
                 this.commentPublish.dialogFormVisible=false;
                 // TODO: 在这里添加网络请求
             },
-            // 获取资源类型列表
-            getTypeList(){
-                this.$http.get(server.url + '/registerCategories',{}).then(function(response){
-                    // 把获取回来的东西push进去
-                    for(let i=0;i<response.data.data.length;i++){
-                        this.typeList.push({value:response.data.data[i].id,label:response.data.data[i].resourceCategoryName});
-                    }
-                },function(response){  
-                    console.error("初始化获取资源类型列表错误")
-                });
-            },
-            // 获取所属分类列表
-            getCategoryList(){
-                this.$http.get(server.url + '/resourceMajors',{}).then(function(response){
-                    // 把获取回来的东西push进去
-                    for(let i=0;i<response.data.data.length;i++){
-                        this.categoryList.push({value:response.data.data[i].id,label:response.data.data[i].resourceMajorName});
-                    }
-                },function(response){  
-                    console.error("初始化获取所属分类列表错误")
-                });
-            },
+
             handleClick(tab,event){
                 console.log(tab,event)
             },
+            // 监听下载按钮
+            // TODO: 下载文件类型需要做判断，目前只能下载PDF Version
+            downloadBtn(){
+                console.error('Bearer '+localStorage.getItem('token'))
+                axios.get(server.url+'/downloadResource/'+this.$route.params.resourceID,{
+                    headers:{Authorization:'Bearer '+localStorage.getItem('token')}
+                },{responseType:'arraybuffer'}).then((res)=>{
+                    let blob = new Blob([res.data],{type:'application/pdf'});
+                    let objectUrl=URL.createObjectURL(blob);
+                    window.location.href=objectUrl;
+                }).catch(function(res){});
+                
+            }
 
 
         },

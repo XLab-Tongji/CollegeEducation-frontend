@@ -44,7 +44,11 @@
                         index: 'dashboard',
                         title: '系统首页'
                     },
-
+                    {
+                        icon: 'el-icon-lx-favor',
+                        index: 'collection',
+                        title: '我的收藏'
+                    },
                     {
                         icon: 'el-icon-lx-upload',
                         index: 'upload-source',
@@ -56,13 +60,7 @@
                         index: 'source-list',
                         title: '下载资源'
                     },
-
-                    {
-                        icon: 'el-icon-tickets',
-                        index: 'source-page',
-                        title: '资源详情（调试后移除）'
-                    },
-
+                    
                     {
                         icon: 'el-icon-question',
                         index: 'topic',

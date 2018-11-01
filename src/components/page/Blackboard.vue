@@ -219,7 +219,7 @@
                         this.loading = false;
                         this.isSaved = true;
                         this.$message({type: 'success', message: '已发表，页面即将跳转'});
-                        this.$router.push('/topic-list');
+                        this.$router.push('/topic');
                     }
                     else{
                         this.loading = false;
