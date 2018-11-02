@@ -46,17 +46,28 @@
                     },
 
                     {
-                        icon: 'el-icon-lx-upload',
-                        index: 'upload-source',
-                        title: '上传资源'
-                    },
-
-                    {
-                        icon: 'el-icon-tickets',
-                        index: 'source-list',
-                        title: '下载资源'
+                        icon: 'el-icon-lx-favor',
+                        index: 'collection',
+                        title: '我的收藏'
                     },
                     
+                    {
+                        icon:'el-icon-tickets',
+                        index:'',
+                        title:'学习资源',
+                        subs:[
+                            {
+                                index:'upload-source',
+                                title:'上传资源'
+                            },
+                            
+                            {
+                                index:'source-list',
+                                title:'下载资源'
+                            }
+                        ]
+                    },
+                                       
                     {
                         icon: 'el-icon-question',
                         index: 'topic',

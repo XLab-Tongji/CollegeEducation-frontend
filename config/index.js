@@ -5,7 +5,7 @@
 const path = require('path')
 
 module.exports = {
-    url: 'http://192.168.1.41:8080',
+    url: 'http://192.168.199.146:8080',
     //本地调试
     //url: 'http://localhost:8080',
   dev: {
