@@ -20,6 +20,23 @@ export default new Router({
                     meta: { title: '系统首页' }
                 },
                 {
+                    path: '/my',
+                    component: resolve => require(['../components/page/My.vue'], resolve),
+                    redirect: '/my-upload',
+                    meta: { title: '个人中心' },
+                    children:[{
+                        path:'/my-upload',
+                        meta:{title:'我的上传'},
+                        component: resolve => require(['../components/page/myUpload.vue'], resolve),
+                        },
+                        {
+                        path:'/my-download',
+                        meta:{title:'我的下载'},
+                        component: resolve => require(['../components/page/myDownload.vue'], resolve),
+                        }
+                    ]
+                },
+                {
                     path: '/collection',
                     component: resolve => require(['../components/page/Collection.vue'], resolve),
                     meta: { title: '我的收藏' }
