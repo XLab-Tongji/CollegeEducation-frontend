@@ -1,3 +1,8 @@
+### Notice
+For debugging, the server.url has been changed to a domain IP. Please change it back when necessary.
+You may change **line 8** in ``{root}\config\index.js``
+
+
 # vue-manage-system #
 基于Vue.js 2.x系列 + Element UI 的后台管理系统解决方案。[线上地址](http://blog.gdfengshuo.com/example/work/)
 
