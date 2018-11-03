@@ -18,8 +18,8 @@
                         :value="item.value">
                     </el-option>
                 </el-select>
-                <el-button type="primary" icon="el-icon-search" @click="searchClick" class="search-button" size="mini">搜索
-                </el-button></div>
+                <el-button type="primary" icon="el-icon-search" @click="searchClick" class="search-button" size="mini">搜索</el-button>
+            </div>
         </div>
 
         <div>
@@ -28,12 +28,30 @@
                 :data="articles"
                 tooltip-effect="dark"
                 class="topic-table"
-                @selection-change="handleSelectionChange" v-loading="loading">
+                v-loading="loading">
+                <el-table-column type="expand">
+                    <template slot-scope="scope"><div>{{scope.row.topicText}}</div>
+                        <el-row :gutter="20" type="flex" justify="center" style="margin-top: 15px;">
+                            <el-col :span="2"><div><el-button type="primary" circle style="border-color: #fff; color: #1ac7c3; background-color: #fff;" @click="Collect(scope.$index)"><i class="fa fa-star fa-lg" aria-hidden="true" v-if="isCollected[scope.$index]"></i><i class="fa fa-star-o fa-lg" aria-hidden="true" v-else></i></el-button></div></el-col>
+                            <el-col :span="2"><div><el-button type="primary" circle style="border-color: #fff; color: #1ac7c3; background-color: #fff;" @click="Like(scope.$index)"><i class="fa fa-thumbs-up fa-lg" aria-hidden="true" v-if="isLiked[scope.$index]"></i><i class="fa fa-thumbs-o-up fa-lg" aria-hidden="true" v-else></i></el-button></div></el-col>
+                        </el-row>
+                        <el-collapse style="margin-top: 20px">
+                            <el-collapse-item title="评论" name="1" style="text-align: center;color: #6A6A6A;font-size: 10px">
+                                <div align="left">
+                                    <el-table>
+
+                                    </el-table>
+                                    <el-input v-model="commentText" placeholder="输入评论"></el-input>
+                                </div>
+                            </el-collapse-item>
+                        </el-collapse>
+                    </template>
+                </el-table-column>
                 <el-table-column
                     label="主题"
                     width="350" style="text-align: center">
                     <template slot-scope="scope">
-                        <p style="font-size: 14px; font-weight: bold; color: #0A9894; padding-top: 7px;">{{ scope.row.topicTitle }}</p>
+                        <el-button type="text" @click="goDetails" style="font-size: 14px; font-weight: bold; color: #0A9894; padding-top: 7px;">{{ scope.row.topicTitle }}</el-button>
                         <p class="topic-content"> {{ scope.row.topicText | filterHtml | htmlDecode}}</p>
                     </template>
                 </el-table-column>
@@ -82,6 +100,7 @@
 
 <script>
     import server from '../../../config/index';
+    import axios from 'axios'
     export default{
         data() {
             return {
@@ -92,6 +111,8 @@
                 totalCount: -1, // 文章总数
                 pageSize: 3, // 每页显示多少文章
                 keywords: '', // 搜索关键词
+                clickId: -1,
+                commentText: '',
                 searchOptions: [{
                     value: '1',
                     label: '全部'
@@ -102,18 +123,25 @@
                     value: '3',
                     label: '按标签'
                 }],
+                isLiked: [],
+                isCollected: []
             }
         },
         mounted: function () {
             this.loading = true;
             this.loadBlogs(1, this.pageSize);
+            // 从后台加载
+            for (var i = 0;i < this.pageSize; i++) {
+                this.isLiked.push(false);
+                this.isCollected.push(false);
+            }
         },
         methods: {
-            searchClick() {
+            searchClick: function() {
                 this.loadBlogs(1, this.pageSize);
             },
             // 翻页
-            currentChange(currentPage) {
+            currentChange: function (currentPage) {
                 this.currentPage = currentPage;
                 this.loading = true;
                 this.loadBlogs(currentPage, this.pageSize);
@@ -176,6 +204,17 @@
                     this.loading = false;
                     this.$message({type: 'error', message: '数据加载失败!'});
                 })
+            },
+            Like: function(index) {
+                // 与后台交互
+                this.isLiked[index] = !this.isLiked[index];
+            },
+            Collect: function(index) {
+                // 与后台交互
+                this.isCollected[index] = !this.isCollected[index];
+            },
+            goDetails: function(index) {
+                this.$router.push('/topic-details')
             }
         },
         filters:{

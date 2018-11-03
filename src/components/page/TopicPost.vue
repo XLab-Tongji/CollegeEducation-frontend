@@ -30,7 +30,7 @@
                 <el-input
                     v-if="tagInputVisible" v-model="tagValue" ref="saveTagInput"
                     size="mini" style="width: 80px" maxlength="10"
-                    @keyup.enter.native="handleInputConfirm"
+                    @keyup.space.native="handleInputConfirm"
                     @blur="handleInputConfirm">
                 </el-input>
                 <el-button v-else type="primary" size="mini" @click="showInput">+Tag</el-button>
@@ -100,6 +100,10 @@
             },
             // 失去焦点时确认添加tag
             handleInputConfirm() {
+                if(this.tagValue === ' '){
+                    this.tagValue = '';
+                    return;
+                }
                 let tagValue = this.tagValue;
                 for(var i in this.SectorName){
                     if(this.SectorName[i] === tagValue) {

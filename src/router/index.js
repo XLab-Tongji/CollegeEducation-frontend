@@ -28,11 +28,11 @@ export default new Router({
                         path:'/my-upload',
                         meta:{title:'我的上传'},
                         component: resolve => require(['../components/page/myUpload.vue'], resolve),
-                        },
+                    },
                         {
-                        path:'/my-download',
-                        meta:{title:'我的下载'},
-                        component: resolve => require(['../components/page/myDownload.vue'], resolve),
+                            path:'/my-download',
+                            meta:{title:'我的下载'},
+                            component: resolve => require(['../components/page/myDownload.vue'], resolve),
                         }
                     ]
                 },
@@ -83,6 +83,11 @@ export default new Router({
                             path: '/blackboard',
                             component: resolve => require(['../components/page/Blackboard.vue'], resolve),
                             meta: { title: '黑板报'}
+                        },
+                        {
+                            path: '/topic-details',
+                            component: resolve => require(['../components/page/TopicDetails.vue'], resolve),
+                            meta: { title: '话题详情'}
                         }
                     ]
                 },

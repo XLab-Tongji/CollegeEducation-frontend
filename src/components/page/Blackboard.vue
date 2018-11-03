@@ -22,18 +22,18 @@
             <el-tag
                 :key="tag"
                 v-for="tag in SectorName"
-                closable、
+                closable
                 :disable-transitions="false"
                 class="tag"
                 @close="handleClose(tag)">
                 {{tag}}
             </el-tag>
-            <el-input
-                v-if="tagInputVisible" v-model="tagValue" ref="saveTagInput"
-                size="mini" style="width: 80px" maxlength="10"
-                @keyup.enter.native="handleInputConfirm"
-                @blur="handleInputConfirm">
-            </el-input>
+                <el-input
+                    v-if="tagInputVisible" v-model="tagValue" ref="saveTagInput"
+                    size="mini" style="width: 80px" maxlength="10"
+                    @keyup.space.native="handleInputConfirm"
+                    @blur="handleInputConfirm">
+                </el-input>
             <el-button v-else type="primary" size="mini" @click="showInput">+Tag</el-button>
             </div>
             <div class="post">
@@ -114,7 +114,11 @@
                     this.$refs.saveTagInput.$refs.input.focus();
                 });
             },
-            handleInputConfirm() {
+            handleInputConfirm : function() {
+                if (this.tagValue === ' ') {
+                    this.tagValue = '';
+                    return;
+                }
                 let tagValue = this.tagValue;
                 for(var i in this.SectorName){
                     if(this.SectorName[i] === tagValue) {
