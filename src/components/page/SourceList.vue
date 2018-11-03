@@ -9,7 +9,7 @@
             <el-form label-position='left' label-width='80px'>
                 <el-form-item label="资源类型">
                     <el-radio-group v-model="model.radioTypeList" size="medium" @change='radioTypeChange'>
-                      <el-radio-button border v-for="type in typeList" :key="abc3" :label="type.label" ></el-radio-button>
+                      <el-radio-button border v-for="type in typeList" :label="type.label" ></el-radio-button>
                     </el-radio-group>
                 </el-form-item>
                 <el-form-item label="资源分类">
@@ -40,7 +40,7 @@
         <el-card>
             <el-tabs v-model="tag" @tab-click="handleClick">
                 <el-tab-pane label="最新上传" name="latestUpdate">
-                    <el-card class='listCard' shadow='hover' v-for='item in sourceList' :key="abc4" @click.native='clickCard(item)'>
+                    <el-card class='listCard' shadow='hover' v-for='item in sourceList' @click.native='clickCard(item)'>
                         <el-row>
                             <el-col :span='2' style="display:inline-block;max-width: 60px">
                                 <i class="el-icon-upload" style="font-size: 40px;text-align: center;color:#449CFA;padding-top: 4pt"></i>
