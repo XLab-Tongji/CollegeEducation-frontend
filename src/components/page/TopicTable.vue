@@ -19,6 +19,11 @@
                     </el-option>
                 </el-select>
                 <el-button type="primary" icon="el-icon-search" @click="searchClick" class="search-button" size="mini">搜索</el-button>
+                <el-radio-group v-model="tagKeyword" fill="#1ac7c3" style="margin-left: 20px" v-if="searchType === '3'" size="mini" @change="handleTagChange">
+                    <el-radio-button label="计算机"></el-radio-button>
+                    <el-radio-button label="信息技术"></el-radio-button>
+                    <el-radio-button label="软件工程"></el-radio-button>
+                </el-radio-group>
             </div>
         </div>
 
@@ -41,7 +46,10 @@
                                     <el-table>
 
                                     </el-table>
-                                    <el-input v-model="commentText" placeholder="输入评论"></el-input>
+                                    <el-row gutter="5">
+                                        <el-col :span="22"><el-input v-model="commentText" placeholder="输入评论"></el-input></el-col>
+                                        <el-col :span="2"><el-button type="primary" @click="" style="background-color: #1ac7c3; border-color: #1ac7c3;">发表</el-button></el-col>
+                                    </el-row>
                                 </div>
                             </el-collapse-item>
                         </el-collapse>
@@ -111,6 +119,7 @@
                 totalCount: -1, // 文章总数
                 pageSize: 3, // 每页显示多少文章
                 keywords: '', // 搜索关键词
+                tagKeyword: '',
                 clickId: -1,
                 commentText: '',
                 searchOptions: [{
@@ -215,6 +224,9 @@
             },
             goDetails: function(index) {
                 this.$router.push('/topic-details')
+            },
+            handleTagChange: function() {
+                this.keywords += this.tagKeyword;
             }
         },
         filters:{
