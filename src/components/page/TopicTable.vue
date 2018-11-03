@@ -35,10 +35,10 @@
                 class="topic-table"
                 v-loading="loading">
                 <el-table-column type="expand">
-                    <template slot-scope="scope"><div>{{scope.row.topicText}}</div>
+                    <template slot-scope="scope"><div>{{scope.row.TopicText}}</div>
                         <el-row :gutter="20" type="flex" justify="center" style="margin-top: 15px;">
-                            <el-col :span="2"><div><el-button type="primary" circle style="border-color: #fff; color: #1ac7c3; background-color: #fff;" @click="Collect(scope.$index)"><i class="fa fa-star fa-lg" aria-hidden="true" v-if="isCollected[scope.$index]"></i><i class="fa fa-star-o fa-lg" aria-hidden="true" v-else></i></el-button></div></el-col>
-                            <el-col :span="2"><div><el-button type="primary" circle style="border-color: #fff; color: #1ac7c3; background-color: #fff;" @click="Like(scope.$index)"><i class="fa fa-thumbs-up fa-lg" aria-hidden="true" v-if="isLiked[scope.$index]"></i><i class="fa fa-thumbs-o-up fa-lg" aria-hidden="true" v-else></i></el-button></div></el-col>
+                            <el-col :span="2"><div><el-button type="primary" circle style="border-color: #fff; color: #1ac7c3; background-color: #fff;" @click="collect(scope.$index)"><i class="fa fa-star fa-lg" aria-hidden="true" v-if="isCollected[scope.$index]"></i><i class="fa fa-star-o fa-lg" aria-hidden="true" v-else></i></el-button></div></el-col>
+                            <el-col :span="2"><div><el-button type="primary" circle style="border-color: #fff; color: #1ac7c3; background-color: #fff;" @click="like(scope.$index)"><i class="fa fa-thumbs-up fa-lg" aria-hidden="true" v-if="isLiked[scope.$index]"></i><i class="fa fa-thumbs-o-up fa-lg" aria-hidden="true" v-else></i></el-button></div></el-col>
                         </el-row>
                         <el-collapse style="margin-top: 20px">
                             <el-collapse-item title="评论" name="1" style="text-align: center;color: #6A6A6A;font-size: 10px">
@@ -48,7 +48,7 @@
                                     </el-table>
                                     <el-row gutter="5">
                                         <el-col :span="22"><el-input v-model="commentText" placeholder="输入评论"></el-input></el-col>
-                                        <el-col :span="2"><el-button type="primary" @click="" style="background-color: #1ac7c3; border-color: #1ac7c3;">发表</el-button></el-col>
+                                        <el-col :span="2"><el-button type="primary" @click="postComment(scope.$index)" style="background-color: #1ac7c3; border-color: #1ac7c3;">发表</el-button></el-col>
                                     </el-row>
                                 </div>
                             </el-collapse-item>
@@ -59,26 +59,26 @@
                     label="主题"
                     width="350" style="text-align: center">
                     <template slot-scope="scope">
-                        <el-button type="text" @click="goDetails" style="font-size: 14px; font-weight: bold; color: #0A9894; padding-top: 7px;">{{ scope.row.topicTitle }}</el-button>
-                        <p class="topic-content"> {{ scope.row.topicText | filterHtml | htmlDecode}}</p>
+                        <el-button type="text" @click="goDetails" style="font-size: 14px; font-weight: bold; color: #0A9894; padding-top: 7px;">{{ scope.row.TopicTitle }}</el-button>
+                        <p class="topic-content"> {{ scope.row.TopicText | filterHtml | htmlDecode}}</p>
                     </template>
                 </el-table-column>
                 <el-table-column
                     label="点击数"
                     align="center" width="100" min-width='200'>
-                    <template slot-scope="scope"><span style="font-size: 13px; color: #6A6A6A">{{ scope.row.clickingRate}} </span></template>
+                    <template slot-scope="scope"><span style="font-size: 13px; color: #6A6A6A">{{ scope.row.ClickingRate}} </span></template>
                 </el-table-column>
                 <el-table-column
                     label="回复数"
                     align="center" width="100">
-                    <template slot-scope="scope"><span style="font-size: 13px; color: #6A6A6A">{{ scope.row.replyCount}} </span></template>
+                    <template slot-scope="scope"><span style="font-size: 13px; color: #6A6A6A">{{ scope.row.ReplyCount}} </span></template>
                 </el-table-column>
                 <el-table-column
                     label="最新回复"
                     align="center">
                     <template slot-scope="scope">
-                        <p style="font-size: 13px; color: #6A6A6A">id: {{ scope.row.userId}} </p>
-                        <p style="font-size: 10px; color: #6A6A6A">{{ scope.row.topicDate.replace(/^([-\d]*)T([\d:]*)\..*$/, '$1 $2')}}</p>
+                        <p style="font-size: 13px; color: #6A6A6A">id: {{ scope.row.UserId}} </p>
+                        <p style="font-size: 10px; color: #6A6A6A">{{ scope.row.TopicDate.replace(/^([-\d]*)T([\d:]*)\..*$/, '$1 $2')}}</p>
                     </template>
                 </el-table-column>
             </el-table>
@@ -119,9 +119,9 @@
                 totalCount: -1, // 文章总数
                 pageSize: 3, // 每页显示多少文章
                 keywords: '', // 搜索关键词
-                tagKeyword: '',
-                clickId: -1,
-                commentText: '',
+                tagKeyword: '', // 选择的标签关键词
+                commentText: '', // 评论内容
+                // 搜索类型
                 searchOptions: [{
                     value: '1',
                     label: '全部'
@@ -132,8 +132,23 @@
                     value: '3',
                     label: '按标签'
                 }],
-                isLiked: [],
-                isCollected: []
+                isLiked: [], // 点赞状态
+                isCollected: [], // 收藏状态
+                // 收藏对象
+                Favorite: {
+                    topic_id: 0,
+                    user_id: 1, // 需要获取
+                    collection_time: new Date()
+                },
+                // 评论对象
+                Reply: {
+                    TopicId: -1,
+                    UserId: 1, // 需要获取
+                    ReplyText: '',
+                    ReplyDate: new Date(),
+                    ClickingRate: 0,
+                    PraiseCount: 0
+                }
             }
         },
         mounted: function () {
@@ -146,6 +161,7 @@
             }
         },
         methods: {
+            // 搜索
             searchClick: function() {
                 this.loadBlogs(1, this.pageSize);
             },
@@ -185,15 +201,16 @@
                         var j = (page * count < this.totalCount ? page * count : this.totalCount);
                         while (i < j) {
                             this.articles.push({
-                                userId: articleList.data[i].userId,
-                                topicDate: articleList.data[i].topicDate,
-                                replyCount: articleList.data[i].replyCount,
-                                sectorId: articleList.data[i].sectorId,
-                                topicId: articleList.data[i].topicId,
-                                topicText: articleList.data[i].topicText,
-                                topicTitle: articleList.data[i].topicTitle,
-                                clickingRate: articleList.data[i].clickingRate,
-                                sectorState: articleList.data[i].sectorState
+                                UserId: articleList.data[i].UserId,
+                                TopicDate: articleList.data[i].TopicDate,
+                                ReplyCount: articleList.data[i].ReplyCount,
+                                SectorId: articleList.data[i].SectorId,
+                                TopicId: articleList.data[i].TopicId,
+                                TopicText: articleList.data[i].TopicText,
+                                TopicTitle: articleList.data[i].TopicTitle,
+                                ClickingRate: articleList.data[i].ClickingRate,
+                                PraiseCount: articleList.data[i].PraiseCount,
+                                favorite_count: articleList.data[i].favorite_count
                             });
                             i++;
                         }
@@ -214,25 +231,75 @@
                     this.$message({type: 'error', message: '数据加载失败!'});
                 })
             },
-            Like: function(index) {
-                // 与后台交互
-                this.isLiked[index] = !this.isLiked[index];
+            // 点赞
+            like: function(index) {
+                this.$http.post(server.url + '/article/like', this.articles[index]).then(response => {
+                    if (response.status == 200){
+                        //刷新
+                        this.isLiked[index] = !this.isLiked[index];
+                    }
+                    else{
+                        this.$message({type: 'error', message: '请重试'});
+                    }
+                }, response => {
+                    this.$message({type: 'error', message: '请重试'});
+                }).catch((response) => {
+                    this.$message({type: 'error', message: '请重试'});
+                });
             },
-            Collect: function(index) {
-                // 与后台交互
-                this.isCollected[index] = !this.isCollected[index];
+            // 收藏
+            collect: function(index) {
+                this.Favorite.topic_id = this.articles[index].TopicId;
+                var t = new Date();
+                this.Favorite.collection_time = t.replace(/^([-\d]*)T([\d:]*)\..*$/, '$1 $2');
+                this.$http.post(server.url + '/article/collect', this.Favorite).then(response => {
+                    if (response.status == 200){
+                        //刷新
+                        this.isCollected[index] = !this.isCollected[index];
+                    }
+                    else{
+                        this.$message({type: 'error', message: '请重试'});
+                    }
+                }, response => {
+                    this.$message({type: 'error', message: '请重试'});
+                }).catch((response) => {
+                    this.$message({type: 'error', message: '请重试'});
+                });
             },
+            // 评论
+            postComment: function(index) {
+                this.Reply.TopicId = this.articles[index].TopicId;
+                this.Reply.ReplyText = this.commentText;
+                var t = new Date();
+                this.Reply.ReplyDate = t.replace(/^([-\d]*)T([\d:]*)\..*$/, '$1 $2');
+                this.$http.post(server.url + '/article/reply', this.Reply).then(response => {
+                    if (response.status == 200){
+                        //刷新
+                    }
+                    else{
+                        this.$message({type: 'error', message: '请重试'});
+                    }
+                }, response => {
+                    this.$message({type: 'error', message: '请重试'});
+                }).catch((response) => {
+                    this.$message({type: 'error', message: '请重试'});
+                });
+            },
+            // 跳转至详情页面
             goDetails: function(index) {
                 this.$router.push('/topic-details')
             },
+            // 选择tag
             handleTagChange: function() {
                 this.keywords += this.tagKeyword;
             }
         },
         filters:{
+            // 去除文字的html标签
             filterHtml: function(val) {
                 return val.replace(/<[^>]*>/g, "");//去除文字的<...></...>标签
             },
+            // 显示emoji
             htmlDecode: function(val) {
                 //1.首先动态创建一个容器标签元素，如DIV
                 var temp = document.createElement("div");

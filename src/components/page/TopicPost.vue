@@ -135,27 +135,15 @@
                     else{
                         this.loading = false;
                         this.editor.$textElem.attr('contenteditable', true);
-                        this.$notify.error({
-                            title: '保存失败',
-                            message: 'status='+response.status
-                        })
+                        this.$message({type: 'error', message: '保存失败'});
                     }
                 }, response => {
                     this.editor.$textElem.attr('contenteditable', true);
                     this.loading = false;
-                    console.log("error");
-                    console.log(response);
-                    this.$notify.error({
-                        title: '保存失败',
-                        message: 'status='+response.status
-                    })
+                    this.$message({type: 'error', message: '保存失败'});
                 }).catch((response) => {
-                    alert(response.status);
                     this.loading = false;
-                    this.$notify.error({
-                        title: '保存失败',
-                        message: 'status='+response.status
-                    })
+                    this.$message({type: 'error', message: '保存失败'});
                 });
             },
             // 发布
@@ -187,27 +175,15 @@
                     else{
                         this.loading = false;
                         this.editor.$textElem.attr('contenteditable', true);
-                        this.$notify.error({
-                            title: '发表失败',
-                            message: 'status='+response.status
-                        })
+                        this.$message({type: 'error', message: '发表失败'});
                     }
                 }, response => {
                     this.editor.$textElem.attr('contenteditable', true);
                     this.loading = false;
-                    console.log("error");
-                    console.log(response);
-                    this.$notify.error({
-                        title: '保存失败',
-                        message: 'status='+response.status
-                    })
+                    this.$message({type: 'error', message: '发表失败'});
                 }).catch((response) => {
-                    alert(response.status);
                     this.loading = false;
-                    this.$notify.error({
-                        title: '保存失败',
-                        message: 'status='+response.status
-                    })
+                    this.$message({type: 'error', message: '保存失败'});
                 });
             }
         },
