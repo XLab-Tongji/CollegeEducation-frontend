@@ -1,41 +1,49 @@
 <template>
     <el-container class="topic-post">
+        <!----- 引入wangEditor的css文件 ----->
         <link rel="stylesheet" href="../../../node_modules/mavon-editor/dist/css/index.css">
         <el-main class="main" v-loading="loading">
+            <!----- 输入标题 ----->
             <div align="left" class="topic-title">
                 <el-input v-model="blackboard.blackboard_name" size="small" maxlength="25"
                           placeholder="请输入标题..."
                           style="width: 350px">
                 </el-input>
             </div>
+            <!----- 编辑器 ----->
             <div id="editor" style="margin-top: 20px"></div>
+            <!----- 提示字数限制 ----->
             <div align="right" style="font-size: 12px;color: #A6A6A6;">{{count}} / 200</div>
             <div class="select">
-            <el-select value="" v-model="sid" size="mini" style="width: 200px" placeholder="请选择类别">
-                <el-option
-                    v-for="item in sectorStates"
-                    :key="item.value"
-                    :label="item.label"
-                    :value="item.value">
-                </el-option>
-            </el-select>
-            <el-tag
-                :key="tag"
-                v-for="tag in SectorName"
-                closable
-                :disable-transitions="false"
-                class="tag"
-                @close="handleClose(tag)">
-                {{tag}}
-            </el-tag>
+                <!-- 选择分类 -->
+                <el-select value="" v-model="sid" size="mini" style="width: 200px" placeholder="请选择类别">
+                    <el-option
+                        v-for="item in sectorStates"
+                        :key="item.value"
+                        :label="item.label"
+                        :value="item.value">
+                    </el-option>
+                </el-select>
+                <!-- 添加标签 -->
+                <el-tag
+                    :key="tag"
+                    v-for="tag in SectorName"
+                    closable
+                    :disable-transitions="false"
+                    class="tag"
+                    @close="handleClose(tag)">
+                    {{tag}}
+                </el-tag>
                 <el-input
                     v-if="tagInputVisible" v-model="tagValue" ref="saveTagInput"
                     size="mini" style="width: 80px" maxlength="10"
                     @keyup.space.native="handleInputConfirm"
                     @blur="handleInputConfirm">
                 </el-input>
-            <el-button v-else type="primary" size="mini" @click="showInput">+Tag</el-button>
+                <el-button v-else type="primary" size="mini" @click="showInput">+Tag</el-button>
             </div>
+
+            <!----- 保存和发表按键 ----->
             <div class="post">
                 <el-button size="mini" class="save-btn" @click="saveInDrafts">保存到草稿箱</el-button>
                 <el-button type="primary" size="mini" class="post-btn" @click="postOn">发布</el-button>
@@ -56,6 +64,7 @@
             }
             this.editor.customConfig.onchange = () => {
                 var t = this.editor.txt.text();
+                // 限制字数
                 if(this.count > 200) {
                     this.$message({type: 'error', message: '字数超出范围！'});
                     var str = t.substring(0, 200);
@@ -104,16 +113,18 @@
             this.editor.config.customUploadInit = this.UPLOADER(this.editor).init();
         },
         methods: {
-            // 添加标签
+            // 删除tag
             handleClose(tag) {
                 this.Sectorname.splice(this.SectorName.indexOf(tag), 1);
             },
+            // 添加tag
             showInput() {
                 this.tagInputVisible = true;
                 this.$nextTick(_ => {
                     this.$refs.saveTagInput.$refs.input.focus();
                 });
             },
+            // 失去焦点时确认添加tag
             handleInputConfirm : function() {
                 if (this.tagValue === ' ') {
                     this.tagValue = '';
@@ -228,20 +239,22 @@
                 });
             }
         },
+
         data() {
             return {
-                objectName: '',
-                editor: new WangEditor('#editor'),
-                sinaData: [],
+                editor: new WangEditor('#editor'), // 编辑器
+                sinaData: [], // 新浪表情数组
+                // emoji数组
                 emojiData: ['😀','😃','😄','😁','😆','😅','😂','🤣','😇','😊','🙂','🙃','😉','😌','😍','😘','😗','😙','😚','😋','😛','😝','😜','🤪','🤨','🧐','🤓','😎','🤩','😏','😒','😞','😔','😟','😕','🙁','☹️','😣','😖','😫','😩','😢','😭','😤','😠','😡','🤬','🤯','😳','😱','😨','😰','😥','😓','🤗','🤔','🤭','🤫','🤥','😶','😐','😑','😬','🙄','😯','😦','😧','😮','😲','😴','😪','😵','🤐','🤧','😷','😈','👿','💩','👻','🤲','🙌','👏','🤝','👍','👎','👊','✊','🤛','🤜','🤞','✌','🤟','👌','👈','👉','👆','👇','👋','🤙','💪','🙏','👀','🙇‍','🙅‍','🙆‍','🙋‍','🤦‍','🤷‍','💅','🌝','🌚','❤️','💔','❣️','💕','💓','💗','💖','❌','✅','⭕️','💯','❗️','❓','⁉️','📝'],
-                tagInputVisible: false,
-                tagValue: '',
-                count: 0,
-                loading: false,
-                isSaved: false,
-                sectorStates: [{value: '1', label: '信息技术'}],
-                SectorName: [],
-                sid: '',
+                tagInputVisible: false, // 添加标签后显示组件
+                count: 0, // 当前输入的字数
+                tagValue: '', // 用户每次输入的标签内容
+                loading: false, // 加载状态
+                isSaved: false, // 是否已经保存
+                sectorStates: [{value: '1', label: '信息技术'}], // 分类列表
+                SectorName: [], // 所有已经添加的标签内容
+                sid: '', // 标签ID
+                // 黑板报实体
                 blackboard: {
                     sector_id: 0,
                     blackboard_name: '',
@@ -253,6 +266,7 @@
                     praise_count: 0,
                     favorite_count: 0
                 },
+                // 草稿实体
                 draft: {
                     user_id: 1,
                     publish_type_id: 1,
@@ -261,16 +275,17 @@
                     draft_text: '',
                     write_date: new Date()
                 },
-                UPLOADER
+                UPLOADER // 图片上传组件
             }
         },
+        /*
         computed:{
             username(){
                 let username = localStorage.getItem('ms_username');
                 return username ? username : this.name;
             }
         },
-        /*
+        // 提示用户离开前是否需要保存
         beforeRouteLeave: function(to, from , next){
             if(!this.isSaved){
                 this.$confirm('内容已编辑，是否存入草稿箱?', '', {

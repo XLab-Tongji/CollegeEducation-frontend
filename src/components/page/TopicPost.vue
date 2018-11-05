@@ -1,15 +1,20 @@
 <template>
     <el-container class="topic-post">
+        <!----- 引入wangEditor的css文件 ----->
         <link rel="stylesheet" href="../../../node_modules/wangeditor/release/wangEditor.min.css">
         <el-main class="main" v-loading="loading">
+            <!----- 输入标题 ----->
             <div align="left" class="topic-title">
                 <el-input v-model="article.TopicTitle" size="small" maxlength="25"
                           placeholder="请输入标题..."
                           style="width: 350px">
                 </el-input>
             </div>
+            <!----- 编辑器 ----->
             <div id="editor" style="margin-top: 20px"></div>
+
             <div class="selectp">
+                <!-- 选择分类 -->
                 <el-select value="" v-model="sid" size="mini" style="width: 200px" placeholder="请选择分类">
                     <el-option
                         v-for="item in sectorStates"
@@ -18,6 +23,7 @@
                         :value="item.value">
                     </el-option>
                 </el-select>
+                <!-- 添加标签 -->
                 <el-tag
                     :key="tag"
                     v-for="tag in SectorName"
@@ -35,6 +41,8 @@
                 </el-input>
                 <el-button v-else type="primary" size="mini" @click="showInput">+Tag</el-button>
             </div>
+
+            <!----- 保存和发表按键 ----->
             <div class="post">
                 <el-button size="mini" class="save-btn" @click="saveInDrafts">保存到草稿箱</el-button>
                 <el-button type="primary" size="mini" class="post-btn" @click="postOn">发布</el-button>
@@ -48,6 +56,7 @@
     import data from '../../data/sina-data.js'
     import server from '../../../config/index.js';
     import {UPLOADER} from '../../tools/utils.js'
+
     export default {
         name: 'editor',
         mounted(){
@@ -187,18 +196,21 @@
                 });
             }
         },
+
         data() {
             return {
-                editor: new WangEditor('#editor'),
-                sinaData: [],
+                editor: new WangEditor('#editor'), // 编辑器
+                sinaData: [], // 新浪表情数组
+                // emoji数组
                 emojiData: ['😀','😃','😄','😁','😆','😅','😂','🤣','😇','😊','🙂','🙃','😉','😌','😍','😘','😗','😙','😚','😋','😛','😝','😜','🤪','🤨','🧐','🤓','😎','🤩','😏','😒','😞','😔','😟','😕','🙁','☹️','😣','😖','😫','😩','😢','😭','😤','😠','😡','🤬','🤯','😳','😱','😨','😰','😥','😓','🤗','🤔','🤭','🤫','🤥','😶','😐','😑','😬','🙄','😯','😦','😧','😮','😲','😴','😪','😵','🤐','🤧','😷','😈','👿','💩','👻','🤲','🙌','👏','🤝','👍','👎','👊','✊','🤛','🤜','🤞','✌','🤟','👌','👈','👉','👆','👇','👋','🤙','💪','🙏','👀','🙇‍','🙅‍','🙆‍','🙋‍','🤦‍','🤷‍','💅','🌝','🌚','❤️','💔','❣️','💕','💓','💗','💖','❌','✅','⭕️','💯','❗️','❓','⁉️','📝'],
-                tagInputVisible: false,
-                tagValue: '',
-                loading: false,
-                isSaved: false,
-                sectorStates: [{value: '1', label: '信息技术'}],
-                SectorName: [],
-                sid: '',
+                tagInputVisible: false, // 添加标签后显示组件
+                tagValue: '', // 用户每次输入的标签内容
+                loading: false, // 加载状态
+                isSaved: false, // 是否已经保存
+                sectorStates: [{value: '1', label: '信息技术'}], // 分类列表
+                SectorName: [], // 所有已经添加的标签内容
+                sid: '', // 标签ID
+                // 发表文章实体
                 article: {
                     SectorId: 0,
                     TopicTitle: '',
@@ -210,6 +222,7 @@
                     PraiseCount: 0,
                     favorite_count: 0
                 },
+                // 草稿实体
                 draft: {
                     user_id: 1,
                     publish_type_id: 0,
@@ -218,15 +231,40 @@
                     draft_text: '',
                     write_date: new Date()
                 },
-                UPLOADER
+                UPLOADER // 图片上传组件
             }
         },
+
+        /*
         computed:{
             username(){
                 let username = localStorage.getItem('ms_username');
                 return username ? username : this.name;
             }
+        },
+        // 提示用户离开前是否需要保存
+        beforeRouteLeave: function(to, from , next){
+            if(!this.isSaved){
+                this.$confirm('内容已编辑，是否存入草稿箱?', '', {
+                    confirmButtonText: '保存',
+                    cancelButtonText: '不保存',
+                    type: 'warning'
+                }).then(() => {
+                    this.$message({
+                        type: 'success',
+                        message: '已保存!'
+                    });
+                    next();
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '未保存'
+                    });
+                    next();
+                });
+            }
         }
+        */
     }
 </script>
 <style>
