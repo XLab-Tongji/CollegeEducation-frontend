@@ -1,7 +1,7 @@
 <template>
     <el-container class="topic-post">
         <!----- 引入wangEditor的css文件 ----->
-        <link rel="stylesheet" href="../../../node_modules/mavon-editor/dist/css/index.css">
+        <link rel="stylesheet" href="../../../node_modules/wangeditor/release/wangEditor.min.css">
         <el-main class="main" v-loading="loading">
             <!----- 输入标题 ----->
             <div align="left" class="topic-title">

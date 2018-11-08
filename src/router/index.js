@@ -85,7 +85,8 @@ export default new Router({
                             meta: { title: '黑板报'}
                         },
                         {
-                            path: '/topic-details',
+                            path: '/topic-details/:topicID',
+                            name: 'TopicDetails',
                             component: resolve => require(['../components/page/TopicDetails.vue'], resolve),
                             meta: { title: '话题详情'}
                         }

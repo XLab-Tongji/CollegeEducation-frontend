@@ -1,5 +1,6 @@
 <template>
     <div>
+        <link rel="stylesheet" href="../../../node_modules/font-awesome-4.7.0/css/font-awesome.min.css">
         <!----- 搜索栏 ----->
         <div>
             <!-- 输入搜索内容 -->
@@ -23,10 +24,10 @@
             <!-- 搜索键 -->
             <el-button type="primary" icon="el-icon-search" @click="searchClick" class="search-button" size="mini">搜索</el-button>
             <!-- 选择标签 -->
-            <el-radio-group v-model="tagKeyword" fill="#1ac7c3" style="margin-left: 20px" v-if="searchType === '3'" size="mini" @change="handleTagChange">
-                <el-radio-button label="计算机"></el-radio-button>
-                <el-radio-button label="信息技术"></el-radio-button>
-                <el-radio-button label="软件工程"></el-radio-button>
+            <el-radio-group v-model="tagKeyword" fill="#1ac7c3" style="margin-left: 20px" v-show="searchType === 2" size="mini" @change="handleTagChange">
+                <el-radio-button label="计算机软件及计算机应用"></el-radio-button>
+                <el-radio-button label="互联网技术"></el-radio-button>
+                <el-radio-button label="电信技术"></el-radio-button>
             </el-radio-group>
         </div>
 
@@ -43,9 +44,9 @@
                     <template slot-scope="scope"><div>{{scope.row.TopicText}}</div>
                         <!-- 收藏/评论/点赞按键 -->
                         <el-row style="margin-top: 15px;">
-                            <el-col :span="8"><div align="center"><el-button type="text" style="color: #1ac7c3;" @click="collect(scope.$index)"><i v-bind:class="[isCollected[scope.$index]? 'fa fa-star fa-lg' : 'fa fa-star-o fa-lg']" aria-hidden="true" style="margin-right: 5px;"></i>收藏</el-button></div></el-col>
-                            <el-col :span="8"><div align="center"><el-button type="text" style="color: #1ac7c3;" @click="showComments(scope.$index)"><i class="fa fa-list-ul fa-lg" aria-hidden="true" style="margin-right: 5px;"></i>评论</el-button></div></el-col>
-                            <el-col :span="8"><div align="center"><el-button type="text" style="color: #1ac7c3;" @click="like(scope.$index)"><i v-bind:class="[isLiked[scope.$index]? 'fa fa-thumbs-up fa-lg' : 'fa fa-thumbs-o-up fa-lg']" aria-hidden="true" style="margin-right: 5px;"></i>点赞</el-button></div></el-col>
+                            <el-col :span="8"><div align="center"><el-button type="text" style="color: #1ac7c3;" @click="collect(scope.$index)" v-loading="collectLoading"><i class="fa fa-star fa-lg" v-show="isCollected[scope.$index]" aria-hidden="true" style="margin-right: 5px;"></i><i class="fa fa-star-o fa-lg" v-show="!isCollected[scope.$index]" aria-hidden="true" style="margin-right: 5px;"></i>收藏</el-button></div></el-col>
+                            <el-col :span="8"><div align="center"><el-button type="text" style="color: #1ac7c3;" @click="showComments(scope.$index)" v-loading="commentLoading"><i class="fa fa-list-ul fa-lg" aria-hidden="true" style="margin-right: 5px;"></i>评论</el-button></div></el-col>
+                            <el-col :span="8"><div align="center"><el-button type="text" style="color: #1ac7c3;" @click="like(scope.$index)" v-loading="likeLoading"><i class="fa fa-thumbs-up fa-lg" v-show="isLiked[scope.$index]" aria-hidden="true" style="margin-right: 5px;"></i><i class="fa fa-thumbs-o-up fa-lg" v-show="!isLiked[scope.$index]" aria-hidden="true" style="margin-right: 5px;"></i>点赞</el-button></div></el-col>
                         </el-row>
                         <!-- 评论列表 -->
                         <div align="left" v-show="isShowComments[scope.$index]">
@@ -65,7 +66,7 @@
                     label="主题"
                     width="300" style="text-align: center">
                     <template slot-scope="scope">
-                        <el-button type="text" @click="goDetails" style="font-size: 14px; font-weight: bold; color: #0A9894; padding-top: 7px;">{{ scope.row.TopicTitle }}</el-button>
+                        <el-button type="text" @click="goDetails(scope.$index)" style="font-size: 14px; font-weight: bold; color: #0A9894; padding-top: 7px;">{{ scope.row.TopicTitle }}</el-button>
                         <p class="topic-content"> {{ scope.row.TopicText | filterHtml | htmlDecode}}</p>
                     </template>
                 </el-table-column>
@@ -133,8 +134,11 @@
         data() {
             return {
                 articles: [], // 存储文章信息
-                loading: false, // 加载状态
-                searchType: '1', // 搜索类型
+                loading: false, // 文章加载状态
+                collectLoading: false, // 收藏状态改变
+                commentLoading: false, // 评论加载状态
+                likeLoading: false, // 点赞状态改变
+                searchType: 0, // 搜索类型
                 currentPage: 1, // 当前位于第几页
                 totalCount: -1, // 文章总数
                 pageSize: 3, // 每页显示多少文章
@@ -143,13 +147,13 @@
                 commentText: '', // 评论内容
                 // 搜索类型
                 searchOptions: [{
-                    value: '1',
+                    value: 0,
                     label: '全部'
                 }, {
-                    value: '2',
+                    value: 1,
                     label: '按标题'
                 }, {
-                    value: '3',
+                    value: 2,
                     label: '按标签'
                 }],
                 isLiked: [], // 点赞状态
@@ -188,14 +192,6 @@
         mounted: function () {
             this.loading = true;
             this.loadBlogs(1, this.pageSize);
-            // 从后台加载点赞和收藏情况
-            for (var i = 0;i < this.pageSize; i++) {
-                if(this.articles[i].praise_id !== -1) this.isLiked.push(true);
-                else this.isLiked.push(false);
-                if(this.articles[i].favorite_id !== -1) this.isCollected.push(true);
-                else this.isCollected.push(false);
-                this.isShowComments.push(false);
-            }
         },
 
         methods: {
@@ -212,28 +208,28 @@
             // 加载文章
             loadBlogs: function (page, count) {
                 this.articles = [];
-                var param = new URLSearchParams();
-                param.append('userID', 1);
-                // 搜索类别处理未完成
-                switch (this.searchType) {
-                    case '1': {
-                        param.append('keywords', this.keywords);
-                        break;
-                    }
-                    case '2': {
-                        param.append('SectorId', 1);
-                        param.append('keywords', this.keywords);
-                        break;
-                    }
-                    case '3': {
-                        param.append('SectorId', 2);
-                        param.append('SectorName', this.keywords);
-                        break;
-                    }
-                    default:
-                        break;
-                }
-                this.$http.get(server.url+ '/article/all?' + param).then((response) => {
+                this.isLiked = [];
+                this.isCollected = [];
+                var url = '';
+                // 全部
+                if (this.searchType === 0) url = '/article/all?userID=1&SectorId=' + this.searchType + '&keywords=' + this.keywords;
+                // 按标签
+                else if (this.searchType === 2) url = '/article/all?userID=1&SectorId=' + this.searchType + '&SectorName=' + this.keywords;
+                // 按标题 有问题
+                else url = '/article/all?userID=1&SectorId=' + this.searchType + + '&SectorName=' + this.keywords + '&keywords=' + this.keywords;
+                this.$http.get(server.url+ url)
+                /*
+                this.$axios({
+                    method: 'get',
+                    params: {
+                        'userID': 1,
+                        'SectorId': this.searchType,
+                        'keywords': this.keywords
+                    },
+                    headers: {'Authorization': localStorage.getItem('token')},
+                    url: 'http://localhost:8080' + url
+                })*/
+                .then((response) => {
                     this.loading = false;
                     if (response.status == 200) {
                         var articleList = JSON.parse(response.bodyText);
@@ -255,6 +251,10 @@
                                 praise_id: articleList.data[i].praise_id,
                                 favorite_id: articleList.favorite_id
                             });
+                            if(articleList.data[i].praise_id === -1) this.isLiked.push(false);
+                            else this.isLiked.push(true);
+                            if(articleList.data[i].favorite_id === -1) this.isCollected.push(false);
+                            else this.isCollected.push(true);
                             i++;
                         }
                     } else {
@@ -274,28 +274,6 @@
                     this.$message({type: 'error', message: '数据加载失败!'});
                 })
             },
-            // 加载点赞状态
-            loadLiked: function(index) {
-                var param = new URLSearchParams();
-                param.append('userID', 1);
-                this.$http.get(server.url+ '/article/all?' + param).then((response) => {
-                    if (response.status == 200) {
-                        var articleList = JSON.parse(response.bodyText);
-                        if(articleList.data[index].praise_id === -1) this.isLiked[index] = false;
-                        else this.isLiked[index] = true;
-                    } else {
-                        this.$message({type: 'error', message: '数据加载失败!'});
-                    }
-                }, (response) => {
-                    if (response.status == 403) {
-                        this.$message({type: 'error', message: response.response.data});
-                    } else {
-                        this.$message({type: 'error', message: '数据加载失败!'});
-                    }
-                }).catch((response) => {
-                    this.$message({type: 'error', message: '数据加载失败!'});
-                })
-            },
             // 点赞
             like: function(index) {
                 this.likeEntity.TopicId = this.articles[index].topicId;
@@ -310,8 +288,9 @@
                 this.likeEntity.TopicDate = t.format("yyyy-MM-dd HH:mm:ss");
                 this.$http.post(server.url + '/article/like', this.likeEntity).then(response => {
                     if (response.status == 200){
-                        //刷新
+                        this.likeLoading = true;
                         this.isLiked[index] = !this.isLiked[index];
+                        this.likeLoading = false;
                     }
                     else{
                         this.$message({type: 'error', message: '请重试'});
@@ -322,28 +301,6 @@
                     this.$message({type: 'error', message: '请重试'});
                 });
             },
-            // 加载收藏状态
-            loadCollected: function(index) {
-                var param = new URLSearchParams();
-                param.append('userID', 1);
-                this.$http.get(server.url+ '/article/all?' + param).then((response) => {
-                    if (response.status == 200) {
-                        var articleList = JSON.parse(response.bodyText);
-                        if(articleList.data[index].favorite_id === -1) this.isCollected[index] = false;
-                        else this.isCollected[index] = true;
-                    } else {
-                        this.$message({type: 'error', message: '数据加载失败!'});
-                    }
-                }, (response) => {
-                    if (response.status == 403) {
-                        this.$message({type: 'error', message: response.response.data});
-                    } else {
-                        this.$message({type: 'error', message: '数据加载失败!'});
-                    }
-                }).catch((response) => {
-                    this.$message({type: 'error', message: '数据加载失败!'});
-                })
-            },
             // 收藏
             collect: function(index) {
                 this.favoriteEntity.topic_id = this.articles[index].TopicId;
@@ -351,8 +308,9 @@
                 this.favoriteEntity.collection_time = t.format("yyyy-MM-dd HH:mm:ss");
                 this.$http.post(server.url + '/article/collect', this.favoriteEntity).then(response => {
                     if (response.status == 200){
-                        //刷新
+                        this.collectLoading = true;
                         this.isCollected[index] = !this.isCollected[index];
+                        this.collectLoading = false;
                     }
                     else{
                         this.$message({type: 'error', message: '请重试'});
@@ -365,7 +323,9 @@
             },
             // 显示评论
             showComments: function(index) {
+                this.commentLoading = true;
                 this.isShowComments[index] = !this.isShowComments[index];
+                this.commentLoading = false;
             },
             // 加载评论
             loadComments: function() {
@@ -379,6 +339,7 @@
                 this.replyEntity.ReplyDate = t.format("yyyy-MM-dd HH:mm:ss");
                 this.$http.post(server.url + '/article/reply', this.replyEntity).then(response => {
                     if (response.status == 200){
+                        this.$message({type: 'success', message: '评论成功'});
                         //刷新
                     }
                     else{
@@ -392,12 +353,18 @@
             },
             // 跳转至详情页面
             goDetails: function(index) {
-                this.$router.push('/topic-details')
+                this.$router.push({
+                    //path: '/topic-details',
+                    name: 'TopicDetails',
+                    params: {
+                        topicID: index
+                    }
+                })
             },
-            // 选择tag
+            // 选择标签
             handleTagChange: function() {
-                this.keywords += this.tagKeyword;
-            }
+                this.keywords = this.tagKeyword;
+            },
         },
 
         filters:{
