@@ -176,13 +176,14 @@
                 this.draft.draft_name = this.blackboard.blackboard_name;
                 this.draft.draft_text = this.blackboard.blackboard_text;
                 if(this.sid !== '') this.draft.sector_id = Number(this.sid);
-                this.draft.write_date = new Date();
+                var t = new Date();
+                this.draft.write_date = t.format("yyyy-MM-dd HH:mm:ss");
                 this.$http.post(server.url + '/draft/save', this.draft).then(response => {
                     if (response.status == 200){
                         this.editor.$textElem.attr('contenteditable', true);
                         this.loading = false;
                         this.isSaved = true;
-                        this.$message({type: 'success', message: '文章已保存'});
+                        this.$message({type: 'success', message: '黑板报已保存'});
                     }
                     else{
                         this.loading = false;
@@ -215,7 +216,8 @@
                 this.loading = true;
                 this.editor.$textElem.attr('contenteditable', false);
                 this.blackboard.sector_id = Number(this.sid);
-                this.blackboard.blackboard_date = new Date();
+                var t = new Date();
+                this.blackboard.blackboard_date = t.format("yyyy-MM-dd HH:mm:ss");
                 this.$http.post(server.url + '/blackboard/save', this.blackboard).then(response => {
                     if (response.status == 200){
                         this.editor.$textElem.attr('contenteditable', true);
@@ -251,7 +253,7 @@
                 tagValue: '', // 用户每次输入的标签内容
                 loading: false, // 加载状态
                 isSaved: false, // 是否已经保存
-                sectorStates: [{value: '1', label: '信息技术'}], // 分类列表
+                sectorStates: [{value: '1', label: '计算机软件及计算机应用'}, {value: '2', label: '互联网技术'}, {value: '3', label: '电信技术'}], // 分类列表
                 SectorName: [], // 所有已经添加的标签内容
                 sid: '', // 标签ID
                 // 黑板报实体

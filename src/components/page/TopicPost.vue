@@ -133,7 +133,8 @@
                 this.draft.draft_name = this.article.TopicTitle;
                 this.draft.draft_text = this.article.TopicText;
                 if(this.sid !== '') this.draft.sector_id = Number(this.sid);
-                this.draft.write_date = new Date();
+                var t = new Date();
+                this.draft.write_date = t.format("yyyy-MM-dd HH:mm:ss");
                 this.$http.post(server.url + '/draft/save', this.draft).then(response => {
                     if (response.status == 200){
                         this.editor.$textElem.attr('contenteditable', true);
@@ -172,7 +173,23 @@
                 this.loading = true;
                 this.editor.$textElem.attr('contenteditable', false);
                 this.article.SectorId = Number(this.sid);
-                this.article.TopicDate = new Date();
+                switch (this.sid) {
+                    case '1':{
+                        this.article.SectorName = '计算机软件及计算机应用';
+                        break;
+                    }
+                    case '2':{
+                        this.article.SectorName = '互联网技术';
+                        break;
+                    }
+                    case '3':{
+                        this.article.SectorName = '电信技术';
+                        break;
+                    }
+                    default: break;
+                }
+                var t = new Date();
+                this.article.TopicDate = t.format("yyyy-MM-dd HH:mm:ss");
                 this.$http.post(server.url + '/article/save', this.article).then(response => {
                     if (response.status == 200){
                         this.editor.$textElem.attr('contenteditable', true);
@@ -207,7 +224,7 @@
                 tagValue: '', // 用户每次输入的标签内容
                 loading: false, // 加载状态
                 isSaved: false, // 是否已经保存
-                sectorStates: [{value: '1', label: '信息技术'}], // 分类列表
+                sectorStates: [{value: '1', label: '计算机软件及计算机应用'}, {value: '2', label: '互联网技术'}, {value: '3', label: '电信技术'}], // 分类列表
                 SectorName: [], // 所有已经添加的标签内容
                 sid: '', // 标签ID
                 // 发表文章实体
@@ -220,6 +237,7 @@
                     ReplyCount: 0,
                     ClickingRate: 0,
                     PraiseCount: 0,
+                    SectorName: '',
                     favorite_count: 0
                 },
                 // 草稿实体

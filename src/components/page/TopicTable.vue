@@ -76,7 +76,7 @@
                     align="center">
                     <template slot-scope="scope">
                         <p style="font-size: 13px; color: #6A6A6A">id: {{ scope.row.UserId}} </p>
-                        <p style="font-size: 10px; color: #6A6A6A">发表于 {{ scope.row.TopicDate.replace(/^([-\d]*)T([\d:]*)\..*$/, '$1 $2')}}</p>
+                        <p style="font-size: 10px; color: #6A6A6A">发表于 {{ scope.row.TopicDate}}</p>
                     </template>
                 </el-table-column>
                 <!-- 点击数 -->
@@ -105,7 +105,7 @@
                     align="center">
                     <template slot-scope="scope">
                         <p style="font-size: 13px; color: #6A6A6A">id: {{ scope.row.UserId}} </p>
-                        <p style="font-size: 10px; color: #6A6A6A">{{ scope.row.TopicDate.replace(/^([-\d]*)T([\d:]*)\..*$/, '$1 $2')}}</p>
+                        <p style="font-size: 10px; color: #6A6A6A">{{ scope.row.TopicDate}}</p>
                     </template>
                 </el-table-column>
             </el-table>
@@ -211,12 +211,12 @@
                 this.isLiked = [];
                 this.isCollected = [];
                 var url = '';
-                // 全部
-                if (this.searchType === 0) url = '/article/all?userID=1&SectorId=' + this.searchType + '&keywords=' + this.keywords;
+                // 按标题
+                if (this.searchType === 1) url = '/article/all?userID=1&SectorId=' + this.searchType + '&keywords=' + this.keywords;
                 // 按标签
                 else if (this.searchType === 2) url = '/article/all?userID=1&SectorId=' + this.searchType + '&SectorName=' + this.keywords;
-                // 按标题 有问题
-                else url = '/article/all?userID=1&SectorId=' + this.searchType + + '&SectorName=' + this.keywords + '&keywords=' + this.keywords;
+                // 全部 有问题
+                else url = '/article/all?userID=1&SectorId=' + this.searchType + '&keywords=' + this.keywords;
                 this.$http.get(server.url+ url)
                 /*
                 this.$axios({
