@@ -15,12 +15,6 @@ Vue.use(VueResource);
 Vue.use(mavonEditor);
 Vue.prototype.$axios = axios;
 
-//axios.defaults.baseURL = server.url;
-axios.defaults.headers.common['Authorization'] = "Bearer" + localStorage.getItem('token');
-//axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded';
-// 获得本地token
-//Vue.http.headers.common['Authorization'] = "Bearer" + localStorage.getItem('token');
-
 //使用钩子函数对路由进行权限跳转
 router.beforeEach((to, from, next) => {
     const role = localStorage.getItem('ms_username');
@@ -64,7 +58,7 @@ new Vue({
     router,
     render: h => h(App)
 }).$mount('#app');
-
+/*
 Vue.http.options.root='/article/all';
 Vue.http.options.root='/article/reply/get';
 Vue.http.post.root='/draft/save';
@@ -75,4 +69,4 @@ Vue.http.post.root='/article/like';
 Vue.http.post.root='/article/like/delete';
 Vue.http.post.root='/article/collect';
 Vue.http.headers.common['Authorization']='Bearer ' + localStorage.getItem('token');
-
+*/
