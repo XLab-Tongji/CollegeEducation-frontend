@@ -26,7 +26,9 @@
                           <el-button size='mini'>踩</el-button>
                         </el-button-group>
                         <el-button size='mini' @click='downloadBtn'>下载 (12.1Mb)</el-button>
+                        
                         <el-button size='mini' style='margin-left: 1pt' @click='editComment'>发表评论</el-button>
+                        <el-button size='mini' @click='collection' style='margin-left: 1pt' :hidden='collectionAdded'>收藏资源</el-button>
 
                     </div>
                 </el-col>
@@ -127,6 +129,7 @@
                     selectCategoryList:'',
                     selectKeyword:''
                 },
+                collectionAdded:true,
                 typeList:[],
                 categoryList:[],
                 tag:'latestUpdate',
@@ -184,6 +187,16 @@
                     window.location.href=objectUrl;
                 }).catch(function(res){});
                 
+            },
+            // 监听收藏按钮
+            collection(){
+                this.$http.post(server.url+'/favourite/like/'+this.$route.params.resourceID,{}).then(function(response){
+                    if(response.status==200){
+                        // 做出收藏成功的动作
+                    }else{
+                        // 做出收藏失败的动作
+                    }
+                })
             }
 
 
