@@ -46,12 +46,6 @@
                     },
         
                     {
-                        icon: 'el-icon-lx-favor',
-                        index: 'collection',
-                        title: '我的收藏'
-                    },
-                    
-                    {
                         icon:'el-icon-star-off',
                         index:'my',
                         title:'个人中心'

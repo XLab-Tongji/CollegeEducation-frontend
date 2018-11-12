@@ -1,208 +1,52 @@
 <template>
-    <div>
-        <el-row :gutter="20">
-            
-            <el-col :span="24">
-                <el-card shadow="hover" class="mgb20" style="height:252px;">
-                    <div class="user-info">
-                        <img src="static/img/img.jpg" class="user-avator" alt="">
-                        <div class="user-info-cont">
-                            <div class="user-info-name">{{name}}</div>
-                            <div>{{role}}</div>
-                        </div>
-                    </div>
-                    <div class="user-info-list">上次登录时间：<span>2018-01-01</span></div>
-                    <div class="user-info-list">上次登录地点：<span>东莞</span></div>
-                </el-card>
-               
+    <div style="margin-top: 2pt">
+    <el-card class='listCard' style='margin-bottom: 2pt' shadow='hover' v-for='item in sourceList' @click.native='clickCard(item)'>
+        <el-row>
+            <el-col :span='2' style="display:inline-block;max-width: 60px">
+            <i class="el-icon-upload" style="font-size: 40px;text-align: center;color:#449CFA;padding-top: 4pt"></i>
             </el-col>
-
-
-            <el-col :span="24">
-                <el-row :gutter="20" class="mgb20">
-
-
-                    <el-col :span="6">
-                        <el-card shadow="hover" :body-style="{padding: '0px'}">
-                            <div class="grid-content grid-con-1">
-                                <i class="el-icon-lx-people grid-con-icon"></i>
-                                <div class="grid-cont-right">
-                                    <div class="grid-num">0</div>
-                                    <div>积分</div>
-                                </div>
-                            </div>
-                        </el-card>
-                    </el-col>
-
-                    <el-col :span="6">
-                        <el-card shadow="hover" :body-style="{padding: '0px'}">
-                            <div class="grid-content grid-con-2">
-                                <i class="el-icon-lx-notice grid-con-icon"></i>
-                                <div class="grid-cont-right">
-                                    <div class="grid-num">0</div>
-                                    <div>上传资源</div>
-                                </div>
-                            </div>
-                        </el-card>
-                    </el-col>
-                    <el-col :span="6">
-                        <el-card shadow="hover" :body-style="{padding: '0px'}">
-                            <div class="grid-content grid-con-3">
-                                <i class="el-icon-lx-goods grid-con-icon"></i>
-                                <div class="grid-cont-right">
-                                    <div class="grid-num">200000+</div>
-                                    <div>总排名</div>
-                                </div>
-                            </div>
-                        </el-card>
-                    </el-col>
-
-
-
-                    <el-col :span="6">
-                        <el-card shadow="hover" :body-style="{padding: '0px'}">
-                            <div class="grid-content grid-con-3">
-                                <i class="el-icon-lx-goods grid-con-icon"></i>
-                                <div class="grid-cont-right">
-                                    <div class="grid-num">0</div>
-                                    <div>下载资源</div>
-                                </div>
-                            </div>
-                        </el-card>
-                    </el-col>
-                    
-                </el-row>
+            <el-col :span='22' style="display: inline-block;vertical-align: top;">
+                <div class="title" style="font-size: 12pt;margin-bottom: 4pt;font-weight: bold;display: inline-block;">{{item.resourceName}}</div>       
+                <div class="context" style="font-size:10pt;color: grey;line-height: 150%;text-align: justify">{{item.description}}</div>
+                <div class="subtitle" style="margin-top: 4pt; font-size: 8pt; color:darkgrey;">{{item.uploadTime}}</div>
             </el-col>
         </el-row>
-
-        <el-col :span="24">
-                <el-card shadow="hover" class="mgb20" style="height:252px;">
-                    <div class="user-info-list"><a href="https://download.csdn.net/download/mrbbed/10722172" target="_blank" font size="100">21 个项目玩转深度学习——基于TensorFlow 的实践详解</a><span><span>2018-01-01</span></span></div>
-                </el-card>
-               
-            </el-col>
-        
-        
+    </el-card>
     </div>
-
-        
-
-
 </template>
 
 <script>
-   import bus from '../common/bus';
+    export default {
+        name: 'baseform',
+        data: function(){
+            return {
+                sourceList:[{resourceName:'收藏页面的测试数据',description:'Teledyne LeCroy quantumdata 980 48G 用于HDMI 测试的协议分析 仪/发生器模块配备了HDMI Tx 和Rx 端口，支持HDMI 2.1 固定速率链 路和FEC 捕获分析和解码，最高可达48Gbps（12Gbps /通道）。 HDMI Rx 分析端口可提供固定速率链路的打包-超级模块，字符模块和 FRL 数据包以及底层TMDS 视频，协议，控制和元数据的可视性。',uploadTime:'2018年10月21日'},
+                    {resourceName:'Office 2007 Access Database Engine',description:'如果你的c#程序采用oledb方式连接access数据库,需要安装此 engine',uploadTime:'2018年10月20日'},
+                    {resourceName:'随机过程与应用',description:'机过程与应用pdf课件，本书内容包括：概率论基础，随机过程基础，泊松过程及其推广，马尔可夫过程，二阶矩过程，平稳过程，以及高阶统计量与非平稳过程',uploadTime:'2018年10月21日'}
+                    ],
+            }
+        },
+        methods: {
+        // 监听点击卡片事件，处理页面跳转
+            clickCard(res){
+                this.$router.push({
+                    name:'SourcePage',
+                    params:{
+                        resourceID:res.resourceID,
+                        id:res.id,
+                        uploaderID:res.uploaderID,
+                        categoryID:res.categoryID,
+                        resourceMajorID:res.resourceMajorID,
+                        resourceName:res.resourceName,
+                        description:res.description,
+                        downloadTimes:res.downloadTimes,
+                        uploadTime:res.uploadTime
+                    }
+                })
+                console.log('clickMethod')
+                console.log(res.description)
+            },
+        }
+    }
 </script>
 
-
-<style scoped>
-    .el-row {
-        margin-bottom: 20px;
-    }
-
-    .grid-content {
-        display: flex;
-        align-items: center;
-        height: 100px;
-    }
-
-    .grid-cont-right {
-        flex: 1;
-        text-align: center;
-        font-size: 14px;
-        color: #999;
-    }
-
-    .grid-num {
-        font-size: 30px;
-        font-weight: bold;
-    }
-
-    .grid-con-icon {
-        font-size: 50px;
-        width: 100px;
-        height: 100px;
-        text-align: center;
-        line-height: 100px;
-        color: #fff;
-    }
-
-    .grid-con-1 .grid-con-icon {
-        background: rgb(45, 140, 240);
-    }
-
-    .grid-con-1 .grid-num {
-        color: rgb(45, 140, 240);
-    }
-
-    .grid-con-2 .grid-con-icon {
-        background: rgb(100, 213, 114);
-    }
-
-    .grid-con-2 .grid-num {
-        color: rgb(45, 140, 240);
-    }
-
-    .grid-con-3 .grid-con-icon {
-        background: rgb(242, 94, 67);
-    }
-
-    .grid-con-3 .grid-num {
-        color: rgb(242, 94, 67);
-    }
-
-    .user-info {
-        display: flex;
-        align-items: center;
-        padding-bottom: 20px;
-        border-bottom: 2px solid #ccc;
-        margin-bottom: 20px;
-    }
-
-    .user-avator {
-        width: 120px;
-        height: 120px;
-        border-radius: 50%;
-    }
-
-    .user-info-cont {
-        padding-left: 50px;
-        flex: 1;
-        font-size: 14px;
-        color: #999;
-    }
-
-    .user-info-cont div:first-child {
-        font-size: 30px;
-        color: #222;
-    }
-
-    .user-info-list {
-        font-size: 14px;
-        color: #999;
-        line-height: 25px;
-    }
-
-    .user-info-list span {
-        margin-left: 70px;
-    }
-
-    .mgb20 {
-        margin-bottom: 20px;
-    }
-
-    .todo-item {
-        font-size: 14px;
-    }
-
-    .todo-item-del {
-        text-decoration: line-through;
-        color: #999;
-    }
-
-    .schart {
-        width: 100%;
-        height: 300px;
-    }
-
-</style>

@@ -212,9 +212,7 @@
         }
     }
 </script>
-<style>
-    
-</style>
+
 <style scoped>
     .title{
         font-size: 12pt;

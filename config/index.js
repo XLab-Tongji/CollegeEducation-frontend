@@ -5,7 +5,7 @@
 const path = require('path')
 
 module.exports = {
-    url: 'http://192.168.199.146:8080',
+    url: 'http://yapi.demo.qunar.com/mock/20940/resource',
     //本地调试
     //url: 'http://localhost:8080',
   dev: {
@@ -15,10 +15,10 @@ module.exports = {
     assetsPublicPath: '/',
     proxyTable: {
       '/api':{
-          target:'http://jsonplaceholder.typicode.com',
+          target:'http://yapi.demo.qunar.com/mock/20940/resource',
           changeOrigin:true,
           pathRewrite:{
-              '/api':''
+              '^/api':''
           }
       },
       '/ms':{

@@ -28,19 +28,20 @@ export default new Router({
                         path:'/my-upload',
                         meta:{title:'我的上传'},
                         component: resolve => require(['../components/page/myUpload.vue'], resolve),
-                    },
+                        },
                         {
                             path:'/my-download',
                             meta:{title:'我的下载'},
                             component: resolve => require(['../components/page/myDownload.vue'], resolve),
-                        }
+                        },
+                        {
+                            path: '/collection',
+                            component: resolve => require(['../components/page/Collection.vue'], resolve),
+                            meta: { title: '我的收藏' }
+                        },
                     ]
                 },
-                {
-                    path: '/collection',
-                    component: resolve => require(['../components/page/Collection.vue'], resolve),
-                    meta: { title: '我的收藏' }
-                },
+                
                 {
                     path: '/upload-source',
                     component: resolve => require(['../components/page/UploadSource.vue'], resolve),
