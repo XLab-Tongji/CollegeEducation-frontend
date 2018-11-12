@@ -14,6 +14,10 @@ Vue.use(ElementUI, { size: 'small' });
 Vue.use(VueResource);
 Vue.use(mavonEditor);
 Vue.prototype.$axios = axios;
+
+//axios.defaults.baseURL = server.url;
+axios.defaults.headers.common['Authorization'] = "Bearer" + localStorage.getItem('token');
+//axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded';
 // 获得本地token
 //Vue.http.headers.common['Authorization'] = "Bearer" + localStorage.getItem('token');
 
@@ -60,13 +64,15 @@ new Vue({
     router,
     render: h => h(App)
 }).$mount('#app');
-/*
+
 Vue.http.options.root='/article/all';
+Vue.http.options.root='/article/reply/get';
 Vue.http.post.root='/draft/save';
 Vue.http.post.root='/blackboard/save';
 Vue.http.post.root='/article/save';
 Vue.http.post.root='/article/reply';
 Vue.http.post.root='/article/like';
+Vue.http.post.root='/article/like/delete';
 Vue.http.post.root='/article/collect';
-Vue.http.headers.common['Authorization']='Bearer '+localStorage.getItem('token');
-*/
+Vue.http.headers.common['Authorization']='Bearer ' + localStorage.getItem('token');
+

@@ -24,7 +24,7 @@
             <!-- 搜索键 -->
             <el-button type="primary" icon="el-icon-search" @click="searchClick" class="search-button" size="mini">搜索</el-button>
             <!-- 选择标签 -->
-            <el-radio-group v-model="tagKeyword" fill="#1ac7c3" style="margin-left: 20px" v-show="searchType === 2" size="mini" @change="handleTagChange">
+            <el-radio-group v-model="tagKeyword" fill="#1ac7c3" style="margin-left: 20px" v-show="searchType !== 1" size="mini" @change="handleTagChange">
                 <el-radio-button label="计算机软件及计算机应用"></el-radio-button>
                 <el-radio-button label="互联网技术"></el-radio-button>
                 <el-radio-button label="电信技术"></el-radio-button>
@@ -45,13 +45,15 @@
                         <!-- 收藏/评论/点赞按键 -->
                         <el-row style="margin-top: 15px;">
                             <el-col :span="8"><div align="center"><el-button type="text" style="color: #1ac7c3;" @click="collect(scope.$index)" v-loading="collectLoading"><i class="fa fa-star fa-lg" v-show="isCollected[scope.$index]" aria-hidden="true" style="margin-right: 5px;"></i><i class="fa fa-star-o fa-lg" v-show="!isCollected[scope.$index]" aria-hidden="true" style="margin-right: 5px;"></i>收藏</el-button></div></el-col>
-                            <el-col :span="8"><div align="center"><el-button type="text" style="color: #1ac7c3;" @click="showComments(scope.$index)" v-loading="commentLoading"><i class="fa fa-list-ul fa-lg" aria-hidden="true" style="margin-right: 5px;"></i>评论</el-button></div></el-col>
+                            <el-col :span="8"><div align="center"><el-button type="text" style="color: #1ac7c3;" @click="showComments(scope.$index)"><i class="fa fa-list-ul fa-lg" aria-hidden="true" style="margin-right: 5px;"></i>评论</el-button></div></el-col>
                             <el-col :span="8"><div align="center"><el-button type="text" style="color: #1ac7c3;" @click="like(scope.$index)" v-loading="likeLoading"><i class="fa fa-thumbs-up fa-lg" v-show="isLiked[scope.$index]" aria-hidden="true" style="margin-right: 5px;"></i><i class="fa fa-thumbs-o-up fa-lg" v-show="!isLiked[scope.$index]" aria-hidden="true" style="margin-right: 5px;"></i>点赞</el-button></div></el-col>
                         </el-row>
                         <!-- 评论列表 -->
                         <div align="left" v-show="isShowComments[scope.$index]">
-                            <el-table>
-
+                            <el-table :data="comments" v-loading="commentLoading">
+                                <el-table-column label="评论内容">
+                                    <p style="font-size: 10px; color: #6A6A6A">{{ scope.row.ReplyText}}</p>
+                                </el-table-column>
                             </el-table>
                             <!-- 发表评论 -->
                             <el-row gutter="5">
@@ -79,18 +81,6 @@
                         <p style="font-size: 10px; color: #6A6A6A">发表于 {{ scope.row.TopicDate}}</p>
                     </template>
                 </el-table-column>
-                <!-- 点击数 -->
-                <el-table-column
-                    label="点击数"
-                    align="center" width="100">
-                    <template slot-scope="scope"><span style="font-size: 13px; color: #6A6A6A">{{ scope.row.ClickingRate}} </span></template>
-                </el-table-column>
-                <!-- 回复数 -->
-                <el-table-column
-                    label="回复数"
-                    align="center" width="100">
-                    <template slot-scope="scope"><span style="font-size: 13px; color: #6A6A6A">{{ scope.row.ReplyCount}} </span></template>
-                </el-table-column>
                 <!-- 标签 -->
                 <el-table-column
                     label="标签"
@@ -98,6 +88,21 @@
                     <template slot-scope="scope">
                         <p style="font-size: 11px; color: #6A6A6A">{{ scope.row.sectorName}} </p>
                     </template>
+                </el-table-column>
+                <!-- 点击数 -->
+                <el-table-column
+                    label="人气"
+                    align="center" width="100">
+                    <template slot-scope="scope">
+                        <p style="font-size: 13px; color: #6A6A6A">点击量 {{ scope.row.ClickingRate}} </p>
+                        <p style="font-size: 13px; color: #6A6A6A">点赞数 {{ scope.row.PraiseCount}} </p>
+                    </template>
+                </el-table-column>
+                <!-- 回复数 -->
+                <el-table-column
+                    label="回复数"
+                    align="center" width="100">
+                    <template slot-scope="scope"><span style="font-size: 13px; color: #6A6A6A">{{ scope.row.ReplyCount}} </span></template>
                 </el-table-column>
                 <!-- 最新回复 -->
                 <el-table-column
@@ -134,6 +139,7 @@
         data() {
             return {
                 articles: [], // 存储文章信息
+                comments: [], // 存储评论信息
                 loading: false, // 文章加载状态
                 collectLoading: false, // 收藏状态改变
                 commentLoading: false, // 评论加载状态
@@ -142,9 +148,12 @@
                 currentPage: 1, // 当前位于第几页
                 totalCount: -1, // 文章总数
                 pageSize: 3, // 每页显示多少文章
-                keywords: '', // 搜索关键词
+                keywords: '', // 输入的关键词
+                titleKeyword: '',
+                sectorKeyword: [],
                 tagKeyword: '', // 选择的标签关键词
                 commentText: '', // 评论内容
+                searchUrl: '/article/all?userID=1&SectorId=1&keywords=',
                 // 搜索类型
                 searchOptions: [{
                     value: 0,
@@ -159,18 +168,6 @@
                 isLiked: [], // 点赞状态
                 isCollected: [], // 收藏状态
                 isShowComments: [], //显示评论
-                // 点赞实体
-                likeEntity: {
-                    TopicId: 0,
-                    UserId: 1, //需要获取
-                    TopicTitle: '',
-                    TopicText: '',
-                    TopicDate: new Date(),
-                    ReplyCount: 0,
-                    ClickingRate: 0,
-                    PraiseCount: 0,
-                    favorite_count: 0
-                },
                 // 收藏实体
                 favoriteEntity: {
                     topic_id: 0,
@@ -197,6 +194,26 @@
         methods: {
             // 搜索
             searchClick: function() {
+                if(this.keywords === '') {
+                    this.searchUrl = '/article/all?userID=1&SectorId=1&keywords=';
+                }
+                else {
+                    // 按标题
+                    if (this.searchType === 1) {
+                        this.titleKeyword = this.keywords;
+                        this.searchUrl = '/article/all?userID=1&SectorId=1&keywords=' + this.titleKeyword;
+                    }
+                    // 按标签和全部
+                    else {
+                        this.sectorKeyword = [];
+                        if(this.keywords !== '')
+                            this.sectorKeyword = this.keywords.trim().split(/\s+/);
+                        this.searchUrl = '/article/all?userID=1&SectorId=' + this.searchType;
+                        for(var i = 0; i < this.sectorKeyword.length;i++){
+                            this.searchUrl += '&SectorName=' + this.sectorKeyword[i];
+                        }
+                    }
+                }
                 this.loadBlogs(1, this.pageSize);
             },
             // 翻页
@@ -210,28 +227,9 @@
                 this.articles = [];
                 this.isLiked = [];
                 this.isCollected = [];
-                var url = '';
-                // 按标题
-                if (this.searchType === 1) url = '/article/all?userID=1&SectorId=' + this.searchType + '&keywords=' + this.keywords;
-                // 按标签
-                else if (this.searchType === 2) url = '/article/all?userID=1&SectorId=' + this.searchType + '&SectorName=' + this.keywords;
-                // 全部 有问题
-                else url = '/article/all?userID=1&SectorId=' + this.searchType + '&keywords=' + this.keywords;
-                this.$http.get(server.url+ url)
-                /*
-                this.$axios({
-                    method: 'get',
-                    params: {
-                        'userID': 1,
-                        'SectorId': this.searchType,
-                        'keywords': this.keywords
-                    },
-                    headers: {'Authorization': localStorage.getItem('token')},
-                    url: 'http://localhost:8080' + url
-                })*/
-                .then((response) => {
+                this.$http.get(server.url + this.searchUrl).then((response) => {
                     this.loading = false;
-                    if (response.status == 200) {
+                    if (response.status === 200) {
                         var articleList = JSON.parse(response.bodyText);
                         this.totalCount = articleList.data.length;
                         var i = (page - 1) * count;
@@ -259,47 +257,59 @@
                         }
                     } else {
                         this.loading = false;
-                        this.$message({type: 'error', message: '数据加载失败!'});
+                        this.$message({type: 'error', message: '文章加载失败!'});
                     }
                 }, (response) => {
-                    if (response.status == 403) {
+                    if (response.status === 403) {
                         this.loading = false;
                         this.$message({type: 'error', message: response.response.data});
                     } else {
                         this.loading = false;
-                        this.$message({type: 'error', message: '数据加载失败!'});
+                        this.$message({type: 'error', message: '文章加载失败!'});
                     }
                 }).catch((response) => {
                     this.loading = false;
-                    this.$message({type: 'error', message: '数据加载失败!'});
+                    this.$message({type: 'error', message: '文章加载失败!'});
                 })
             },
-            // 点赞
+            // 点赞和取消点赞
             like: function(index) {
-                this.likeEntity.TopicId = this.articles[index].topicId;
-                this.likeEntity.SectorId = this.articles[index].sectorId;
-                this.likeEntity.TopicTitle = this.articles[index].topicTitle;
-                this.likeEntity.TopicText = this.articles[index].topicText;
-                this.likeEntity.ReplyCount = this.articles[index].replyCount;
-                this.likeEntity.ClickingRate = this.articles[index].clickingRate;
-                this.likeEntity.PraiseCount = this.articles[index].praiseCount;
-                this.likeEntity.favorite_count = this.articles[index].favorite_count;
-                var t = new Date();
-                this.likeEntity.TopicDate = t.format("yyyy-MM-dd HH:mm:ss");
-                this.$http.post(server.url + '/article/like', this.likeEntity).then(response => {
-                    if (response.status == 200){
-                        this.likeLoading = true;
-                        this.isLiked[index] = !this.isLiked[index];
-                        this.likeLoading = false;
-                    }
-                    else{
+                if(this.isLiked[index] === false) {
+                    // 1为userID，需要获取
+                    this.$http.post(server.url + '/article/like', this.articles[index], 1).then(response => {
+                        if (response.status === 200){
+                            this.likeLoading = true;
+                            this.isLiked[index] = true;
+                            this.likeLoading = false;
+                            alert(this.articles[index].praise_id);
+                        }
+                        else{
+                            this.$message({type: 'error', message: '请重试'});
+                        }
+                    }, response => {
                         this.$message({type: 'error', message: '请重试'});
-                    }
-                }, response => {
-                    this.$message({type: 'error', message: '请重试'});
-                }).catch((response) => {
-                    this.$message({type: 'error', message: '请重试'});
-                });
+                    }).catch((response) => {
+                        this.$message({type: 'error', message: '请重试'});
+                    });
+                }
+                else {
+                    // 1为userID，需要获取
+                    this.$http.post(server.url + '/article/like/delete', this.articles[index], 1).then(response => {
+                        if (response.status === 200){
+                            this.likeLoading = true;
+                            this.isLiked[index] = false;
+                            this.likeLoading = false;
+                            alert(this.articles[index].praise_id);
+                        }
+                        else{
+                            this.$message({type: 'error', message: '请重试'});
+                        }
+                    }, response => {
+                        this.$message({type: 'error', message: '请重试'});
+                    }).catch((response) => {
+                        this.$message({type: 'error', message: '请重试'});
+                    });
+                }
             },
             // 收藏
             collect: function(index) {
@@ -307,7 +317,7 @@
                 var t = new Date();
                 this.favoriteEntity.collection_time = t.format("yyyy-MM-dd HH:mm:ss");
                 this.$http.post(server.url + '/article/collect', this.favoriteEntity).then(response => {
-                    if (response.status == 200){
+                    if (response.status === 200){
                         this.collectLoading = true;
                         this.isCollected[index] = !this.isCollected[index];
                         this.collectLoading = false;
@@ -325,11 +335,40 @@
             showComments: function(index) {
                 this.commentLoading = true;
                 this.isShowComments[index] = !this.isShowComments[index];
+                this.loadComments(index);
                 this.commentLoading = false;
             },
             // 加载评论
-            loadComments: function() {
-                // get
+            loadComments: function(index) {
+                this.comments = [];
+                this.$http.get(server.url + '/article/reply/get?TopicId=' + this.articles[index].TopicId).then((response) => {
+                    if (response.status === 200) {
+                        let commentList = JSON.parse(response.bodyText);
+                        var i = 0;
+                        while (i < commentList.data.length) {
+                            this.comments.push({
+                                ReplyId: commentList.data[i].ReplyId,
+                                TopicId: commentList.data[i].TopicId,
+                                UserId: commentList.data[i].UserId,
+                                ReplyText: commentList.data[i].ReplyText,
+                                ReplyDate: commentList.data[i].ReplyDate,
+                                ClickingRate: commentList.data[i].ClickingRate,
+                                PraiseCount: commentList.data[i].PraiseCount
+                            });
+                            i++;
+                        }
+                    } else {
+                        this.$message({type: 'error', message: '评论加载失败!'});
+                    }
+                }, (response) => {
+                    if (response.status === 403) {
+                        this.$message({type: 'error', message: response.response.data});
+                    } else {
+                        this.$message({type: 'error', message: '评论加载失败!'});
+                    }
+                }).catch((response) => {
+                    this.$message({type: 'error', message: '评论加载失败!'});
+                })
             },
             // 评论
             postComment: function(index) {
@@ -338,7 +377,7 @@
                 var t = new Date();
                 this.replyEntity.ReplyDate = t.format("yyyy-MM-dd HH:mm:ss");
                 this.$http.post(server.url + '/article/reply', this.replyEntity).then(response => {
-                    if (response.status == 200){
+                    if (response.status === 200){
                         this.$message({type: 'success', message: '评论成功'});
                         //刷新
                     }
@@ -363,7 +402,8 @@
             },
             // 选择标签
             handleTagChange: function() {
-                this.keywords = this.tagKeyword;
+                this.keywords += this.tagKeyword;
+                this.keywords += ' ';
             },
         },
 
