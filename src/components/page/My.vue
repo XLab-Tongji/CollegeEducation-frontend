@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div style="max-width: 1920px;margin: auto">
         <el-header style='background-color: white;border-bottom: 3px #F0F0F0 solid;margin-top: 4pt;padding-top: 16pt;padding-bottom: 16pt;height: '>
             <div>
                 <div style="display: inline-block;">
