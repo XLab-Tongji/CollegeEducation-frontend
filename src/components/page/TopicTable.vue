@@ -22,12 +22,12 @@
                 </el-option>
             </el-select>
             <!-- 搜索键 -->
-            <el-button type="primary" icon="el-icon-search" @click="searchClick" class="search-button" size="mini">搜索</el-button>
+            <el-button type="primary" icon="el-icon-search" @click="search" class="search-button" size="mini">搜索</el-button>
             <!-- 选择标签 -->
             <div style="float: right" v-show="searchType !== 1">
-                <el-checkbox v-model="tagKeyword" label="计算机软件及计算机应用" border size="mini"></el-checkbox>
-                <el-checkbox v-model="tagKeyword" label="互联网技术" border size="mini"></el-checkbox>
-                <el-checkbox v-model="tagKeyword" label="电信技术" border size="mini"></el-checkbox>
+                <el-checkbox v-model="tagKeyword" label="计算机软件及计算机应用" border size="mini" @change="search"></el-checkbox>
+                <el-checkbox v-model="tagKeyword" label="互联网技术" border size="mini" @change="search"></el-checkbox>
+                <el-checkbox v-model="tagKeyword" label="电信技术" border size="mini" @change="search"></el-checkbox>
             </div>
         </div>
 
@@ -50,14 +50,22 @@
                         </el-row>
                         <!-- 评论列表 -->
                         <div v-show="isShowComments[scope.$index]" style="margin: 0 auto">
-                            <el-table :data="commentsAt[scope.$index]" v-loading="commentLoading" style="margin-top: 20px" border>
-                                <el-table-column label="评论内容" style="font-size: 10px; color: #6A6A6A">
+                            <el-table :data="commentsAt[scope.$index]" v-loading="commentLoading" style="margin-top: 20px; border: 2px" :default-sort="{prop: 'ReplyDate', order: 'ascending'}">
+                                <el-table-column label="评论内容" style="color: #6A6A6A">
                                     <template slot-scope="scope">
-                                        <p>{{scope.row.UserId}}：{{scope.row.ReplyText}}</p>
-                                        <p>
-                                            <span>{{scope.row.ReplyDate}}</span>
-                                            <span style="float: right"><i class="fa fa-thumbs-o-up fa-lg" aria-hidden="true" style="margin-right: 5px;"></i>{{scope.row.PraiseCount}}</span>
-                                        </p>
+                                        <p style="font-size: 12px">{{scope.row.UserId}}：{{scope.row.ReplyText}}</p>
+                                        <p style="font-size: 8px">{{scope.row.ReplyDate}}</p>
+                                    </template>
+                                </el-table-column>
+                                <el-table-column label="按时间" width="100px" style="font-size: 10px; color: #6A6A6A" align="right" sortable prop="ReplyDate">
+                                    <template slot-scope="scope">
+                                    </template>
+                                </el-table-column>
+                                <el-table-column label="按人气" width="100px" style="font-size: 8px; color: #6A6A6A" align="center" sortable prop="PraiseCount">
+                                    <template slot-scope="scope">
+                                        <div style="height: 20px"></div>
+                                        <span><el-button type="text" style="color: #6A6A6A">回复</el-button></span>
+                                        <span style="margin-left: 10px"><i class="fa fa-thumbs-o-up" aria-hidden="true" style="margin-right: 5px;"></i>{{scope.row.PraiseCount}}</span>
                                     </template>
                                 </el-table-column>
                             </el-table>
@@ -72,9 +80,9 @@
                 <!-- 主题 -->
                 <el-table-column
                     label="主题"
-                    width="300" style="text-align: center">
+                    width="500" style="text-align: center">
                     <template slot-scope="scope">
-                        <el-button type="text" @click="goDetails(scope.$index)" style="font-size: 14px; font-weight: bold; color: #0A9894; padding-top: 7px;">{{ scope.row.TopicTitle }}</el-button>
+                        <p class="margin-top: 10px;"><el-button type="text" @click="goDetails(scope.$index)" style="font-size: 14px; font-weight: bold; color: #0A9894">{{ scope.row.TopicTitle }}</el-button></p>
                         <p class="topic-content"> {{scope.row.TopicText | filterHtml | htmlDecode}}</p>
                     </template>
                 </el-table-column>
@@ -83,8 +91,8 @@
                     label="作者"
                     align="center">
                     <template slot-scope="scope">
-                        <p style="font-size: 13px; color: #6A6A6A">id: {{scope.row.UserId}} </p>
-                        <p style="font-size: 10px; color: #6A6A6A">发表于 {{scope.row.TopicDate}}</p>
+                        <p style="font-size: 12px; color: #6A6A6A">id: {{scope.row.UserId}} </p>
+                        <p style="font-size: 9px; color: #6A6A6A">发表于 {{scope.row.TopicDate}}</p>
                     </template>
                 </el-table-column>
                 <!-- 标签 -->
@@ -99,34 +107,34 @@
                 <el-table-column
                     label="回复"
                     align="center" width="100">
-                    <template slot-scope="scope"><span style="font-size: 13px; color: #6A6A6A">{{scope.row.ReplyCount}} </span></template>
+                    <template slot-scope="scope"><span style="font-size: 10px; color: #6A6A6A">{{scope.row.ReplyCount}} </span></template>
                 </el-table-column>
                 <!-- 点赞数 -->
                 <el-table-column
                     label="点赞"
                     align="center" width="100">
-                    <template slot-scope="scope"><span style="font-size: 13px; color: #6A6A6A">{{scope.row.PraiseCount}} </span></template>
+                    <template slot-scope="scope"><span style="font-size: 10px; color: #6A6A6A">{{scope.row.PraiseCount}} </span></template>
                 </el-table-column>
                 <!-- 点击数 -->
                 <el-table-column
                 label="阅读"
                 align="center" width="100">
-                <template slot-scope="scope"><span style="font-size: 13px; color: #6A6A6A">{{scope.row.ClickingRate}} </span></template>
+                <template slot-scope="scope"><span style="font-size: 10px; color: #6A6A6A">{{scope.row.ClickingRate}} </span></template>
             </el-table-column>
 
             </el-table>
         </div>
 
         <!----- 翻页 ----->
-        <div class="topic-table-footer">
+        <div class="topic-table-footer" align="center">
             <el-pagination
                 small
                 :page-size="pageSize"
-                pager-count="11"
                 layout="prev, pager, next"
                 :total="totalCount"
                 class="page-change"
-                @current-change="currentChange" v-show="this.articles.length > 0">
+                :current-page="currentPage"
+                @current-change="currentChange" v-show="articles.length > 0">
             </el-pagination>
         </div>
 
@@ -149,7 +157,7 @@
                 searchType: 0, // 搜索类型
                 currentPage: 1, // 当前位于第几页
                 totalCount: -1, // 文章总数
-                pageSize: 3, // 每页显示多少文章
+                pageSize: 5, // 每页显示多少文章
                 keywords: '', // 输入的关键词
                 titleKeyword: '', // 按标题搜索关键词
                 sectorKeyword: [], // 按标签和全部搜索关键词
@@ -200,7 +208,7 @@
 
         methods: {
             // 搜索
-            searchClick: function() {
+            search: function() {
                 if(this.keywords === '' && this.tagKeyword.length === 0) {
                     this.searchUrl = '/article/all?userID=1&SectorId=1&keywords=';
                 }
@@ -228,7 +236,7 @@
                         }
                     }
                 }
-                this.loadBlogs(1, this.pageSize);
+                this.currentChange(1);
             },
             // 翻页
             currentChange: function (currentPage) {
@@ -482,13 +490,7 @@
         overflow:hidden;
         font-size: 12px;
         color: #B0B0B0;
-        margin-top: 4px;
-        padding-bottom: 7px;
+        padding-bottom: 8px;
     }
 
-    .tag-card {
-        width: 120px;
-        margin-top: 0px;
-        margin-right: 10px;
-    }
 </style>
