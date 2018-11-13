@@ -28,7 +28,7 @@
                         <el-button size='mini' @click='downloadBtn'>下载 (12.1Mb)</el-button>
                         
                         <el-button size='mini' style='margin-left: 1pt' @click='editComment'>发表评论</el-button>
-                        <el-button size='mini' @click='collection' style='margin-left: 1pt' :hidden='collectionAdded'>收藏资源</el-button>
+                        <el-button size='mini' @click='collection' style='margin-left: 1pt' v-bind:type='collectionBind'>收藏资源</el-button>
 
                     </div>
                 </el-col>
@@ -129,7 +129,6 @@
                     selectCategoryList:'',
                     selectKeyword:''
                 },
-                collectionAdded:true,
                 typeList:[],
                 categoryList:[],
                 tag:'latestUpdate',
@@ -146,7 +145,8 @@
                     title:'',
                     content:'',
                     dialogFormVisible:false,
-                }
+                },
+                collectionBind:'primary'
 
             }
         },
@@ -190,15 +190,36 @@
             },
             // 监听收藏按钮
             collection(){
-                this.$http.post(server.url+'/favourite/like/'+this.$route.params.resourceID,{}).then(function(response){
-                    if(response.status==200){
-                        // 做出收藏成功的动作
-                    }else{
-                        // 做出收藏失败的动作
-                    }
-                })
+                if(this.collectionBind=='danger'){
+                    // 已经收藏
+                    this.$http.post(server.url+'/favourite/dislike/'+this.$route.params.resourceID,{}).then(function(response){
+                        if(response.status==200){
+                            // 做出取消收藏成功的动作
+                            this.collectionBind='danger'
+                            this.$message({
+                              message: '取消收藏成功',
+                              type: 'success'
+                            });
+                        }else{
+                            this.$message.error('咦？取消收藏失败了，请再试一次');
+                        }
+                    })
+                }else{
+                    // 没有收藏
+                    this.$http.post(server.url+'/favourite/like/'+this.$route.params.resourceID,{}).then(function(response){
+                        if(response.status==200){
+                            // 做出收藏成功的动作
+                            this.collectionBind='primary'
+                            this.$message({
+                              message: '您已成功收藏资源',
+                              type: 'success'
+                            });
+                        }else{
+                            this.$message.error('咦？收藏失败了，请再试一次');
+                        }
+                    })
+                }
             }
-
 
         },
         created(){
