@@ -178,7 +178,7 @@
                 if(this.sid !== '') this.draft.sector_id = Number(this.sid);
                 var t = new Date();
                 this.draft.write_date = t.format("yyyy-MM-dd HH:mm:ss");
-                this.$http.post(server.url + '/draft/save', this.draft).then(response => {
+                this.$http.post(server.url + '/draft/save', this.draft, {headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}}).then(response => {
                     if (response.status == 200){
                         this.editor.$textElem.attr('contenteditable', true);
                         this.loading = false;
@@ -218,7 +218,7 @@
                 this.blackboard.sector_id = Number(this.sid);
                 var t = new Date();
                 this.blackboard.blackboard_date = t.format("yyyy-MM-dd HH:mm:ss");
-                this.$http.post(server.url + '/blackboard/save', this.blackboard).then(response => {
+                this.$http.post(server.url + '/blackboard/save', this.blackboard, {headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}}).then(response => {
                     if (response.status == 200){
                         this.editor.$textElem.attr('contenteditable', true);
                         this.loading = false;

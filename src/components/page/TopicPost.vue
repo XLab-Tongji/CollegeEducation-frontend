@@ -135,7 +135,7 @@
                 if(this.sid !== '') this.draft.sector_id = Number(this.sid);
                 var t = new Date();
                 this.draft.write_date = t.format("yyyy-MM-dd HH:mm:ss");
-                this.$http.post(server.url + '/draft/save', this.draft).then(response => {
+                this.$http.post(server.url + '/draft/save', this.draft, {headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}}).then(response => {
                     if (response.status == 200){
                         this.editor.$textElem.attr('contenteditable', true);
                         this.loading = false;
@@ -190,7 +190,7 @@
                 }
                 var t = new Date();
                 this.article.TopicDate = t.format("yyyy-MM-dd HH:mm:ss");
-                this.$http.post(server.url + '/article/save', this.article).then(response => {
+                this.$http.post(server.url + '/article/save', this.article, {headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}}).then(response => {
                     if (response.status == 200){
                         this.editor.$textElem.attr('contenteditable', true);
                         this.loading = false;
@@ -287,7 +287,6 @@
 </script>
 <style>
     .topic-post > .main {
-        /*justify-content: flex-start;*/
         flex-direction: column;
         background-color: #fff;
         display: flex;
