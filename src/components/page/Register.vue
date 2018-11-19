@@ -2,9 +2,13 @@
     <div class="login-wrap" v-loading='loading'>
         <div class="ms-login">
             <div class="ms-title">用户注册</div>
-            <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="10px" class="ms-content" status-icon='true'>
+            <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="10px" class="ms-content" :status-icon='true'>
+                <el-row :gutter='20'>
+                    <!--头像这边后面会做成base64的方式而非文件上传，故注释-->
+                </el-row>
                 <el-row :gutter="20">
                     <el-col :span='12'>
+                        <!--
                     <el-form-item prop="imgUrl">
                     <el-upload
                         class="avatar-uploader"
@@ -16,6 +20,7 @@
                         <i><div class="ms-setImg">上传头像</div></i>
                     </el-upload>
                     </el-form-item>
+                -->
                     </el-col>
                     <el-col :span="12">
                         <el-form-item></el-form-item>
@@ -136,10 +141,8 @@
                     </el-col>
                 </el-row>
 
-                <el-row class="el-row--flex" justify="end"><p class="login-tips">Tips : 如不上传头像，系统将使用默认头像，其他信息不能为空。</p></el-row>
-
                 <div class="login-btn"><el-button type="primary" @click="register()">注册</el-button></div>
-                <el-row class="el-row--flex" justify="center"><el-button type="text" @click="toLogin()">已有账号？点击登录</el-button></el-row>
+                <el-row class="el-row--flex" justify="center"><el-button type="text" @click="toLogin()" >已有账号？点击登录</el-button></el-row>
             </el-form>
         </div>
     </div>
@@ -302,6 +305,7 @@
             },
             handleAvatarSuccess(res, file) {
                 this.imageUrl = URL.createObjectURL(file.raw);
+                console.log(this.imageUrl)
             },
             beforeAvatarUpload(file) {
                 const isJPG = file.type === 'image/jpeg';

@@ -28,7 +28,7 @@
                         <el-button size='mini' @click='downloadBtn'>下载 (12.1Mb)</el-button>
                         
                         <el-button size='mini' style='margin-left: 1pt' @click='editComment'>发表评论</el-button>
-                        <el-button size='mini' @click='collection' style='margin-left: 1pt' v-bind:type='collectionBind'>收藏资源</el-button>
+                        <el-button size='mini' @click='collection' style='margin-left: 1pt' v-bind:type='collectionBind'>{{collectionButtonInfo}}</el-button>
 
                     </div>
                 </el-col>
@@ -146,7 +146,8 @@
                     content:'',
                     dialogFormVisible:false,
                 },
-                collectionBind:'primary'
+                collectionBind:'primary',
+                collectionButtonInfo:'收藏资源'
 
             }
         },
@@ -193,10 +194,12 @@
                 console.log(this.collectionBind)
                 if(this.collectionBind=='danger'){
                     // 已经收藏
-                    this.$http.post(server.url+'/resource/favourite/dislike/'+this.$route.params.resourceID,{}).then(function(response){
+                    this.$http.delete(server.url+'/resource/favourite/dislike/'+this.$route.params.resourceID,{}).then(function(response){
                         if(response.status==200){
                             // 做出取消收藏成功的动作
-                            this.collectionBind='danger'
+                            this.collectionBind='primary';
+                            this.collectionButtonInfo='收藏资源';
+                            console.error(this.collectionBind)
                             this.$message({
                               message: '取消收藏成功',
                               type: 'success'
@@ -211,7 +214,9 @@
                     this.$http.post(server.url+'/resource/favourite/like/'+this.$route.params.resourceID,{}).then(function(response){
                         if(response.status==200){
                             // 做出收藏成功的动作
-                            this.collectionBind='primary'
+                            this.collectionBind='danger';
+                            this.collectionButtonInfo='取消收藏';
+                            console.error(this.collectionBind)
                             this.$message({
                               message: '您已成功收藏资源',
                               type: 'success'
