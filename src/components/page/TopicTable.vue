@@ -24,7 +24,7 @@
             <!-- 搜索键 -->
             <el-button type="primary" icon="el-icon-search" @click="search" class="search-button" size="mini">搜索</el-button>
             <!-- 选择标签 -->
-            <div style="float: right" v-show="searchType !== 1">
+            <div style="float: right" v-show="searchType === 2">
                 <el-checkbox v-model="tagKeyword" label="计算机软件及计算机应用" border size="mini" @change="search"></el-checkbox>
                 <el-checkbox v-model="tagKeyword" label="互联网技术" border size="mini" @change="search"></el-checkbox>
                 <el-checkbox v-model="tagKeyword" label="电信技术" border size="mini" @change="search"></el-checkbox>
@@ -39,44 +39,6 @@
                 tooltip-effect="dark"
                 class="topic-table"
                 v-loading="loading">
-                <!-- 可展开的话题详情 -->
-                <el-table-column type="expand">
-                    <template slot-scope="scope"><div>{{scope.row.TopicText}}</div>
-                        <!-- 收藏/评论/点赞按键 -->
-                        <el-row style="margin-top: 15px;">
-                            <el-col :span="8"><div align="center"><el-button type="text" style="color: #1ac7c3;" @click="collect(scope.$index)" v-loading="collectLoading"><i class="fa fa-star fa-lg" v-show="isCollected[scope.$index]" aria-hidden="true" style="margin-right: 5px;"></i><i class="fa fa-star-o fa-lg" v-show="!isCollected[scope.$index]" aria-hidden="true" style="margin-right: 5px;"></i>收藏</el-button></div></el-col>
-                            <el-col :span="8"><div align="center"><el-button type="text" style="color: #1ac7c3;" @click="showComments(scope.$index)"><i class="fa fa-list-ul fa-lg" aria-hidden="true" style="margin-right: 5px;"></i>评论</el-button></div></el-col>
-                            <el-col :span="8"><div align="center"><el-button type="text" style="color: #1ac7c3;" @click="like(scope.$index)" v-loading="likeLoading"><i class="fa fa-thumbs-up fa-lg" v-show="isLiked[scope.$index]" aria-hidden="true" style="margin-right: 5px;"></i><i class="fa fa-thumbs-o-up fa-lg" v-show="!isLiked[scope.$index]" aria-hidden="true" style="margin-right: 5px;"></i>点赞</el-button></div></el-col>
-                        </el-row>
-                        <!-- 评论列表 -->
-                        <div v-show="isShowComments[scope.$index]" style="margin: 0 auto">
-                            <el-table :data="commentsAt[scope.$index]" v-loading="commentLoading" style="margin-top: 20px; border: 2px" :default-sort="{prop: 'ReplyDate', order: 'ascending'}">
-                                <el-table-column label="评论内容" style="color: #6A6A6A">
-                                    <template slot-scope="scope">
-                                        <p style="font-size: 12px">{{scope.row.UserId}}：{{scope.row.ReplyText}}</p>
-                                        <p style="font-size: 8px">{{scope.row.ReplyDate}}</p>
-                                    </template>
-                                </el-table-column>
-                                <el-table-column label="按时间" width="100px" style="font-size: 10px; color: #6A6A6A" align="right" sortable prop="ReplyDate">
-                                    <template slot-scope="scope">
-                                    </template>
-                                </el-table-column>
-                                <el-table-column label="按人气" width="100px" style="font-size: 8px; color: #6A6A6A" align="center" sortable prop="PraiseCount">
-                                    <template slot-scope="scope">
-                                        <div style="height: 20px"></div>
-                                        <span><el-button type="text" style="color: #6A6A6A">回复</el-button></span>
-                                        <span style="margin-left: 10px"><i class="fa fa-thumbs-o-up" aria-hidden="true" style="margin-right: 5px;"></i>{{scope.row.PraiseCount}}</span>
-                                    </template>
-                                </el-table-column>
-                            </el-table>
-                            <!-- 发表评论 -->
-                            <el-row gutter="50" style="margin-top: 10px">
-                                <el-col :span="22"><el-input v-model="commentText" placeholder="输入评论" maxlength="150" autosize></el-input></el-col>
-                                <el-col :span="2"><el-button type="primary" @click="postComment(scope.$index)" style="background-color: #1ac7c3; border-color: #1ac7c3;">发表</el-button></el-col>
-                            </el-row>
-                        </div>
-                    </template>
-                </el-table-column>
                 <!-- 主题 -->
                 <el-table-column
                     label="主题"
@@ -97,10 +59,10 @@
                 </el-table-column>
                 <!-- 标签 -->
                 <el-table-column
-                    label="标签"
+                    label="分类"
                     align="center">
                     <template slot-scope="scope">
-                        <p style="font-size: 11px; color: #6A6A6A">{{scope.row.sectorName}} </p>
+                        <p style="font-size: 11px; color: #6A6A6A" v-for="s in scope.row.sectorName">{{s}} </p>
                     </template>
                 </el-table-column>
                 <!-- 回复 -->
@@ -144,16 +106,12 @@
 <script>
     import server from '../../../config/index';
     import axios from 'axios'
+
     export default{
         data() {
             return {
                 articles: [], // 存储文章信息
-                comments: [], // 存储评论信息
-                commentsAt: [], // 读取指定文章的评论
                 loading: false, // 文章加载状态
-                collectLoading: false, // 收藏状态改变
-                commentLoading: false, // 评论加载状态
-                likeLoading: false, // 点赞状态改变
                 searchType: 0, // 搜索类型
                 currentPage: 1, // 当前位于第几页
                 totalCount: -1, // 文章总数
@@ -162,7 +120,6 @@
                 titleKeyword: '', // 按标题搜索关键词
                 sectorKeyword: [], // 按标签和全部搜索关键词
                 tagKeyword: [], // 选择的标签关键词
-                commentText: '', // 发表评论内容
                 searchUrl: '/article/all?userID=1&SectorId=1&keywords=',
                 // 搜索类型
                 searchOptions: [{
@@ -174,36 +131,13 @@
                 }, {
                     value: 2,
                     label: '按标签'
-                }],
-                isLiked: [], // 点赞状态
-                isCollected: [], // 收藏状态
-                isShowComments: [], //显示评论
-                // 收藏实体
-                favoriteEntity: {
-                    topic_id: 0,
-                    user_id: 1, // 需要获取
-                    collection_time: new Date()
-                },
-                // 评论实体
-                replyEntity: {
-                    TopicId: -1,
-                    UserId: 1, // 需要获取
-                    ReplyText: '',
-                    ReplyDate: new Date(),
-                    ClickingRate: 0,
-                    PraiseCount: 0
-                }
+                }]
             }
         },
 
         mounted: function () {
-            this.commentsAt = new Array(this.pageSize);
             this.loading = true;
             this.loadBlogs(1, this.pageSize);
-            for(var i = 0;i < this.pageSize;i++) {
-                this.isShowComments.push(false);
-                this.commentsAt[i] = [];
-            }
         },
 
         methods: {
@@ -242,19 +176,13 @@
             currentChange: function (currentPage) {
                 this.currentPage = currentPage;
                 this.loading = true;
-                for(var i = 0;i < this.pageSize;i++) {
-                    this.isShowComments[i] = false;
-                    this.commentsAt[i] = [];
-                }
                 this.loadBlogs(currentPage, this.pageSize);
 
             },
             // 加载文章
             loadBlogs: function (page, count) {
                 this.articles = [];
-                this.isLiked = [];
-                this.isCollected = [];
-                this.$http.get(server.url + this.searchUrl).then((response) => {
+                this.$http.get(server.url + this.searchUrl, {headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}}).then((response) => {
                     this.loading = false;
                     if (response.status === 200) {
                         var articleList = JSON.parse(response.bodyText);
@@ -271,15 +199,12 @@
                                 TopicTitle: articleList.data[i].TopicTitle,
                                 ClickingRate: articleList.data[i].ClickingRate,
                                 PraiseCount: articleList.data[i].PraiseCount,
+                                favorite_count: articleList.data[i].favorite_count,
                                 sectorName: articleList.data[i].sectorName,
                                 sectorState: articleList.data[i].sectorState,
                                 praise_id: articleList.data[i].praise_id,
-                                favorite_id: articleList.data[i].favorite_id
+                                favourite_id: articleList.data[i].favourite_id
                             });
-                            if(articleList.data[i].praise_id === -1) this.isLiked.push(false);
-                            else this.isLiked.push(true);
-                            if(articleList.data[i].favorite_id === -1) this.isCollected.push(false);
-                            else this.isCollected.push(true);
                             i++;
                         }
                     } else {
@@ -299,139 +224,13 @@
                     this.$message({type: 'error', message: '文章加载失败!'});
                 })
             },
-            // 点赞和取消点赞
-            like: function(index) {
-                if(this.isLiked[index] === false) {
-                    // 1为userID，需要获取
-                    this.$http.post(server.url + '/article/like', this.articles[index], {params:{userID:1}}).then(response => {
-                        if (response.status === 200){
-                            this.likeLoading = true;
-                            this.isLiked[index] = true;
-                            this.likeLoading = false;
-                            alert(this.articles[index].praise_id);
-                        }
-                        else{
-                            this.$message({type: 'error', message: '请重试'});
-                        }
-                    }, response => {
-                        this.$message({type: 'error', message: '请重试'});
-                    }).catch((response) => {
-                        this.$message({type: 'error', message: '请重试'});
-                    });
-                }
-                else {
-                    // 1为userID，需要获取
-                    this.$http.post(server.url + '/article/like/delete', this.articles[index], {params:{userID:1}}).then(response => {
-                        if (response.status === 200){
-                            this.likeLoading = true;
-                            this.isLiked[index] = false;
-                            this.likeLoading = false;
-                            alert(this.articles[index].praise_id);
-                        }
-                        else{
-                            this.$message({type: 'error', message: '请重试'});
-                        }
-                    }, response => {
-                        this.$message({type: 'error', message: '请重试'});
-                    }).catch((response) => {
-                        this.$message({type: 'error', message: '请重试'});
-                    });
-                }
-            },
-            // 收藏
-            collect: function(index) {
-                this.favoriteEntity.topic_id = this.articles[index].TopicId;
-                var t = new Date();
-                this.favoriteEntity.collection_time = t.format("yyyy-MM-dd HH:mm:ss");
-                this.$http.post(server.url + '/article/collect', this.favoriteEntity).then(response => {
-                    if (response.status === 200){
-                        this.collectLoading = true;
-                        this.isCollected[index] = !this.isCollected[index];
-                        this.collectLoading = false;
-                    }
-                    else{
-                        this.$message({type: 'error', message: '请重试'});
-                    }
-                }, response => {
-                    this.$message({type: 'error', message: '请重试'});
-                }).catch((response) => {
-                    this.$message({type: 'error', message: '请重试'});
-                });
-            },
-            // 显示评论
-            showComments: function(index) {
-                this.commentLoading = true;
-                this.isShowComments[index] = !this.isShowComments[index];
-                if(this.isShowComments[index] === true) {
-                    this.loadComments(index);
-                    this.commentsAt[index] = this.comments;
-                }
-                else this.commentsAt[index] = [];
-                this.commentLoading = false;
-            },
-            // 加载评论
-            loadComments: function(index) {
-                this.comments = [];
-                this.$http.get(server.url + '/article/reply/get?TopicId=' + this.articles[index].TopicId).then((response) => {
-                    if (response.status === 200) {
-                        let commentList = JSON.parse(response.bodyText);
-                        var i = 0;
-                        while (i < commentList.data.length) {
-                            this.comments.push({
-                                ReplyId: commentList.data[i].ReplyId,
-                                TopicId: commentList.data[i].TopicId,
-                                UserId: commentList.data[i].UserId,
-                                ReplyText: commentList.data[i].ReplyText,
-                                ReplyDate: commentList.data[i].ReplyDate,
-                                ClickingRate: commentList.data[i].ClickingRate,
-                                PraiseCount: commentList.data[i].PraiseCount
-                            });
-                            i++;
-                        }
-                    } else {
-                        this.$message({type: 'error', message: '评论加载失败!'});
-                    }
-                }, (response) => {
-                    if (response.status === 403) {
-                        this.$message({type: 'error', message: response.response.data});
-                    } else {
-                        this.$message({type: 'error', message: '评论加载失败!'});
-                    }
-                }).catch((response) => {
-                    this.$message({type: 'error', message: '评论加载失败!'});
-                })
-            },
-            // 评论
-            postComment: function(index) {
-                this.replyEntity.TopicId = this.articles[index].TopicId;
-                this.replyEntity.ReplyText = this.commentText;
-                var t = new Date();
-                this.replyEntity.ReplyDate = t.format("yyyy-MM-dd HH:mm:ss");
-                this.$http.post(server.url + '/article/reply', this.replyEntity).then(response => {
-                    if (response.status === 200){
-                        this.$message({type: 'success', message: '评论成功'});
-                        this.commentLoading = true;
-                        this.loadComments(index);
-                        this.commentsAt[index] = this.comments;
-                        this.commentText = '';
-                        this.commentLoading = false;
-                    }
-                    else{
-                        this.$message({type: 'error', message: '请重试'});
-                    }
-                }, response => {
-                    this.$message({type: 'error', message: '请重试'});
-                }).catch((response) => {
-                    this.$message({type: 'error', message: '请重试'});
-                });
-            },
             // 跳转至详情页面
             goDetails: function(index) {
                 this.$router.push({
-                    //path: '/topic-details',
+                    path: '/topic-details',
                     name: 'TopicDetails',
-                    params: {
-                        topicID: index
+                    query: {
+                        article: this.articles[index]
                     }
                 })
             }

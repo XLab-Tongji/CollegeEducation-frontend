@@ -5,7 +5,13 @@
 const path = require('path')
 
 module.exports = {
+<<<<<<< HEAD
   url: 'http://localhost:8080',
+=======
+    //url: 'http://yapi.demo.qunar.com/mock/20940',
+    //本地调试
+    url: 'http://localhost:8080',
+>>>>>>> 7c6f73c668a3a73f6f2ad1830bceeef2182bfe6b
   dev: {
 
     // Paths

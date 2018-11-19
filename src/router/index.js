@@ -84,14 +84,14 @@ export default new Router({
                             path: '/blackboard',
                             component: resolve => require(['../components/page/Blackboard.vue'], resolve),
                             meta: { title: '黑板报'}
-                        },
-                        {
-                            path: '/topic-details/:topicID',
-                            name: 'TopicDetails',
-                            component: resolve => require(['../components/page/TopicDetails.vue'], resolve),
-                            meta: { title: '话题详情'}
                         }
                     ]
+                },
+                {
+                    path: '/topic-details/:id',
+                    name: 'TopicDetails',
+                    component: resolve => require(['../components/page/TopicDetails.vue'], resolve),
+                    meta: { title: '话题详情'}
                 },
                 {
                     path: '/source-list',
