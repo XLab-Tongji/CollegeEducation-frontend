@@ -131,6 +131,7 @@
             },
             // 监听点击卡片事件，处理页面跳转
             clickCard(res){
+                console.log(res)
                 this.$router.push({
                     name:'SourcePage',
                     params:{

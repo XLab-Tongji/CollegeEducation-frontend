@@ -205,6 +205,7 @@
                         }
                     })
                 }else{
+                    console.log(this.$route.params)
                     // 没有收藏
                     this.$http.post(server.url+'/favourite/like/'+this.$route.params.resourceID,{}).then(function(response){
                         if(response.status==200){

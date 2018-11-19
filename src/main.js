@@ -70,3 +70,4 @@ Vue.http.post.root='/article/like/delete';
 Vue.http.post.root='/article/collect';
 Vue.http.headers.common['Authorization']='Bearer ' + localStorage.getItem('token');
 */
+Vue.http.headers.common['Authorization']='Bearer ' + localStorage.getItem('token');
