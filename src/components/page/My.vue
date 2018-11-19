@@ -14,9 +14,9 @@
         </el-header>
         <el-col :span='6' style='padding-right: 8pt;max-width: 450px'>
             <el-card style="text-align: center;background-color: white;padding-top: 8pt">
-                <dev>
+                <div>
                     <img src="../../assets/1.jpg" style="width: 100pt;height:100pt;border-radius: 50pt;vertical-align: middle;">
-                </dev>
+                </div>
                 <div class="nickName">{{userInfo.nickname}}</div>
                 <div class="description">{{userInfo.description}}</div>
                 <div style="margin-top: 16pt;border-top: solid #eeeeee 1px; padding-top: 8pt">
