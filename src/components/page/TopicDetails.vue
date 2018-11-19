@@ -93,7 +93,6 @@
     import server from '../../../config/index';
 
     export default {
-        name: '',
         mounted: function() {
             this.getParams();
             if (this.article.praise_id !== -1) this.isLiked = true;
@@ -143,6 +142,7 @@
                         if (response.status === 200){
                             this.likeLoading = true;
                             this.isLiked = true;
+                            this.article.PraiseCount++;
                             this.likeLoading = false;
                         }
                         else{
@@ -161,6 +161,7 @@
                         if (response.status === 200){
                             this.likeLoading = true;
                             this.isLiked = false;
+                            this.article.PraiseCount--;
                             this.likeLoading = false;
                         }
                         else{
