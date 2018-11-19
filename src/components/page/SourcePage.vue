@@ -190,9 +190,10 @@
             },
             // 监听收藏按钮
             collection(){
+                console.log(this.collectionBind)
                 if(this.collectionBind=='danger'){
                     // 已经收藏
-                    this.$http.post(server.url+'/favourite/dislike/'+this.$route.params.resourceID,{}).then(function(response){
+                    this.$http.post(server.url+'/resource/favourite/dislike/'+this.$route.params.resourceID,{}).then(function(response){
                         if(response.status==200){
                             // 做出取消收藏成功的动作
                             this.collectionBind='danger'
@@ -207,7 +208,7 @@
                 }else{
                     console.log(this.$route.params)
                     // 没有收藏
-                    this.$http.post(server.url+'/favourite/like/'+this.$route.params.resourceID,{}).then(function(response){
+                    this.$http.post(server.url+'/resource/favourite/like/'+this.$route.params.resourceID,{}).then(function(response){
                         if(response.status==200){
                             // 做出收藏成功的动作
                             this.collectionBind='primary'
