@@ -1,6 +1,6 @@
 <template>
     <div style="margin-top: 2pt">
-        <el-card class='listCard' style='margin-bottom: 2pt;' shadow='hover' v-for='item in sourceList' @click.native='clickCard(item)'>
+        <el-card class='listCard' style='margin-bottom: 2pt;' shadow='hover' v-for='(item, idx) in sourceList' :key="idx" @click.native='clickCard(item)'>
             <el-row>
                 <el-col :span='2' style="display:inline-block;max-width: 60px">
                 <i class="el-icon-upload" style="font-size: 40px;text-align: center;color:#449CFA;padding-top: 4pt"></i>

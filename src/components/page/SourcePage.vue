@@ -44,9 +44,9 @@
                          label='评价'
                         >
                             <template slot-scope='scope'>
-                                <div class="table-title">{{scope.row.title}}</div>
+                                <div class="table-title">{{scope.row.commentTitle}}</div>
                                 <div class="table-comment">{{scope.row.comment}}</div>
-                                <div class="table-date">{{scope.row.uid}} 发布于 {{scope.row.date}}</div>
+                                <div class="table-date">{{scope.row.userID}} 发布于 {{scope.row.commentTime}}</div>
                             </template>
                         </el-table-column>
                         <el-table-column
@@ -61,12 +61,12 @@
                          align='center'
                         >
                           <template slot-scope="scope">
-                            <a v-for="item in 4" style="color:#EBB563;font-size: 12pt">★</a>
+                            <a v-for="item in scope.row.score" style="color:#EBB563;font-size: 12pt">★</a>
                           </template>
                         </el-table-column>
                     </el-table>
                     <div id='pageSelector' style="text-align: center;margin-top: 16pt">
-                        <el-pagination layout="prev, pager, next" :total="1000"></el-pagination>
+                        <el-pagination :total="commentPages" layout="prev, pager, next"></el-pagination>
                     </div>
                     <div id='commentPublish' style="margin-top: 16pt;padding-left: 4pt;padding-right: 4pt">
                         <!--
@@ -90,7 +90,7 @@
                     </div>
                 </el-tab-pane>
                 <el-tab-pane label="相关推荐">
-                    <el-card class='listCard' shadow='hover' v-for='item in sourceList'>
+                    <el-card class='listCard' shadow='hover' v-for='(item, idx) in sourceList' :key="idx">
                         <el-row>
                             <el-col :span='2' style="display:inline-block;max-width: 60px">
                                 <i class="el-icon-upload" style="font-size: 40px;text-align: center;color:#449CFA;padding-top: 4pt"></i>
@@ -136,31 +136,45 @@
                     {title:'Office 2007 Access Database Engine',description:'如果你的c#程序采用oledb方式连接access数据库,需要安装此 engine',date:'2018年10月20日'},
                     {title:'随机过程与应用',description:'机过程与应用pdf课件，本书内容包括：概率论基础，随机过程基础，泊松过程及其推广，马尔可夫过程，二阶矩过程，平稳过程，以及高阶统计量与非平稳过程',date:'2018年10月21日'}
                     ],
-                commentList:[
-                    {date:'2018年10月23日',uid:'我是用户名',rate:'4',comment:'此店铺诚信问题很大，所送商品需好评才能送，之前并没有说清楚！而且相互推诿，没有诚信的此店铺诚信问题很大，所送商品需好评才能送，之前并没有说清楚！而且相互推诿，没有诚信的店铺希望大家斟酌！此店铺诚信问题很大，所送商品需好评才能送，之前并没有说清楚！而且相互推诿，没有诚信的店铺希望大家斟酌！此店铺诚信问题很大，所送商品需好评才能送，之前并没有说清楚！而且相互推诿，没有诚信的店铺希望大家斟酌！店铺希望大家斟酌！这里是一条温馨提示',title:'这是评论标题'},
-                    {date:'2018年10月23日',uid:'我是用户名',rate:'4',comment:'这里是一条温馨提示',title:'这是评论标题'},
-                    {date:'2018年10月23日',uid:'我是用户名',rate:'4',comment:'这里是一条温馨提示',title:'这是评论标题'}
-                    ],
+                commentList:[ ],
                 commentPublish:{
                     title:'',
                     content:'',
                     dialogFormVisible:false,
                 },
                 collectionBind:'primary',
-                collectionButtonInfo:'收藏资源'
-
+                collectionButtonInfo:'收藏资源',
+                commentPages:1,
             }
         },
         watch:{
-            
+            $route(){
+            	this.requestComment(1)
+            }
         },
         mounted:function(){
-        	
+        	this.requestComment(1);
+        },
+        destroyed: function () {
+
         },
         methods:{
+        	// 获取评论
+        	requestComment(pageID){
+        		console.log(server.url+'/comments/'+this.$route.params.resourceID+'/'+pageID.toString())
+                this.$http.get(server.url+'/resource/comments/'+this.$route.params.resourceID+'/'+pageID.toString(),{}).then(function(response){
+                	this.commentList.splice(0,this.commentList.length);
+                	this.commentPages=response.data.data.total;
+                	for(let i=0;i<response.data.data.list.length;i++){
+                		this.commentList.push(response.data.data.list[i])
+                	}
+                	console.log(response.data.data)
+                })
+        	},
         	// 评论评分选择器
             filterRate(value, row){
-                return row.rate === value;
+            	console.log(row.score==value)
+                return row.score == value;
             },
             // 编辑评论按钮监听
             editComment(){

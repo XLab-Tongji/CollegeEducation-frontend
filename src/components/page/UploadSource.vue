@@ -15,12 +15,11 @@
                             <el-col style="margin-bottom:20pt;">
                                 <el-upload
                                     :headers="uploadFunc.uploadHeaders"
-                                    :on-success="uploadSuccess"
-                                    class="upload-demo"
                                     drag
-                                    action='http://yapi.demo.qunar.com/mock/20940/uploadResource'
+                                    :action='uploadURL'
                                     style='width: 360px'
                                     :beforeUpload='beforeUpload'
+                                    :on-success="uploadSuccess"
                                     >
                                     <i class="el-icon-upload"></i>
                                     <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
@@ -107,6 +106,7 @@
         name: 'upload',
         data: function(){
             return {
+                uploadURL:server.url+'/uploadResource',
                 form:{
                     name:'',
                     type:'',
@@ -182,7 +182,7 @@
             },
             // 获取资源类型列表
             getTypeList(){
-                this.$http.get(server.url + '/registerCategories',{}).then(function(response){
+                this.$http.get(server.url + '/resourceCategories',{}).then(function(response){
                     // 把获取回来的东西push进去
                     for(let i=0;i<response.data.data.length;i++){
                         this.options.type.push({value:response.data.data[i].id,label:response.data.data[i].resourceCategoryName});

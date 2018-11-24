@@ -10,6 +10,7 @@ import "babel-polyfill";
 import VueResource from 'vue-resource';
 import mavonEditor from 'mavon-editor';
 
+
 Vue.use(ElementUI, { size: 'small' });
 Vue.use(VueResource);
 Vue.use(mavonEditor);
