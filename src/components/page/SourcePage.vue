@@ -38,6 +38,7 @@
             <el-tabs tab-position="top">
                 <el-tab-pane label="用户评价">
                     <el-table :data='commentList'
+                        v-loading='showLoading'
                         style='width: 100%'>
                         <el-table-column
                          prop='comment'
@@ -66,7 +67,7 @@
                         </el-table-column>
                     </el-table>
                     <div id='pageSelector' style="text-align: center;margin-top: 16pt">
-                        <el-pagination :total="commentPages" layout="prev, pager, next"></el-pagination>
+                        <el-pagination :total="commentPages.total" :page-size='commentPages.size' layout="prev, pager, next" @current-change="commentPageChange"></el-pagination>
                     </div>
                     <div id='commentPublish' style="margin-top: 16pt;padding-left: 4pt;padding-right: 4pt">
                         <!--
@@ -75,7 +76,11 @@
 
                         <!--弹出填写评论对话框-->
                         <el-dialog title="发布评论" :visible.sync="commentPublish.dialogFormVisible">
-                          <el-form ref="commentPublish" :model="commentPublish" style='width: 98%;margin:auto'>
+                          <el-form ref="commentPublish" :model="commentPublish" style='width: 98%;margin:auto' :rules='commentPublishRules'>
+                            <el-form-item>
+                                <div style="display: inline-block;vertical-align: middle;margin-right: 4pt;color: #BFC2CA">为资源打分</div>
+                                <el-rate style='display: inline-block;vertical-align: middle;' v-model="commentPublish.rate"></el-rate>
+                            </el-form-item>
                             <el-form-item>
                                 <el-input v-model="commentPublish.title" placeholder="请输入评论标题" prefix-icon='el-icon-lx-edit'></el-input>
                             </el-form-item>
@@ -140,37 +145,64 @@
                 commentPublish:{
                     title:'',
                     content:'',
+                    rate:'',
                     dialogFormVisible:false,
+                },
+                commentPublishRules:{
+                    title:[{ required: true, message: '请输入评论标题', trigger: 'blur' }],
+                    content:[{ required: true, message: '请输入评论内容', trigger: 'blur' }],
+                    rate:[{ required: true, message: '请打分', trigger: 'blur' }],
                 },
                 collectionBind:'primary',
                 collectionButtonInfo:'收藏资源',
-                commentPages:1,
+                commentPages:{
+                    size:0,
+                    total:0,
+                },
+                showLoading:false,
             }
         },
         watch:{
             $route(){
-            	this.requestComment(1)
+            	this.requestComment(1);
+
             }
         },
         mounted:function(){
         	this.requestComment(1);
+            this.requestRelatedResource(1);
+            console.log(this.$route.params)
         },
         destroyed: function () {
-
+            // 目前离开页面，页面即刻被销毁
         },
         methods:{
         	// 获取评论
         	requestComment(pageID){
-        		console.log(server.url+'/comments/'+this.$route.params.resourceID+'/'+pageID.toString())
                 this.$http.get(server.url+'/resource/comments/'+this.$route.params.resourceID+'/'+pageID.toString(),{}).then(function(response){
                 	this.commentList.splice(0,this.commentList.length);
-                	this.commentPages=response.data.data.total;
+                	this.commentPages.total=response.data.data.total;
+                    this.commentPages.size=response.data.data.pageSize;
                 	for(let i=0;i<response.data.data.list.length;i++){
                 		this.commentList.push(response.data.data.list[i])
                 	}
-                	console.log(response.data.data)
                 })
         	},
+            // 页码改变（刷新评论）
+            commentPageChange(val){
+                this.requestComment(val)
+            },
+            // 获取相关资源
+            requestRelatedResource(pageID){
+                console.error(server.url+'/resource/recommend/'+this.$route.params.resourceMajorID+'/'+this.$route.params.categoryID+'/'+pageID.toString())
+                this.$http.get(server.url+this.$route.params.resourceMajorID+'/'+this.$route.params.categoryID+'/'+pageID.toString(),{}).then(function(response){
+                    console.log(response)
+                    this.sourceList.splice(0,this.sourceList.length);
+                    for(let i=0;i<response.data.data.list.length;i++){
+                        this.sourceList.push(response.data.data.list[i])
+                    }
+                })
+            },
         	// 评论评分选择器
             filterRate(value, row){
             	console.log(row.score==value)
@@ -183,8 +215,23 @@
             },
             // 点击发布评论按钮
             onClickDialogPublish(){
+                this.showLoading=true;
                 this.commentPublish.dialogFormVisible=false;
-                // TODO: 在这里添加网络请求
+                this.$http.post(server.url+'/resource/comment/make',{
+                      "resourceID": this.$route.params.resourceID,
+                      "comment": this.commentPublish.content,
+                      "score": this.commentPublish.rate,
+                      "commentTitle": this.commentPublish.title
+                }).then(function(response){
+                    this.showLoading=false;
+                    console.log(response)
+                    this.requestComment(1);
+                    // 显示第一页
+                    this.$message({
+                      message: '评论发布成功',
+                      type: 'success'
+                    });
+                })
             },
 
             handleClick(tab,event){
@@ -213,7 +260,6 @@
                             // 做出取消收藏成功的动作
                             this.collectionBind='primary';
                             this.collectionButtonInfo='收藏资源';
-                            console.error(this.collectionBind)
                             this.$message({
                               message: '取消收藏成功',
                               type: 'success'

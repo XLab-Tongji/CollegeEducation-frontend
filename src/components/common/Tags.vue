@@ -58,6 +58,14 @@
             },
             // 设置标签
             setTags(route){
+                /*
+                 * 用于在跳转时销毁资源详情页面（以保证正确的参数传递）
+                 */
+                const isResourcePageExist = this.tagsList.filter(item => {
+                    return item.title != '资源详情';
+                })
+                this.tagsList = isResourcePageExist;
+
                 const isExist = this.tagsList.some(item => {
                     return item.path === route.fullPath;
                 })

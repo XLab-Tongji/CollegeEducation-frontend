@@ -131,8 +131,6 @@
             },
             // 监听点击卡片事件，处理页面跳转
             clickCard(res){
-                console.log(res)
-                console.error(this.$router)
                 this.$router.push({
                     name:'SourcePage',
                     params:{
@@ -147,11 +145,8 @@
                         uploadTime:res.uploadTime
                     }
                 })
-                console.log('clickMethod')
-                console.log(res.description)
             },
             temp(){
-                console.log('*********')
                 var temp=this.categoryList;
                 console.log(temp)
                 this.categoryList.unshift();
