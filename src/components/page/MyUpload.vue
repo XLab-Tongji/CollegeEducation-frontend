@@ -1,5 +1,5 @@
 <template>
-    <div style="margin-top: 2pt">
+    <div style="margin-top: 2pt;min-height: 300pt" v-loading='loading'>
         <el-card class='listCard' style='margin-bottom: 2pt;' shadow='hover' v-for='(item, idx) in sourceList' :key="idx" @click.native='clickCard(item)'>
             <el-row>
                 <el-col :span='2' style="display:inline-block;max-width: 60px">
@@ -12,14 +12,19 @@
                 </el-col>
             </el-row>
         </el-card>
+        <div style="font-size:10pt;color:#aaaaaa;text-align: center;padding-top:32pt" v-if='sourceList.length==0'>
+            <img src="../../assets/empty.png" style="width: 80pt;height: 80pt;margin-bottom: 16pt;">
+            <div>您还没有上传过资源，快去上传吧</div>
+        </div>
         <div style="text-align: center;margin-top: 8pt">
-            <div class="block">
+            <div class="block" v-if='sourceList.length!=0'>
               <el-pagination
                 @current-change='getUploadList'
                 :background='true'
                 layout="prev, pager, next"
-                :total="page"
-                :current-page='currentPage'>
+                :total="page.total"
+                :current-page='page.current'
+                :page-size='page.size'>
               </el-pagination>
             </div>
         </div>
@@ -35,12 +40,16 @@
             return {
                 activeIndex:'/my-upload',
                 sourceList:[],
-                page:0,
-                currentPage:1,
+                page:{
+                    total:0,
+                    current:0,
+                    size:0,
+                },
+                loading:true,
             }
         },
         mounted:function(){
-            this.getUploadList()
+            this.getUploadList(1)
         },
         methods: {
         // 监听点击卡片事件，处理页面跳转
@@ -59,16 +68,18 @@
                         uploadTime:res.uploadTime
                     }
                 })
-                console.log('clickMethod')
-                console.log(res.description)
             },
-            getUploadList(){
-                this.$http.get(server.url+'/resource/myUpload/'+this.currentPage.toString(),{}).then(function(response){
-                    this.page=response.data.data.total;
+            getUploadList(val){
+                this.loading=true;
+                this.page.current=val;
+                this.$http.get(server.url+'/resource/myUpload/'+this.page.current.toString(),{}).then(function(response){
+                    this.page.total=response.data.data.total;
+                    this.page.size=response.data.data.pageSize;
                     this.sourceList.splice(0,this.sourceList.length)
                     for(let i=0;i<response.data.data.list.length;i++){
                         this.sourceList.push(response.data.data.list[i]);
                     }
+                    this.loading=false;
                 })
             }
         }

@@ -66,6 +66,13 @@
                 })
                 this.tagsList = isResourcePageExist;
 
+                if(route.meta.title=='我的上传'||route.meta.title=='我的下载'||route.meta.title=='我的收藏'){
+                    const isMyPageExist = this.tagsList.filter(item => {
+                        return item.title != '我的上传' && item.title != '我的下载' && item.title != '我的收藏';
+                    })
+                    this.tagsList = isMyPageExist;
+                }
+
                 const isExist = this.tagsList.some(item => {
                     return item.path === route.fullPath;
                 })

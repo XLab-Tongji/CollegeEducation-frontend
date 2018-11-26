@@ -95,15 +95,15 @@
                     </div>
                 </el-tab-pane>
                 <el-tab-pane label="相关推荐">
-                    <el-card class='listCard' shadow='hover' v-for='(item, idx) in sourceList' :key="idx">
+                    <el-card class='listCard' shadow='hover' v-for='(item, idx) in sourceList' :key="idx" @click.native='clickCard(item)'>
                         <el-row>
                             <el-col :span='2' style="display:inline-block;max-width: 60px">
                                 <i class="el-icon-upload" style="font-size: 40px;text-align: center;color:#449CFA;padding-top: 4pt"></i>
                             </el-col>
                             <el-col :span='22' style="display: inline-block;vertical-align: top;">
-                                <div class="title">{{item.title}}</div>       
+                                <div class="title">{{item.resourceName}}</div>       
                                 <div class="context">{{item.description}}</div>
-                                <div class="subtitle">{{item.date}}</div>
+                                <div class="subtitle">{{item.uploadTime}}</div>
                             </el-col>
                         </el-row>
                     </el-card>
@@ -137,10 +137,7 @@
                 typeList:[],
                 categoryList:[],
                 tag:'latestUpdate',
-                sourceList:[{title:'QuantumdataDP1.4产品技术资料',description:'Teledyne LeCroy quantumdata 980 48G 用于HDMI 测试的协议分析 仪/发生器模块配备了HDMI Tx 和Rx 端口，支持HDMI 2.1 固定速率链 路和FEC 捕获分析和解码，最高可达48Gbps（12Gbps /通道）。 HDMI Rx 分析端口可提供固定速率链路的打包-超级模块，字符模块和 FRL 数据包以及底层TMDS 视频，协议，控制和元数据的可视性。',date:'2018年10月21日'},
-                    {title:'Office 2007 Access Database Engine',description:'如果你的c#程序采用oledb方式连接access数据库,需要安装此 engine',date:'2018年10月20日'},
-                    {title:'随机过程与应用',description:'机过程与应用pdf课件，本书内容包括：概率论基础，随机过程基础，泊松过程及其推广，马尔可夫过程，二阶矩过程，平稳过程，以及高阶统计量与非平稳过程',date:'2018年10月21日'}
-                    ],
+                sourceList:[],
                 commentList:[ ],
                 commentPublish:{
                     title:'',
@@ -171,12 +168,23 @@
         mounted:function(){
         	this.requestComment(1);
             this.requestRelatedResource(1);
-            console.log(this.$route.params)
         },
         destroyed: function () {
             // 目前离开页面，页面即刻被销毁
         },
         methods:{
+            // 监听点击相关资源推荐卡片事件，处理页面跳转
+            // TODO:相关资源推荐无法跳转
+            clickCard(res){
+                this.$route.params.resourceID=res.resourceID;
+                this.$route.params.uploaderID=res.uploaderID;
+                this.$route.params.categoryID=res.categoryID;
+                this.$route.params.resourceMajorID=res.resourceMajorID;
+                this.$route.params.resourceName=res.resourceName;
+                this.$route.params.description=res.description;
+                this.$route.params.downloadTimes=res.downloadTimes;
+                this.$route.params.uploadTime=res.uploadTime;
+            },
         	// 获取评论
         	requestComment(pageID){
                 this.$http.get(server.url+'/resource/comments/'+this.$route.params.resourceID+'/'+pageID.toString(),{}).then(function(response){
@@ -194,9 +202,7 @@
             },
             // 获取相关资源
             requestRelatedResource(pageID){
-                console.error(server.url+'/resource/recommend/'+this.$route.params.resourceMajorID+'/'+this.$route.params.categoryID+'/'+pageID.toString())
-                this.$http.get(server.url+this.$route.params.resourceMajorID+'/'+this.$route.params.categoryID+'/'+pageID.toString(),{}).then(function(response){
-                    console.log(response)
+                this.$http.get(server.url+'/resource/recommend/'+this.$route.params.resourceMajorID+'/'+this.$route.params.categoryID+'/'+pageID.toString(),{}).then(function(response){
                     this.sourceList.splice(0,this.sourceList.length);
                     for(let i=0;i<response.data.data.list.length;i++){
                         this.sourceList.push(response.data.data.list[i])
@@ -205,12 +211,10 @@
             },
         	// 评论评分选择器
             filterRate(value, row){
-            	console.log(row.score==value)
                 return row.score == value;
             },
             // 编辑评论按钮监听
             editComment(){
-                console.log("HHHW")
                 this.commentPublish.dialogFormVisible=true;
             },
             // 点击发布评论按钮
@@ -224,7 +228,6 @@
                       "commentTitle": this.commentPublish.title
                 }).then(function(response){
                     this.showLoading=false;
-                    console.log(response)
                     this.requestComment(1);
                     // 显示第一页
                     this.$message({
@@ -232,10 +235,6 @@
                       type: 'success'
                     });
                 })
-            },
-
-            handleClick(tab,event){
-                console.log(tab,event)
             },
             // 监听下载按钮
             // TODO: 下载文件类型需要做判断，目前只能下载PDF Version
@@ -252,7 +251,6 @@
             },
             // 监听收藏按钮
             collection(){
-                console.log(this.collectionBind)
                 if(this.collectionBind=='danger'){
                     // 已经收藏
                     this.$http.delete(server.url+'/resource/favourite/dislike/'+this.$route.params.resourceID,{}).then(function(response){
@@ -269,14 +267,12 @@
                         }
                     })
                 }else{
-                    console.log(this.$route.params)
                     // 没有收藏
                     this.$http.post(server.url+'/resource/favourite/like/'+this.$route.params.resourceID,{}).then(function(response){
                         if(response.status==200){
                             // 做出收藏成功的动作
                             this.collectionBind='danger';
                             this.collectionButtonInfo='取消收藏';
-                            console.error(this.collectionBind)
                             this.$message({
                               message: '您已成功收藏资源',
                               type: 'success'

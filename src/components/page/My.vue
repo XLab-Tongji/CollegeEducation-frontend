@@ -1,104 +1,98 @@
 <template>
     <div style="max-width: 1920px;margin: auto">
-        <el-header hidden='true' style='background-color: white;border-bottom: 3px #F0F0F0 solid;margin-top: 4pt;padding-top: 16pt;padding-bottom: 16pt;height: '>
-            <div hidden="true">
-                <div style="display: inline-block;">
-                    <img src="../../assets/1.jpg" style="width: 80pt;height:80pt;border-radius: 40pt;vertical-align: middle;">
-                </div>
-                <div style="display: inline-block;vertical-align: top;margin-left:16pt;padding-top: 1pt">
-                    <div class="nickName">{{userInfo.nickname}}</div>
-                    <div class="description">{{userInfo.description}}</div>
-                    <div class="tag"><el-tag style='margin-right: 2pt' type="success">同济大学</el-tag><el-tag>软件工程专业</el-tag></div>
-                </div>
-            </div>
-        </el-header>
         <el-col :span='6' style='padding-right: 8pt;max-width: 450px'>
             <el-card style="text-align: center;background-color: white;padding-top: 8pt">
                 <div>
                     <img src="../../assets/1.jpg" style="width: 100pt;height:100pt;border-radius: 50pt;vertical-align: middle;">
                 </div>
-                <div class="nickName">{{userInfo.nickname}}</div>
-                <div class="description">{{userInfo.description}}</div>
-                <div style="margin-top: 16pt;border-top: solid #eeeeee 1px; padding-top: 8pt">
-                    <div style="display: inline-block;width: 50pt;padding-right: 4pt">
-                        <div class="infoNumber">8</div>
+                <div class="nickName">{{userInfo.username}}</div>
+                <div class="description">
+                    <el-tag style='margin-left:1pt;margin-right: 1pt' type="success">点赞{{userInfo.mySuggestedNum}}次</el-tag>
+                    <el-tag style='margin-left:1pt;margin-right: 1pt'>我获得了{{(userInfo.suggestedRate*100).toFixed(2)}}%的赞</el-tag>
+                    <el-tag style='margin-left:1pt;margin-right: 1pt' type="warning">资源平均分：{{userInfo.avgScore.toFixed(2)}}</el-tag>
+                </div>
+                <div style="margin-top: 16pt;border-top: solid #eeeeee 1px; padding-top: 8pt;padding-bottom: 12pt" v-loading='userInfo.loading'>
+                    <div style="display: inline-block;width: 50pt;padding-left: 4pt;padding-right: 4pt;">
+                        <div class="infoNumber">{{userInfo.myUploadNum}}</div>
                         <div class="infoTag">我的上传</div>
                     </div>
                     <div style="display: inline-block;width: 50pt;padding-left: 4pt;padding-right: 4pt;">
-                        <div class="infoNumber">17</div>
+                        <div class="infoNumber">{{userInfo.myDownloadNum}}</div>
                         <div class="infoTag">我的下载</div>
                     </div>
-                    <div style="display: inline-block;width: 50pt;padding-left: 4pt">
-                        <div class="infoNumber">2</div>
+                    <div style="display: inline-block;width: 50pt;padding-left: 4pt;padding-right: 4pt;">
+                        <div class="infoNumber">{{userInfo.myFavouriteNum}}</div>
                         <div class="infoTag">我的收藏</div>
                     </div>
                 </div>
-                <div style="margin-top: 24pt;font-size: 8pt;">下面可以是列表式的按钮或风琴式的信息</div>
+
             </el-card>
         </el-col>
-        <!--
-        <div style='padding-top: -50px;margin:auto;' >
-	        <el-menu :default-active="activeIndex" mode="horizontal" router background-color='white'>
-                <el-menu-item index="/my-upload">我的上传</el-menu-item>
-	            <el-menu-item index="/my-download">我的下载</el-menu-item>
-                <el-menu-item index="/collection">我的收藏</el-menu-item>
-	        </el-menu>
-	        <div style="margin-top: 0px"><router-view></router-view></div>
-        </div>
-	    -->
+
         <el-col :span='18' style='padding-top: -50px;margin:auto;' >
             <el-menu :default-active="activeIndex" mode="horizontal" router background-color='white'>
-                <el-menu-item index="/my-upload">我的上传</el-menu-item>
-                <el-menu-item index="/my-download">我的下载</el-menu-item>
-                <el-menu-item index="/collection">我的收藏</el-menu-item>
+                <el-menu-item index="/my-upload" @click='personalInformationInit'>我的上传</el-menu-item>
+                <el-menu-item index="/my-download" @click='personalInformationInit'>我的下载</el-menu-item>
+                <el-menu-item index="/collection" @click='personalInformationInit'>我的收藏</el-menu-item>
             </el-menu>
             <div style="margin-top: 0px"><router-view></router-view></div>
         </el-col>
-
-    
-
-        
 
     </div>
 </template>
 
 <script>
+    import VueCropper  from 'vue-cropperjs';
+    import server from '../../../config/index';
     export default {
         name: 'baseform',
         data: function(){
             return {
                 activeIndex:'/my-upload',
                 userInfo:{
-                    nickname:"Techevan",
-                    description:"这里是一句很矫情的签名。"
+                    username:"",
+                    myUploadNum:0,
+                    myDownloadNum:0,
+                    myFavouriteNum:0,
+                    loading:false,
+                    mySuggestedNum:0,
+                    avgScore:0,
+                    suggestedRate:0,
                 }
             }
         },
+        mounted:function(){
+            this.personalInformationInit();
+        },
         methods: {
-            
+            personalInformationInit(){
+                this.userInfo.loading=true;
+                this.$http.get(server.url+'/user/detail/',{}).then(function(response){
+                    this.userInfo.username=response.data.data.username;
+                    this.userInfo.myUploadNum=response.data.data.myUploadNum;
+                    this.userInfo.myDownloadNum=response.data.data.myDownloadNum;
+                    this.userInfo.myFavouriteNum=response.data.data.myFavouriteNum;
+                    this.userInfo.mySuggestedNum=response.data.data.mySuggestedNum;
+                    this.userInfo.avgScore=response.data.data.avgScore;
+                    this.userInfo.suggestedRate=response.data.data.suggestedRate;
+                    this.userInfo.loading=false;
+                })
+            }
         }
     }
 </script>
 
 <style scoped>
-/*.nickName{
-    font-size: 18pt;
-}
-.description{
-    padding-left: 1pt;
-    margin-top: 2pt;
-    color:#cccccc;
-    font-size: 10pt;
-}*/
 .nickName{
     font-size: 24pt;
     margin-top: 8pt;
 }
 .description{
     padding-left: 1pt;
-    margin-top: 4pt;
+    margin-top: 8pt;
     color:#cccccc;
     font-size: 12pt;
+    line-height: 28pt;
 }
 .tag{
     margin-top: 8pt;
