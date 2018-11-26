@@ -6,7 +6,7 @@
             </el-breadcrumb>
         </div>
         <el-card style='margin-bottom: 8pt'>
-            <el-row>
+            <el-row id='info'>
                 <el-col :span='2' style='display: inline-block; max-width: 84pt'>
                     <i class="el-icon-upload" style="font-size: 60pt;text-align: center;color:#449CFA;padding-top: 4pt;padding-left: 8pt;padding-right: 16pt"></i>
                 </el-col>
@@ -21,14 +21,14 @@
                     <div class="context">{{this.$route.params.description}}</div>
                     <div style="margin-top: 12pt">
                         <el-button size='mini' icon='el-icon-lx-group'>分享</el-button>
-                        <el-button-group style="display: inline-block;">
-                          <el-button size='mini'>赞</el-button>
-                          <el-button size='mini'>踩</el-button>
+                        <el-button-group style="display: inline-block;" id='thumb'>
+                          <el-button size='mini' :type='thumb.up' @click='thumbUp'>赞</el-button>
+                          <el-button size='mini' :type='thumb.down' @click='thumbDown'>踩</el-button>
                         </el-button-group>
-                        <el-button size='mini' @click='downloadBtn'>下载 (12.1Mb)</el-button>
+                        <el-button size='mini' @click='downloadBtn'>下载资源</el-button>
                         
                         <el-button size='mini' style='margin-left: 1pt' @click='editComment'>发表评论</el-button>
-                        <el-button size='mini' @click='collection' style='margin-left: 1pt' v-bind:type='collectionBind'>{{collectionButtonInfo}}</el-button>
+                        <el-button id='collection' size='mini' @click='collection' style='margin-left: 1pt' v-bind:type='collectionBind'>{{collectionButtonInfo}}</el-button>
 
                     </div>
                 </el-col>
@@ -125,6 +125,7 @@
     import Vue from 'vue';
     import axios from 'axios';
     import server from '../../../config/index';
+    import { Loading } from 'element-ui';
     export default {
         name: 'download',
         data: function(){
@@ -156,6 +157,10 @@
                     size:0,
                     total:0,
                 },
+                thumb:{
+                    up:'',
+                    down:''
+                },
                 showLoading:false,
             }
         },
@@ -166,6 +171,7 @@
             }
         },
         mounted:function(){
+            this.init();
         	this.requestComment(1);
             this.requestRelatedResource(1);
         },
@@ -173,6 +179,46 @@
             // 目前离开页面，页面即刻被销毁
         },
         methods:{
+            // 监听点赞按钮
+            thumbUp(){
+                let loadingInstance = Loading.service({
+                    target:'#thumb',
+                    fullscreen:false
+                });
+                if(this.thumb.up==''){
+                    this.$http.post(server.url+'/resource/suggest/make/'+this.$route.params.resourceID,{}).then(function(response){
+                        this.thumb.up='success'
+                        this.thumb.down=''
+                        loadingInstance.close()
+                    })
+                }else if(this.thumb.up=='success'){
+                    this.$http.delete(server.url+'/resource/suggest/undo/'+this.$route.params.resourceID,{}).then(function(response){
+                        this.thumb.up=''
+                        this.thumb.down=''
+                        loadingInstance.close()
+                    })
+                }
+            },
+            // 监听点踩按钮
+            thumbDown(){
+                let loadingInstance = Loading.service({
+                    target:'#thumb',
+                    fullscreen:false,
+                });
+                if(this.thumb.down==''){
+                    this.$http.post(server.url+'/resource/suggest/dislike/'+this.$route.params.resourceID,{}).then(function(response){
+                        this.thumb.down='info'
+                        this.thumb.up=''
+                        loadingInstance.close()
+                    })
+                }else if(this.thumb.down=='info'){
+                    this.$http.delete(server.url+'/resource/suggest/undo/'+this.$route.params.resourceID,{}).then(function(response){
+                        this.thumb.up=''
+                        this.thumb.down=''
+                        loadingInstance.close()
+                    })
+                }
+            },
             // 监听点击相关资源推荐卡片事件，处理页面跳转
             // TODO:相关资源推荐无法跳转
             clickCard(res){
@@ -249,8 +295,41 @@
                 }).catch(function(res){});
                 
             },
+            init(){
+                let loadingInstance = Loading.service({
+                    target:'#info',
+                    fullscreen:false
+                });
+                this.$http.get(server.url+'/resource/user/history/'+this.$route.params.resourceID,{}).then(function(response){
+                        if(response.data.data.favourite==0){
+                            this.collectionBind='primary';
+                            this.collectionButtonInfo='收藏资源';
+                        }else if(response.data.data.favourite==1){
+                            this.collectionBind='danger';
+                            this.collectionButtonInfo='取消收藏';
+                        }
+                        if(response.data.data.suggested==-1){
+                            this.thumb.up='';
+                            this.thumb.down='';
+                        }else if(response.data.data.suggested==0){
+                            this.thumb.up='';
+                            this.thumb.down='info';
+                        }else if(response.data.data.suggested==1){
+                            this.thumb.up='success';
+                            this.thumb.down='';
+                        }
+                        loadingInstance.close();
+                    })
+
+
+
+            },
             // 监听收藏按钮
             collection(){
+                let loadingInstance = Loading.service({
+                    target:'#collection',
+                    fullscreen:false,
+                });
                 if(this.collectionBind=='danger'){
                     // 已经收藏
                     this.$http.delete(server.url+'/resource/favourite/dislike/'+this.$route.params.resourceID,{}).then(function(response){
@@ -265,6 +344,7 @@
                         }else{
                             this.$message.error('咦？取消收藏失败了，请再试一次');
                         }
+                        loadingInstance.close();
                     })
                 }else{
                     // 没有收藏
@@ -280,6 +360,7 @@
                         }else{
                             this.$message.error('咦？收藏失败了，请再试一次');
                         }
+                        loadingInstance.close();
                     })
                 }
             }
