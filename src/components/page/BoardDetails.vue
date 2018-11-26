@@ -5,7 +5,7 @@
             <el-card shadow="never">
                 <div slot="header">
                     <span><el-button icon="fa fa-chevron-left" @click="goBack()" style="border-color: #fff; margin-right: 2px"></el-button></span>
-                    <span style="font-size: 15px">{{article.TopicTitle}}</span>
+                    <span style="font-size: 15px">{{blackboard.blackboard_name}}</span>
                 </div>
                 <div>
                     <el-row style="color: #6A6A6A">
@@ -22,61 +22,61 @@
                             </el-row>
                         </el-col>
                         <el-col :span="21" style="padding-left: 20px">
-                            <el-row style="font-size: 14px; width: 78%; min-height: 120px; line-height: 24px">{{article.TopicText}}</el-row>
+                            <el-row style="font-size: 14px; width: 78%; min-height: 120px; line-height: 24px">{{blackboard.blackboard_text | htmlDecode}}</el-row>
                             <el-row style="font-size: 12px;margin-top: 30px;padding-right: 170px">
-                                <el-col :span="15"><div style="padding-top: 8px">{{article.TopicDate}}</div></el-col>
+                                <el-col :span="15"><div style="padding-top: 8px">{{blackboard.blackboard_date}}</div></el-col>
                                 <el-col :span="3"><div align="right"><el-button type="text" @click="collect()" v-loading="collectLoading" style="color: #6A6A6A"><i  class="fa fa-star fa-lg" v-show="isCollected" aria-hidden="true" style="margin-right: 5px;color: #FFE100"></i><i class="fa fa-star-o fa-lg" v-show="!isCollected" aria-hidden="true" style="margin-right: 5px; color: #6A6A6A;"></i>收藏</el-button></div></el-col>
                                 <el-col :span="3"><div align="right"><a href="#postComment"><el-button type="text" style="color: #6A6A6A"><i class="fa fa-commenting-o fa-lg" aria-hidden="true" style="margin-right: 5px;"></i>评论</el-button></a></div></el-col>
-                                <el-col :span="3"><div align="right"><el-button type="text" @click="like()" v-loading="likeLoading" style="color: #6A6A6A"><i class="fa fa-thumbs-o-up fa-lg" v-show="isLiked" aria-hidden="true" style="margin-right: 5px;color: #FF7B00;"></i><i class="fa fa-thumbs-o-up fa-lg" v-show="!isLiked" aria-hidden="true" style="margin-right: 5px; color: #6A6A6A;"></i>{{article.PraiseCount}}</el-button></div></el-col>
+                                <el-col :span="3"><div align="right"><el-button type="text" @click="like()" v-loading="likeLoading" style="color: #6A6A6A"><i class="fa fa-thumbs-o-up fa-lg" v-show="isLiked" aria-hidden="true" style="margin-right: 5px;color: #FF7B00;"></i><i class="fa fa-thumbs-o-up fa-lg" v-show="!isLiked" aria-hidden="true" style="margin-right: 5px; color: #6A6A6A;"></i>{{blackboard.praise_count}}</el-button></div></el-col>
                             </el-row>
                         </el-col>
                     </el-row>
                 </div>
-            <!-- 收藏/评论/点赞按键 -->
+                <!-- 收藏/评论/点赞按键 -->
             </el-card>
             <!-- 评论列表 -->
             <div style="margin-top: 10px">
                 <el-card shadow="never">
-                <el-table :data="comments" v-loading="commentLoading" :default-sort="{prop: 'ReplyDate', order: 'ascending'}" style="padding-top: 0">
-                    <el-table-column label="评论" style="color: #6A6A6A;">
-                        <template slot-scope="scope">
-                            <el-row style="margin: 15px 0">
-                                <el-col :span="4">
-                                    <el-row>
-                                        <div>
-                                            <el-card shadow="never" style="height: 100px; width: 100px">
-                                                <!-- 显示头像 -->
-                                            </el-card>
-                                        </div>
-                                    </el-row>
-                                    <el-row style="padding-top: 10px;font-size: 12px;width: 100px">
-                                        <div align="center">用户名</div>
-                                    </el-row>
-                                </el-col>
-                                <el-col :span="20">
-                                    <el-row style="min-height: 120px" id="content">
-                                        <p style="font-size: 14px;line-height: 24px">{{scope.row.ReplyText}}</p>
-                                    </el-row>
-                                    <el-row style="margin-top: 30px">
-                                        <el-col :span="18"><div style="font-size: 12px;padding-top: 8px">{{scope.row.ReplyDate}}</div></el-col>
-                                        <el-col :span="3"><div align="right" style="font-size: 12px"><el-button type="text" style="color: #6A6A6A"><i class="fa fa-commenting-o fa-lg" aria-hidden="true" style="margin-right: 5px;"></i>回复</el-button></div></el-col>
-                                        <el-col :span="3"><div align="right" style="font-size: 12px"><el-button type="text" style="color: #6A6A6A"><i class="fa fa-thumbs-o-up fa-lg" aria-hidden="true" style="margin-right: 5px;"></i></el-button>{{scope.row.PraiseCount}}</div></el-col>
-                                    </el-row>
-                                </el-col>
-                            </el-row>
-                        </template>
-                    </el-table-column>
-                    <el-table-column label="按时间" width="80px" sortable prop="ReplyDate" style="margin: 15px 0">
-                        <template slot-scope="scope">
+                    <el-table :data="comments" v-loading="commentLoading" :default-sort="{prop: 'ReplyDate', order: 'ascending'}" style="padding-top: 0">
+                        <el-table-column label="评论" style="color: #6A6A6A;">
+                            <template slot-scope="scope">
+                                <el-row style="margin: 15px 0">
+                                    <el-col :span="4">
+                                        <el-row>
+                                            <div>
+                                                <el-card shadow="never" style="height: 100px; width: 100px">
+                                                    <!-- 显示头像 -->
+                                                </el-card>
+                                            </div>
+                                        </el-row>
+                                        <el-row style="padding-top: 10px;font-size: 12px;width: 100px">
+                                            <div align="center">用户名</div>
+                                        </el-row>
+                                    </el-col>
+                                    <el-col :span="20">
+                                        <el-row style="min-height: 120px" id="content">
+                                            <p style="font-size: 14px;line-height: 24px">{{scope.row.ReplyText}}</p>
+                                        </el-row>
+                                        <el-row style="margin-top: 30px">
+                                            <el-col :span="18"><div style="font-size: 12px;padding-top: 8px">{{scope.row.ReplyDate}}</div></el-col>
+                                            <el-col :span="3"><div align="right" style="font-size: 12px"><el-button type="text" style="color: #6A6A6A"><i class="fa fa-commenting-o fa-lg" aria-hidden="true" style="margin-right: 5px;"></i>回复</el-button></div></el-col>
+                                            <el-col :span="3"><div align="right" style="font-size: 12px"><el-button type="text" style="color: #6A6A6A"><i class="fa fa-thumbs-o-up fa-lg" aria-hidden="true" style="margin-right: 5px;"></i></el-button>{{scope.row.PraiseCount}}</div></el-col>
+                                        </el-row>
+                                    </el-col>
+                                </el-row>
+                            </template>
+                        </el-table-column>
+                        <el-table-column label="按时间" width="80px" sortable prop="ReplyDate" style="margin: 15px 0">
+                            <template slot-scope="scope">
 
-                        </template>
-                    </el-table-column>
-                    <el-table-column label="按人气" width="80px" style="font-size: 12px; color: #6A6A6A; margin: 15px 0" align="center" sortable prop="PraiseCount">
-                        <template slot-scope="scope">
+                            </template>
+                        </el-table-column>
+                        <el-table-column label="按人气" width="80px" style="font-size: 12px; color: #6A6A6A; margin: 15px 0" align="center" sortable prop="PraiseCount">
+                            <template slot-scope="scope">
 
-                        </template>
-                    </el-table-column>
-                </el-table>
+                            </template>
+                        </el-table-column>
+                    </el-table>
                 </el-card>
             </div>
             <div id="postComment">
@@ -95,13 +95,13 @@
     export default {
         mounted: function() {
             this.getParams();
-            if (this.article.praise_id !== -1) this.isLiked = true;
-            if (this.article.favourite_id !== -1) this.isCollected = true;
+            if (this.blackboard.praise_id !== -1) this.isLiked = true;
+            if (this.blackboard.favourite_id !== -1) this.isCollected = true;
             this.loadComments();
         },
         data() {
             return {
-                article: {},
+                blackboard: {},
                 comments: [], // 存储评论信息
                 collectLoading: false, // 收藏状态改变
                 commentLoading: false, // 评论加载状态
@@ -114,7 +114,7 @@
                     topic_id: 0,
                     user_id: 1, // 需要获取
                     collection_time: new Date(),
-                    type: 0
+                    type: 1
                 },
                 // 评论实体
                 replyEntity: {
@@ -124,13 +124,13 @@
                     ReplyDate: new Date(),
                     ClickingRate: 0,
                     PraiseCount: 0,
-                    type: 0
+                    type: 1
                 }
             }
         },
         methods: {
             getParams: function () {
-                this.article = this.$route.query.article
+                this.blackboard = this.$route.query.blackboard
             },
             goBack: function() {
                 this.$router.go(-1);
@@ -139,12 +139,11 @@
             like: function() {
                 if(this.isLiked === false) {
                     // 1为userID，需要获取
-                    // article.SectorName有问题
-                    this.$http.post(server.url + '/article/like', this.article, {params: {userID:1}, headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}}).then(response => {
+                    this.$http.post(server.url + '/blackboard/praise', this.blackboard, {params: {userID:1}, headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}}).then(response => {
                         if (response.status === 200){
                             this.likeLoading = true;
                             this.isLiked = true;
-                            this.article.PraiseCount++;
+                            this.blackboard.praise_count++;
                             this.likeLoading = false;
                         }
                         else{
@@ -158,12 +157,11 @@
                 }
                 else {
                     // 1为userID，需要获取
-                    // article.SectorName有问题
-                    this.$http.post(server.url + '/article/like/delete', this.article, {params: {userID:1}, headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}}).then(response => {
+                    this.$http.post(server.url + '/blackboard/praise/delete', this.blackboard, {params: {userID:1}, headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}}).then(response => {
                         if (response.status === 200){
                             this.likeLoading = true;
                             this.isLiked = false;
-                            this.article.PraiseCount--;
+                            this.blackboard.praise_count--;
                             this.likeLoading = false;
                         }
                         else{
@@ -178,11 +176,11 @@
             },
             // 收藏和取消收藏
             collect: function() {
-                this.favoriteEntity.topic_id = this.article.TopicId;
+                this.favoriteEntity.topic_id = this.blackboard.blackboard_id;
                 var t = new Date();
                 this.favoriteEntity.collection_time = t.format("yyyy-MM-dd HH:mm:ss");
                 if (this.isCollected === false) {
-                    this.$http.post(server.url + '/article/collect', this.favoriteEntity, {headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}}).then(response => {
+                    this.$http.post(server.url + '/blackboard/collect', this.favoriteEntity, {headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}}).then(response => {
                         if (response.status === 200){
                             this.collectLoading = true;
                             this.isCollected = true;
@@ -198,7 +196,7 @@
                     });
                 }
                 else {
-                    this.$http.post(server.url + '/article/collect/delete', this.favoriteEntity, {headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}}).then(response => {
+                    this.$http.post(server.url + '/blackboard/collect/delete', this.favoriteEntity, {headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}}).then(response => {
                         if (response.status === 200){
                             this.collectLoading = true;
                             this.isCollected = false;
@@ -217,7 +215,7 @@
             // 加载评论
             loadComments: function() {
                 this.comments = [];
-                this.$http.get(server.url + '/article/reply/get?TopicId=' + this.article.TopicId, {headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}}).then((response) => {
+                this.$http.get(server.url + '/blackboard/reply/get?TopicId=' + this.blackboard.blackboard_id, {headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}}).then((response) => {
                     if (response.status === 200) {
                         let commentList = JSON.parse(response.bodyText);
                         var i = 0;
@@ -248,11 +246,11 @@
             },
             // 评论
             postComment: function() {
-                this.replyEntity.TopicId = this.article.TopicId;
+                this.replyEntity.TopicId = this.blackboard.blackboard_id;
                 this.replyEntity.ReplyText = this.commentText;
                 var t = new Date();
                 this.replyEntity.ReplyDate = t.format("yyyy-MM-dd HH:mm:ss");
-                this.$http.post(server.url + '/article/reply', this.replyEntity, {headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}}).then(response => {
+                this.$http.post(server.url + '/blackboard/reply', this.replyEntity, {headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}}).then(response => {
                     if (response.status === 200){
                         this.$message({type: 'success', message: '评论成功'});
                         this.commentLoading = true;
@@ -269,6 +267,18 @@
                     this.$message({type: 'error', message: '请重试'});
                 });
             },
+        },
+        filters: {
+            htmlDecode: function(val) {
+                //1.首先动态创建一个容器标签元素，如DIV
+                var temp = document.createElement("div");
+                //2.然后将要转换的字符串设置为这个元素的innerHTML(ie，火狐，google都支持)
+                temp.innerHTML = val;
+                //3.最后返回这个元素的innerText(ie支持)或者textContent(火狐，google支持)，即得到经过HTML解码的字符串了。
+                var output = temp.innerText || temp.textContent;
+                temp = null;
+                return output;
+            }
         },
         watch: {
             // 监测路由变化,只要变化了就调用获取路由参数方法将数据存储本组件即可
