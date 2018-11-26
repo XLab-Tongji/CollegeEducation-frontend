@@ -1,6 +1,7 @@
 <template>
     <el-container class="topic-post">
         <!----- 引入wangEditor的css文件 ----->
+        <link rel="stylesheet" href="../../../node_modules/font-awesome/css/font-awesome.min.css">
         <link rel="stylesheet" href="../../../node_modules/wangeditor/release/wangEditor.min.css">
         <el-main class="main" v-loading="loading">
             <!----- 输入标题 ----->

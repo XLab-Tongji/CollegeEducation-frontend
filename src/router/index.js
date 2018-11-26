@@ -76,6 +76,11 @@ export default new Router({
                             meta: { title: '话题列表' }
                         },
                         {
+                            path: '/blackboard-list',
+                            component: resolve => require(['../components/page/BoardTable.vue'], resolve),
+                            meta: { title: '黑板报列表' }
+                        },
+                        {
                             path: '/topic-post',
                             component: resolve => require(['../components/page/TopicPost.vue'], resolve),
                             meta: { title: '发表文章'}
@@ -92,6 +97,12 @@ export default new Router({
                     name: 'TopicDetails',
                     component: resolve => require(['../components/page/TopicDetails.vue'], resolve),
                     meta: { title: '话题详情'}
+                },
+                {
+                    path: '/blackboard-details/:id',
+                    name: 'BoardDetails',
+                    component: resolve => require(['../components/page/BoardDetails.vue'], resolve),
+                    meta: { title: '黑板报详情'}
                 },
                 {
                     path: '/source-list',
