@@ -1,12 +1,11 @@
 <template>
-    <el-container class="topic-list">
+    <el-container>
         <link rel="stylesheet" href="../../../node_modules/font-awesome/css/font-awesome.min.css">
-        <el-main class="main">
+        <el-main style="padding-top: 0">
             <div>
                 <el-menu
                     default-active="/topic-list"
                     router
-                    class="el-menu-demo"
                     mode="horizontal"
                     background-color="#fff"
                     text-color="#282828"
@@ -18,7 +17,7 @@
                         <el-menu-item index="/topic-post">文章</el-menu-item>
                         <el-menu-item index="/blackboard">黑板报</el-menu-item>
                     </el-submenu>
-                    <el-menu-item index="4"><i class="fa fa-user-o" aria-hidden="true" style="margin-right: 5px"></i>我的论坛</el-menu-item>
+                    <el-menu-item index="/question"><i class="fa fa-question-circle-o" aria-hidden="true" style="margin-right: 5px"></i>答疑</el-menu-item>
                 </el-menu>
             </div>
             <div style="margin-top: 15px"><router-view></router-view></div>
@@ -27,11 +26,5 @@
 </template>
 
 <style>
-    .topic-list{
-        background-color: #fff;
-    }
 
-    .topic-list > .main {
-        padding-top: 0px;
-    }
 </style>

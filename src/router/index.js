@@ -67,7 +67,7 @@ export default new Router({
                 {
                     path: '/topic',
                     component: resolve => require(['../components/page/TopicList.vue'], resolve),
-                    meta: { title: '问题交流' },
+                    meta: { title: '论坛' },
                     redirect: '/topic-list',
                     children:[
                         {
@@ -88,7 +88,13 @@ export default new Router({
                         {
                             path: '/blackboard',
                             component: resolve => require(['../components/page/Blackboard.vue'], resolve),
-                            meta: { title: '黑板报'}
+                            meta: { title: '发表黑板报'}
+                        },
+                        {
+                            path: '/question',
+                            name: 'QuestionList',
+                            component: resolve => require(['../components/page/QuestionList.vue'], resolve),
+                            meta: { title: '问题答疑'}
                         }
                     ]
                 },

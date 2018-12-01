@@ -4,51 +4,53 @@
         <link rel="stylesheet" href="../../../node_modules/font-awesome/css/font-awesome.min.css">
         <link rel="stylesheet" href="../../../node_modules/wangeditor/release/wangEditor.min.css">
         <el-main class="main" v-loading="loading">
-            <!----- 输入标题 ----->
-            <div align="left" class="topic-title">
-                <el-input v-model="blackboard.blackboard_name" size="small" maxlength="25"
-                          placeholder="请输入标题..."
-                          style="width: 350px">
-                </el-input>
-            </div>
-            <!----- 编辑器 ----->
-            <div id="editor" style="margin-top: 20px"></div>
-            <!----- 提示字数限制 ----->
-            <div align="right" style="font-size: 12px;color: #A6A6A6;">{{count}} / 200</div>
-            <div class="select">
-                <!-- 选择分类 -->
-                <el-select value="" v-model="sid" size="mini" style="width: 200px" placeholder="请选择类别">
-                    <el-option
-                        v-for="item in sectorStates"
-                        :key="item.value"
-                        :label="item.label"
-                        :value="item.value">
-                    </el-option>
-                </el-select>
-                <!-- 添加标签 -->
-                <el-tag
-                    :key="tag"
-                    v-for="tag in SectorName"
-                    closable
-                    :disable-transitions="false"
-                    class="tag"
-                    @close="handleClose(tag)">
-                    {{tag}}
-                </el-tag>
-                <el-input
-                    v-if="tagInputVisible" v-model="tagValue" ref="saveTagInput"
-                    size="mini" style="width: 80px" maxlength="10"
-                    @keyup.space.native="handleInputConfirm"
-                    @blur="handleInputConfirm">
-                </el-input>
-                <el-button v-else type="primary" size="mini" @click="showInput">+Tag</el-button>
-            </div>
+            <el-card style="width: 100%">
+                <!----- 输入标题 ----->
+                <div align="left" class="topic-title">
+                    <el-input v-model="blackboard.blackboard_name" size="small" maxlength="25"
+                              placeholder="请输入标题..."
+                              style="width: 350px">
+                    </el-input>
+                </div>
+                <!----- 编辑器 ----->
+                <div id="editor" style="margin-top: 20px"></div>
+                <!----- 提示字数限制 ----->
+                <div align="right" style="font-size: 12px;color: #A6A6A6;">{{count}} / 200</div>
+                <div class="selectp">
+                    <!-- 选择分类 -->
+                    <el-select value="" v-model="sid" size="mini" style="width: 200px" placeholder="请选择类别">
+                        <el-option
+                            v-for="item in sectorStates"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value">
+                        </el-option>
+                    </el-select>
+                    <!-- 添加标签 -->
+                    <el-tag
+                        :key="tag"
+                        v-for="tag in SectorName"
+                        closable
+                        :disable-transitions="false"
+                        class="tag"
+                        @close="handleClose(tag)">
+                        {{tag}}
+                    </el-tag>
+                    <el-input
+                        v-if="tagInputVisible" v-model="tagValue" ref="saveTagInput"
+                        size="mini" style="width: 80px" maxlength="10"
+                        @keyup.space.native="handleInputConfirm"
+                        @blur="handleInputConfirm">
+                    </el-input>
+                    <el-button v-else type="primary" size="mini" @click="showInput">+Tag</el-button>
+                </div>
 
-            <!----- 保存和发表按键 ----->
-            <div class="post">
-                <el-button size="mini" class="save-btn" @click="saveInDrafts">保存到草稿箱</el-button>
-                <el-button type="primary" size="mini" class="post-btn" @click="postOn">发布</el-button>
-            </div>
+                <!----- 保存和发表按键 ----->
+                <div class="post">
+                    <el-button size="mini" class="save-btn" @click="saveInDrafts">保存到草稿箱</el-button>
+                    <el-button type="primary" size="mini" class="post-btn" @click="postOn">发布</el-button>
+                </div>
+            </el-card>
         </el-main>
     </el-container>
 </template>
@@ -315,39 +317,41 @@
 </script>
 <style>
     .topic-post > .main {
-        /*justify-content: flex-start;*/
         flex-direction: column;
-        background-color: #fff;
         display: flex;
         justify-content: flex-start;
         padding-top: 0;
         padding-left: 0;
     }
 
-    .topic-post > .main > .select .tag {
+    .selectp {
+        margin-top: 17px;
+    }
+
+    .selectp .tag {
         background-color: #f7ffff;
         color: #0a9894;
         margin-left: 5px;
     }
 
-    .topic-post > .main > .select button {
+    .selectp button {
         background-color: #1ac7c3;
         border-color: #1ac7c3;
         margin-left: 10px;
     }
 
-    .topic-post > .main > .post {
+    .post {
         display: flex;
         justify-content: flex-start;
         margin-top: 15px;
     }
 
-    .topic-post > .main > .post .save-btn {
+    .post .save-btn {
         border-color: #1ac7c3;
         color: #1ac7c3;
     }
 
-    .topic-post > .main > .post .post-btn {
+    .post .post-btn {
         background-color: #1ac7c3;
         border-color: #1ac7c3;
     }

@@ -280,7 +280,7 @@
     .topic-table {
         overflow-x: hidden;
         overflow-y: hidden;
-        padding-top: 10px;
+        margin-top: 20px;
     }
 
     .topic-content {
