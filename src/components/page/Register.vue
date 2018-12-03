@@ -243,27 +243,30 @@
                 //console.log(val);
                 // 请在这里写获取学院列表的请求，val中的参数是用户选择的学校，即university的value
                 // 之后将拿到的数据push进schoolOptions中，如下
-                this.$http.get(server.url + '/register/university/' + val).then(response => {
-                    var count = 0;
-                    var majorIn = JSON.parse(response.bodyText);
-                    while(count < majorIn.data.length){
-                        this.schoolOptions.push({value:majorIn.data[count].majorID,label:majorIn.data[count].majorName});
-                        count++;
-                    }
-                }, response => {
-                     console.log("error");
-                     console.log(response);
-                 });
+                var that=this;
+                this.$axios({
+                        method:'get',
+                        url:server.url + '/register/university/' + val,
+                        data:{},
+                        header:{}  
+                    }).then(function(response){
+                        var majorIn = response.data.data;
+                        for(let i=0;i<majorIn.length;i++){
+                            var majorDetail=majorIn[i]
+                            that.schoolOptions.push({value:majorDetail.majorID,label:majorDetail.majorName})
+                        }
+                })
             }
         },
         methods: {
             // 上传头像
             uploadCroppedImage(token) {
+                var that=this;
                 this.myCroppa.generateBlob((blob) => {
                     var fd = new FormData()
                     fd.append('file', blob, 'avatar.jpg')
                     console.log(localStorage.getItem('token'))
-                    this.$axios({
+                    that.$axios({
                         method:'put',
                         url:server.url + '/user/uploadIcon',
                         data:{icon:fd},
@@ -309,19 +312,19 @@
             getUniversityList(){
                 // Evan:请在这里加入获取大学列表的接口信息
                 // 之后把get得到的大学列表push进universityOptions中，如下
-                this.$http.get(server.url + '/register/university/').then(response => {
-                    //console.log(response);
-                    var count = 0;
-                    var universityList = JSON.parse(response.bodyText);
-                    while(count < universityList.data.length){
-                        this.universityOptions.push({value:universityList.data[count].universityID,label:universityList.data[count].universityName});
-                        count++;
-                    }
-                    //this.universityOptions.push({value:resppo,label:'同济大学'});
-                }, response => {
-                     console.log("error");
-                     console.log(response);
-                 });
+                var that=this;
+                this.$axios({
+                        method:'get',
+                        url:server.url + '/register/university/',
+                        data:{},
+                        header:{}  
+                    }).then(function(response){
+                        var universityList = response.data.data;
+                        for(let i=0;i<universityList.length;i++){
+                            var universityDetail=universityList[i]
+                            that.universityOptions.push({value:universityDetail.universityID,label:universityDetail.universityName})
+                        }
+                })
             },
             handleAvatarSuccess(res, file) {
                 this.imageUrl = URL.createObjectURL(file.raw);
@@ -353,6 +356,55 @@
                     this.loading=false;
                 }
                 var that=this;
+                this.$axios({
+                        method:'post',
+                        url:server.url + '/register',
+                        data:{
+                            username:that.ruleForm.uName,
+                            password:that.ruleForm.password,
+                            email:that.ruleForm.email,
+                            gender:that.ruleForm.gender,
+                            universityID:that.ruleForm.university,
+                            majorID:that.ruleForm.school,
+                            birthday:that.ruleForm.birthday.getFullYear()+'-'+(that.ruleForm.birthday.getMonth()+1)+'-01',
+                            studentID:that.ruleForm.sID,
+                            auth:that.ruleForm.auth,
+                            admissionYear:that.ruleForm.startYear.getFullYear(),
+                        },
+                        header:{}  
+                    }).then(function(response){
+                        console.log(response)
+                        that.$axios({
+                            method:'post',
+                            url:server.url + '/auth',
+                            data:{username:that.ruleForm.uName,password:that.ruleForm.password},
+                            header:{}
+                        }).then(function(response){
+                            console.log(response)
+                            localStorage.setItem('token',response.data.token);
+                            localStorage.setItem('ms_username',that.ruleForm.uName);
+                            that.uploadCroppedImage(response.data.token)
+                            that.$notify({
+                                title: '注册成功',
+                                message: '稍后将转向登录页',
+                                type: 'success'
+                            });
+                            that.loading=false;
+                            setTimeout(function(){
+                                that.$router.push('/');
+                            },2000)
+                        })
+                }).catch((response) =>{
+                    that.$notify.error({
+                        title: '注册失败',
+                        message: '请稍后重试'
+                    });
+                    that.loading=false;
+                })
+
+
+
+/**
                 this.$http.post(server.url + '/register', {
                     // Evan:这段的接口全部都是我YY的，需要和后端确定
                     username:this.ruleForm.uName,
@@ -394,6 +446,7 @@
                      });
                      this.loading=false;
                 });
+                */
             }
         }
     }
