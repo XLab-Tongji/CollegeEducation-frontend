@@ -68,6 +68,7 @@
             personalInformationInit(){
                 this.userInfo.loading=true;
                 this.$http.get(server.url+'/user/detail/',{}).then(function(response){
+                    console.log(response)
                     this.userInfo.username=response.data.data.username;
                     this.userInfo.myUploadNum=response.data.data.myUploadNum;
                     this.userInfo.myDownloadNum=response.data.data.myDownloadNum;
@@ -76,6 +77,8 @@
                     this.userInfo.avgScore=response.data.data.avgScore;
                     this.userInfo.suggestedRate=response.data.data.suggestedRate;
                     this.userInfo.loading=false;
+                    if(!this.userInfo.avgScore){this.userInfo.avgScore=0;}
+                    if(!this.userInfo.suggestedRate){this.userInfo.suggestedRate=0;}
                 })
             }
         }

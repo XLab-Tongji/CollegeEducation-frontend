@@ -9,11 +9,13 @@ import '../static/css/icon.css';
 import "babel-polyfill";
 import VueResource from 'vue-resource';
 import mavonEditor from 'mavon-editor';
+import Croppa from 'vue-croppa'
 
 
 Vue.use(ElementUI, { size: 'small' });
 Vue.use(VueResource);
 Vue.use(mavonEditor);
+Vue.use(Croppa);
 Vue.prototype.$axios = axios;
 
 //使用钩子函数对路由进行权限跳转

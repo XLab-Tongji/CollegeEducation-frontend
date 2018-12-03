@@ -143,7 +143,7 @@
                 commentPublish:{
                     title:'',
                     content:'',
-                    rate:'',
+                    rate:0,
                     dialogFormVisible:false,
                 },
                 commentPublishRules:{
