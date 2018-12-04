@@ -134,7 +134,8 @@
                 uploadFunc:{
                     uploadURL:server.url+"/uploadResource",
                     uploadHeaders:{
-                        Authorization:'Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJxaWJhdHUiLCJleHAiOjE1Mzk4NTEyMzksImlhdCI6MTUzOTI0NjQzOX0.L0i_uqSjfXvcgNIyP_zKWde8FZ9nQT0xQB2pbslPuMIGDYTptthB4f4sqJLZP2bramTtWPdO1mELRy1zA_Yicw'
+                        'Authorization':'Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJxaWJhdHUiLCJleHAiOjE1Mzk4NTEyMzksImlhdCI6MTUzOTI0NjQzOX0.L0i_uqSjfXvcgNIyP_zKWde8FZ9nQT0xQB2pbslPuMIGDYTptthB4f4sqJLZP2bramTtWPdO1mELRy1zA_Yicw',
+                        'Content-Type':'multipart/form-data'
                         // 这里需要更换成Authorization
                     }
                 },

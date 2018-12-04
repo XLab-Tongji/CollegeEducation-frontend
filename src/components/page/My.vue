@@ -62,6 +62,9 @@
             }
         },
         mounted:function(){
+            console.log(localStorage.getItem('token'));
+            console.log(localStorage.getItem('ms_username'));
+
             this.personalInformationInit();
         },
         methods: {

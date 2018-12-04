@@ -30,13 +30,13 @@
                                 <el-button slot="prepend" icon="el-icon-lx-people"></el-button>
                             </el-input>
                         </el-form-item>
-                        <el-form-item prop="repassword">
-                            <el-input type="password" placeholder="请确认密码" v-model="ruleForm.repassword"> 
+                        <el-form-item prop="password">
+                            <el-input type="password" placeholder="请输入密码" v-model="ruleForm.password"> 
                                 <el-button slot="prepend" icon="el-icon-lx-lock"></el-button>
                             </el-input>
                         </el-form-item>
-                        <el-form-item prop="password">
-                            <el-input type="password" placeholder="请输入密码" v-model="ruleForm.password"> 
+                        <el-form-item prop="repassword">
+                            <el-input type="password" placeholder="请确认密码" v-model="ruleForm.repassword"> 
                                 <el-button slot="prepend" icon="el-icon-lx-lock"></el-button>
                             </el-input>
                         </el-form-item>
@@ -253,7 +253,7 @@
                         var majorIn = response.data.data;
                         for(let i=0;i<majorIn.length;i++){
                             var majorDetail=majorIn[i]
-                            that.schoolOptions.push({value:majorDetail.majorID,label:majorDetail.majorName})
+                            that.schoolOptions.push({value:majorDetail.id,label:majorDetail.majorName})
                         }
                 })
             }
@@ -264,14 +264,16 @@
                 var that=this;
                 this.myCroppa.generateBlob((blob) => {
                     var fd = new FormData()
-                    fd.append('file', blob, 'avatar.jpg')
+                    fd.append('icon', blob)
                     console.log(localStorage.getItem('token'))
+                    console.log(fd)
+                    console.log(fd.get('icon'))
                     that.$axios({
                         method:'put',
                         url:server.url + '/user/uploadIcon',
-                        data:{icon:fd},
-                        header:{
-                            'Authorization':token,
+                        data:fd,
+                        headers:{
+                            Authorization:'Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiLlva3kuo7mmY8iLCJleHAiOjE1NDQ1MTk1NzAsImlhdCI6MTU0MzkxNDc3MH0.hmBDEVI23YvfyZBhyfDXch1NHpGrsQe8hbQvfLdNuTCv6h2IKuWg5gAPMQOYQTrDgC0kn57axSBjOVdwUit1Zg',
                             'Content-Type':'multipart/form-data'
                         }  
                     }).then(function(res){
@@ -371,14 +373,14 @@
                             auth:that.ruleForm.auth,
                             admissionYear:that.ruleForm.startYear.getFullYear(),
                         },
-                        header:{}  
+                        headers:{}  
                     }).then(function(response){
                         console.log(response)
                         that.$axios({
                             method:'post',
                             url:server.url + '/auth',
                             data:{username:that.ruleForm.uName,password:that.ruleForm.password},
-                            header:{}
+                            headers:{}
                         }).then(function(response){
                             console.log(response)
                             localStorage.setItem('token',response.data.token);
