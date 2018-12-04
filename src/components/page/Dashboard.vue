@@ -4,7 +4,7 @@
             <el-col :span="8">
                 <el-card shadow="hover" class="mgb20" style="height:252px;">
                     <div class="user-info">
-                        <img src="static/img/img.jpg" class="user-avator" alt="">
+                        <img :src="srcImg" class="user-avator" alt="">
                         <div class="user-info-cont">
                             <div class="user-info-name">{{name}}</div>
                             <div>{{role}}</div>
@@ -191,13 +191,13 @@
             this.$axios({
                         method:'get',
                         url:server.url+'/user/getIcon',
-                        data:{},
                         headers:{'Authorization':'Bearer '+localStorage.getItem('token')},
                         responseType:'arraybuffer',
                     }).then(function(response){
-                        var src='data:image/jpeg;base64,'+btoa(new Uint8Array(res).reduce((data,byte)=>data+String.fromCharCode(byte),''));
-                        this.srcImg=src;
-                        console.log(src)
+                        var src='data:image/jpeg;base64,'+btoa(new Uint8Array(response.data).reduce((data,byte)=>data+String.fromCharCode(byte),''));
+                        that.srcImg=src;
+                }).catch((response)=>{
+                    console.error(response)
                 })
         },
         components: {

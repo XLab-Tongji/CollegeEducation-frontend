@@ -3,7 +3,7 @@
         <el-col :span='6' style='padding-right: 8pt;max-width: 450px'>
             <el-card style="text-align: center;background-color: white;padding-top: 8pt">
                 <div>
-                    <img src="../../assets/1.jpg" style="width: 100pt;height:100pt;border-radius: 50pt;vertical-align: middle;">
+                    <img :src="srcImg" style="width: 100pt;height:100pt;border-radius: 50pt;vertical-align: middle;">
                 </div>
                 <div class="nickName">{{userInfo.username}}</div>
                 <div class="description">
@@ -44,13 +44,15 @@
 <script>
     import VueCropper  from 'vue-cropperjs';
     import server from '../../../config/index';
+    import axios from 'axios';
     export default {
         name: 'baseform',
         data: function(){
             return {
+                srcImg:'',
                 activeIndex:'/my-upload',
                 userInfo:{
-                    username:"",
+                    username:localStorage.getItem('ms_username'),
                     myUploadNum:0,
                     myDownloadNum:0,
                     myFavouriteNum:0,
@@ -62,26 +64,56 @@
             }
         },
         mounted:function(){
-            console.log(localStorage.getItem('token'));
-            console.log(localStorage.getItem('ms_username'));
-
-            this.personalInformationInit();
+            var that=this;
+            this.$axios({
+                        method:'get',
+                        url:server.url+'/user/getIcon',
+                        headers:{'Authorization':'Bearer '+localStorage.getItem('token')},
+                        responseType:'arraybuffer',
+                    }).then(function(response){
+                        var src='data:image/jpeg;base64,'+btoa(new Uint8Array(response.data).reduce((data,byte)=>data+String.fromCharCode(byte),''));
+                        that.srcImg=src;
+                }).catch((response)=>{
+                    console.error(response)
+            })
+            var that=this;
+            this.userInfo.loading=true;
+            this.$axios({
+                methods:'get',
+                url:server.url+'/user/detail/',
+                headers:{Authorization:'Bearer '+localStorage.getItem('token')},
+            }).then(function(response){
+                that.userInfo.username=response.data.data.username;
+                that.userInfo.myUploadNum=response.data.data.myUploadNum;
+                that.userInfo.myDownloadNum=response.data.data.myDownloadNum;
+                that.userInfo.myFavouriteNum=response.data.data.myFavouriteNum;
+                that.userInfo.mySuggestedNum=response.data.data.mySuggestedNum;
+                that.userInfo.avgScore=response.data.data.avgScore;
+                that.userInfo.suggestedRate=response.data.data.suggestedRate;
+                that.userInfo.loading=false;
+                if(!that.userInfo.avgScore){that.userInfo.avgScore=0;}
+                if(!that.userInfo.suggestedRate){that.userInfo.suggestedRate=0;}
+            })
         },
         methods: {
             personalInformationInit(){
+                var that=this;
                 this.userInfo.loading=true;
-                this.$http.get(server.url+'/user/detail/',{}).then(function(response){
-                    console.log(response)
-                    this.userInfo.username=response.data.data.username;
-                    this.userInfo.myUploadNum=response.data.data.myUploadNum;
-                    this.userInfo.myDownloadNum=response.data.data.myDownloadNum;
-                    this.userInfo.myFavouriteNum=response.data.data.myFavouriteNum;
-                    this.userInfo.mySuggestedNum=response.data.data.mySuggestedNum;
-                    this.userInfo.avgScore=response.data.data.avgScore;
-                    this.userInfo.suggestedRate=response.data.data.suggestedRate;
-                    this.userInfo.loading=false;
-                    if(!this.userInfo.avgScore){this.userInfo.avgScore=0;}
-                    if(!this.userInfo.suggestedRate){this.userInfo.suggestedRate=0;}
+                this.$axios({
+                    methods:'get',
+                    url:server.url+'/user/detail/',
+                    headers:{Authorization:'Bearer '+localStorage.getItem('token')},
+                }).then(function(response){
+                    that.userInfo.username=response.data.data.username;
+                    that.userInfo.myUploadNum=response.data.data.myUploadNum;
+                    that.userInfo.myDownloadNum=response.data.data.myDownloadNum;
+                    that.userInfo.myFavouriteNum=response.data.data.myFavouriteNum;
+                    that.userInfo.mySuggestedNum=response.data.data.mySuggestedNum;
+                    that.userInfo.avgScore=response.data.data.avgScore;
+                    that.userInfo.suggestedRate=response.data.data.suggestedRate;
+                    that.userInfo.loading=false;
+                    if(!that.userInfo.avgScore){that.userInfo.avgScore=0;}
+                    if(!that.userInfo.suggestedRate){that.userInfo.suggestedRate=0;}
                 })
             }
         }

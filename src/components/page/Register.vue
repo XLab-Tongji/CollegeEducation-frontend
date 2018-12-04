@@ -108,12 +108,7 @@
                             </el-date-picker>
                         </el-form-item>
                     </el-col>
-                    
                 </el-row>
-
-
-
-
                 <div class="login-btn"><el-button type="primary" @click="register()">注册</el-button></div>
                 <el-row class="el-row--flex" justify="center"><el-button type="text" @click="toLogin()" >已有账号？点击登录</el-button></el-row>
             </el-form>
@@ -240,9 +235,6 @@
         },
         watch:{
             'ruleForm.university':function(val){
-                //console.log(val);
-                // 请在这里写获取学院列表的请求，val中的参数是用户选择的学校，即university的value
-                // 之后将拿到的数据push进schoolOptions中，如下
                 var that=this;
                 this.$axios({
                         method:'get',
@@ -265,9 +257,6 @@
                 this.myCroppa.generateBlob((blob) => {
                     var fd = new FormData()
                     fd.append('icon', blob)
-                    console.log(localStorage.getItem('token'))
-                    console.log(fd)
-                    console.log(fd.get('icon'))
                     that.$axios({
                         method:'put',
                         url:server.url + '/user/uploadIcon',
@@ -290,24 +279,13 @@
             },
             // 监听完成上传
             onFileLoaded(){
-                /*
-                this.$http.post(server.url + '/auth', {username:'qibatu',password:'123456'}).then(response => {
-                    localStorage.setItem('token',response.data.token);
-                    localStorage.setItem('ms_username',response.data.username);
-                    this.uploadCroppedImage()
-                   }, response => {
-                     console.log("error");
-                     console.log(response);
-                });
-                */
+                
             },
             toLogin(){
                 console.log("toLogin");
                 this.$router.push('/login');
             },
             getUniversityList(){
-                // Evan:请在这里加入获取大学列表的接口信息
-                // 之后把get得到的大学列表push进universityOptions中，如下
                 var that=this;
                 this.$axios({
                         method:'get',
@@ -321,23 +299,6 @@
                             that.universityOptions.push({value:universityDetail.universityID,label:universityDetail.universityName})
                         }
                 })
-            },
-            handleAvatarSuccess(res, file) {
-                this.imageUrl = URL.createObjectURL(file.raw);
-                console.log(this.imageUrl)
-            },
-            beforeAvatarUpload(file) {
-                const isJPG = file.type === 'image/jpeg';
-                const isPNG = file.type === 'image/png';
-                const isLt2M = file.size / 1024 / 1024 < 2;
-
-                if (!isJPG && !isPNG) {
-                    this.$message.error('上传头像图片只能是 JPG 或 PNG 格式!');
-                }
-                if (!isLt2M) {
-                    this.$message.error('上传头像图片大小不能超过 2MB!');
-                }
-                return isJPG && isPNG && isLt2M;
             },
             register() {
                 this.loading=true;
@@ -397,52 +358,6 @@
                     });
                     that.loading=false;
                 })
-
-
-
-/**
-                this.$http.post(server.url + '/register', {
-                    // Evan:这段的接口全部都是我YY的，需要和后端确定
-                    username:this.ruleForm.uName,
-                    password:this.ruleForm.password,
-                    email:this.ruleForm.email,
-                    gender:this.ruleForm.gender,
-                    universityID:this.ruleForm.university,
-                    majorID:this.ruleForm.school,
-                    birthday:this.ruleForm.birthday.getFullYear()+'-'+(this.ruleForm.birthday.getMonth()+1)+'-01',
-                    studentID:this.ruleForm.sID,
-                    auth:this.ruleForm.auth,
-                    admissionYear:this.ruleForm.startYear.getFullYear(),
-                }).then(response => {
-                    console.error('register',response)
-                    this.$http.post(server.url + '/auth', {username:this.ruleForm.uName,password:this.ruleForm.password}).then(response => {
-                        console.error('login',response.data.token)
-                        localStorage.setItem('token',response.data.token);
-                        localStorage.setItem('ms_username',this.ruleForm.uName);
-                        this.uploadCroppedImage(response.data.token)
-                        this.$notify({
-                            title: '注册成功',
-                            message: '稍后将转向登录页',
-                            type: 'success'
-                        });
-                        this.loading=false;
-                        setTimeout(function(){
-                            that.$router.push('/');
-                        },2000)
-                    }, response => {
-                        console.log("error");
-                        console.log(response);
-                    });
-                   }, response => {
-                     console.log("error");
-                     console.log(response);
-                     this.$notify.error({
-                     title: '注册失败',
-                     message: '请稍后重试'
-                     });
-                     this.loading=false;
-                });
-                */
             }
         }
     }
