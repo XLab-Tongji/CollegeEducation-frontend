@@ -1,111 +1,108 @@
 <template>
     <div>
         <link rel="stylesheet" href="../../../node_modules/font-awesome/css/font-awesome.min.css">
-        <!----- 搜索栏 ----->
-        <div>
-            <!-- 输入搜索内容 -->
-            <el-input
-                placeholder="查找内容"
-                clearable="true"
-                prefix-icon="el-icon-search"
-                v-model="keywords"
-                style="width: 250px"
-                size="mini">
-            </el-input>
-            <!-- 选择搜索类型 -->
-            <el-select value="" v-model="searchType" class="type-select" size="mini">
-                <el-option
-                    v-for="item in searchOptions"
-                    :key="item.value"
-                    :label="item.label"
-                    :value="item.value">
-                </el-option>
-            </el-select>
-            <!-- 搜索键 -->
-            <el-button type="primary" icon="el-icon-search" @click="search" class="search-button" size="mini">搜索</el-button>
-            <!-- 选择标签 -->
-            <div style="float: right" v-show="searchType === 2">
-                <el-checkbox v-model="tagKeyword" label="计算机软件及计算机应用" border size="mini" @change="search"></el-checkbox>
-                <el-checkbox v-model="tagKeyword" label="互联网技术" border size="mini" @change="search"></el-checkbox>
-                <el-checkbox v-model="tagKeyword" label="电信技术" border size="mini" @change="search"></el-checkbox>
-            </div>
-        </div>
-
         <!----- 话题列表 ----->
         <div>
-            <el-table
-                ref="multipleTable"
-                :data="blackboards"
-                tooltip-effect="dark"
-                class="topic-table"
-                v-loading="loading">
-                <!-- 主题 -->
-                <el-table-column
-                    label="主题"
-                    width="500" style="text-align: center">
-                    <template slot-scope="scope">
-                        <p class="margin-top: 10px;"><el-button type="text" @click="goDetails(scope.$index)" style="font-size: 14px; font-weight: bold; color: #0A9894">{{ scope.row.blackboard_name }}</el-button></p>
-                        <p class="topic-content"> {{scope.row.blackboard_text | filterHtml | htmlDecode}}</p>
-                    </template>
-                </el-table-column>
-                <!-- 作者 -->
-                <el-table-column
-                    label="作者"
-                    align="center">
-                    <template slot-scope="scope">
-                        <p style="font-size: 12px; color: #6A6A6A">id: {{scope.row.user_id}} </p>
-                        <p style="font-size: 9px; color: #6A6A6A">发表于 {{scope.row.blackboard_date}}</p>
-                    </template>
-                </el-table-column>
-                <!-- 标签 -->
-                <el-table-column
-                    label="分类"
-                    align="center">
-                    <template slot-scope="scope">
-                        <p style="font-size: 11px; color: #6A6A6A">{{scope.row.sectorName}} </p>
-                    </template>
-                </el-table-column>
-                <!-- 回复 -->
-                <el-table-column
-                    label="回复"
-                    align="center" width="100">
-                    <template slot-scope="scope"><span style="font-size: 10px; color: #6A6A6A">{{scope.row.reply_count}} </span></template>
-                </el-table-column>
-                <!-- 点赞数 -->
-                <el-table-column
-                    label="点赞"
-                    align="center" width="100">
-                    <template slot-scope="scope"><span style="font-size: 10px; color: #6A6A6A">{{scope.row.praise_count}} </span></template>
-                </el-table-column>
-                <!-- 点击数 -->
-                <el-table-column
-                    label="阅读"
-                    align="center" width="100">
-                    <template slot-scope="scope"><span style="font-size: 10px; color: #6A6A6A">{{scope.row.clicking_rate}} </span></template>
-                </el-table-column>
-
-            </el-table>
+            <el-card style="margin-top: 20px">
+                <!----- 搜索栏 ----->
+                <div>
+                    <!-- 输入搜索内容 -->
+                    <el-input
+                        placeholder="查找内容"
+                        clearable="true"
+                        prefix-icon="el-icon-search"
+                        v-model="keywords"
+                        style="width: 250px"
+                        size="mini">
+                    </el-input>
+                    <!-- 选择搜索类型 -->
+                    <el-select value="" v-model="searchType" class="type-select" size="mini">
+                        <el-option
+                            v-for="item in searchOptions"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value">
+                        </el-option>
+                    </el-select>
+                    <!-- 搜索键 -->
+                    <el-button type="primary" icon="el-icon-search" @click="search" class="search-button" size="mini">搜索</el-button>
+                    <!-- 选择标签 -->
+                    <div style="float: right" v-show="searchType === 2">
+                        <el-checkbox v-model="tagKeyword" label="计算机软件及计算机应用" border size="mini" @change="search"></el-checkbox>
+                        <el-checkbox v-model="tagKeyword" label="互联网技术" border size="mini" @change="search"></el-checkbox>
+                        <el-checkbox v-model="tagKeyword" label="电信技术" border size="mini" @change="search"></el-checkbox>
+                    </div>
+                </div>
+                <el-table
+                    ref="multipleTable"
+                    :data="blackboards"
+                    tooltip-effect="dark"
+                    class="topic-table"
+                    v-loading="loading">
+                    <!-- 主题 -->
+                    <el-table-column
+                        label="主题"
+                        width="500" style="text-align: center">
+                        <template slot-scope="scope">
+                            <p class="margin-top: 10px;"><el-button type="text" @click="goDetails(scope.$index)" style="font-size: 14px; font-weight: bold; color: #0A9894">{{ scope.row.blackboard_name }}</el-button></p>
+                            <p class="topic-content"> {{scope.row.blackboard_text | filterHtml | htmlDecode}}</p>
+                        </template>
+                    </el-table-column>
+                    <!-- 作者 -->
+                    <el-table-column
+                        label="作者"
+                        align="center">
+                        <template slot-scope="scope">
+                            <p style="font-size: 12px; color: #6A6A6A">id: {{scope.row.user_id}} </p>
+                            <p style="font-size: 9px; color: #6A6A6A">发表于 {{scope.row.blackboard_date}}</p>
+                        </template>
+                    </el-table-column>
+                    <!-- 标签 -->
+                    <el-table-column
+                        label="分类"
+                        align="center">
+                        <template slot-scope="scope">
+                            <p style="font-size: 11px; color: #6A6A6A">{{scope.row.sectorName}} </p>
+                        </template>
+                    </el-table-column>
+                    <!-- 回复 -->
+                    <el-table-column
+                        label="回复"
+                        align="center" width="100">
+                        <template slot-scope="scope"><span style="font-size: 10px; color: #6A6A6A">{{scope.row.reply_count}} </span></template>
+                    </el-table-column>
+                    <!-- 点赞数 -->
+                    <el-table-column
+                        label="点赞"
+                        align="center" width="100">
+                        <template slot-scope="scope"><span style="font-size: 10px; color: #6A6A6A">{{scope.row.praise_count}} </span></template>
+                    </el-table-column>
+                    <!-- 点击数 -->
+                    <el-table-column
+                        label="阅读"
+                        align="center" width="100">
+                        <template slot-scope="scope"><span style="font-size: 10px; color: #6A6A6A">{{scope.row.clicking_rate}} </span></template>
+                    </el-table-column>
+                </el-table>
+                <!----- 翻页 ----->
+                <div class="topic-table-footer" align="center">
+                    <el-pagination
+                        small
+                        :page-size="pageSize"
+                        layout="prev, pager, next"
+                        :total="totalCount"
+                        class="page-change"
+                        :current-page="currentPage"
+                        @current-change="currentChange" v-show="blackboards.length > 0">
+                    </el-pagination>
+                </div>
+            </el-card>
         </div>
-
-        <!----- 翻页 ----->
-        <div class="topic-table-footer" align="center">
-            <el-pagination
-                small
-                :page-size="pageSize"
-                layout="prev, pager, next"
-                :total="totalCount"
-                class="page-change"
-                :current-page="currentPage"
-                @current-change="currentChange" v-show="blackboards.length > 0">
-            </el-pagination>
-        </div>
-
     </div>
 </template>
 
 <script>
     import server from '../../../config/index';
-    import axios from 'axios'
 
     export default{
         data() {
@@ -280,7 +277,7 @@
     .topic-table {
         overflow-x: hidden;
         overflow-y: hidden;
-        margin-top: 20px;
+        margin-top: 10px;
     }
 
     .topic-content {
