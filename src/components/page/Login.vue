@@ -14,10 +14,10 @@
                     </el-input>
                 </el-form-item>
                 <div class="login-btn">
-                    <el-button type="primary" @click="submitForm()">登录</el-button>
+                    <el-button type="primary" @click="submitForm()" style='width: 100%'>登录</el-button>
                 </div>
                  <div class="login-btn">
-                    <el-button type="primary" @click="toRegister()">注册</el-button>
+                    <el-button type="primary" @click="toRegister()" style='width: 100%'>注册</el-button>
                 </div>
                 <p class="login-tips">Tips : 用户名和密码随便填。</p>
             </el-form>

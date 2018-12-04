@@ -105,12 +105,15 @@
 </template>
 
 <script>
+    import axios from 'axios';
     import Schart from 'vue-schart';
     import bus from '../common/bus';
+    import server from '../../../config/index';
     export default {
         name: 'dashboard',
         data() {
             return {
+                srcImg:'',
                 name: localStorage.getItem('ms_username'),
                 todoList: [{
                         title: '今天要修复100个bug',
@@ -182,6 +185,20 @@
                     topPadding: 30
                 }
             }
+        },
+        mounted:function(){
+            var that=this;
+            this.$axios({
+                        method:'get',
+                        url:server.url+'/user/getIcon',
+                        data:{},
+                        headers:{'Authorization':'Bearer '+localStorage.getItem('token')},
+                        responseType:'arraybuffer',
+                    }).then(function(response){
+                        var src='data:image/jpeg;base64,'+btoa(new Uint8Array(res).reduce((data,byte)=>data+String.fromCharCode(byte),''));
+                        this.srcImg=src;
+                        console.log(src)
+                })
         },
         components: {
             Schart

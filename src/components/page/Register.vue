@@ -273,18 +273,12 @@
                         url:server.url + '/user/uploadIcon',
                         data:fd,
                         headers:{
-                            Authorization:'Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiLlva3kuo7mmY8iLCJleHAiOjE1NDQ1MTk1NzAsImlhdCI6MTU0MzkxNDc3MH0.hmBDEVI23YvfyZBhyfDXch1NHpGrsQe8hbQvfLdNuTCv6h2IKuWg5gAPMQOYQTrDgC0kn57axSBjOVdwUit1Zg',
+                            'Authorization':'Bearer '+token,
                             'Content-Type':'multipart/form-data'
                         }  
                     }).then(function(res){
                         console.log(res)
                     })
-                    //this.$http.put(server.url + '/user/uploadIcon',{icon:fd}).then(response => {
-                    //    console.log(response)
-                    //}, response => {
-                    //    console.log(response)
-                    //});
-                 // write code to upload the cropped image file (a file is a blob)
                }, 'image/jpeg', 0.8) // 80% compressed jpeg file
              },
             // 控制头像大小和格式
@@ -388,7 +382,7 @@
                             that.uploadCroppedImage(response.data.token)
                             that.$notify({
                                 title: '注册成功',
-                                message: '稍后将转向登录页',
+                                message: '稍后将转向首页',
                                 type: 'success'
                             });
                             that.loading=false;
