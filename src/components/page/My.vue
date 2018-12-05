@@ -79,7 +79,7 @@
             var that=this;
             this.userInfo.loading=true;
             this.$axios({
-                methods:'get',
+                method:'get',
                 url:server.url+'/user/detail/',
                 headers:{Authorization:'Bearer '+localStorage.getItem('token')},
             }).then(function(response){
@@ -100,7 +100,7 @@
                 var that=this;
                 this.userInfo.loading=true;
                 this.$axios({
-                    methods:'get',
+                    method:'get',
                     url:server.url+'/user/detail/',
                     headers:{Authorization:'Bearer '+localStorage.getItem('token')},
                 }).then(function(response){

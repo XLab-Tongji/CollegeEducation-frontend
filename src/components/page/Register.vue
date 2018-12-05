@@ -302,7 +302,6 @@
             },
             register() {
                 this.loading=true;
-                console.log(this.ruleForm.gender)
                 // To Be Done:判断表单提交前的所有字段合法性
 
                 if(this.ruleForm.birthday==''||this.ruleForm.startYear==''||this.ruleForm.birthday==null||this.ruleForm.startYear==null){

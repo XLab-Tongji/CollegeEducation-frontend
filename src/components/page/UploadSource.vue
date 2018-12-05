@@ -16,7 +16,7 @@
                                 <el-upload
                                     :headers="uploadFunc.uploadHeaders"
                                     drag
-                                    :action='uploadURL'
+                                    action='http://localhost:8080'
                                     style='width: 360px'
                                     :beforeUpload='beforeUpload'
                                     :on-success="uploadSuccess"
@@ -77,7 +77,7 @@
                                     </el-form-item>
                                     <el-checkbox v-model="form.agreement" style='margin-top: 8pt;margin-bottom: 18pt'>我已阅读并同意《一份根本不会看的协议》</el-checkbox>
                                     <el-row>
-                                        <el-button type="primary" icon="el-icon-lx-roundcheck" @click="onSubmit" v-loading.fullscreen.lock="fullscreenLoading" >提交</el-button>
+                                        <el-button type="primary" icon="el-icon-lx-roundcheck" @click="onSubmit" :disabled='!buttonLogic.submitBtn'  v-loading.fullscreen.lock="fullscreenLoading" >提交</el-button>
                                     </el-row>
                                 </el-form>
                             </el-col>
@@ -102,6 +102,7 @@
 <script>
     import VueCropper  from 'vue-cropperjs';
     import server from '../../../config/index';
+    import axios from 'axios';
     export default {
         name: 'upload',
         data: function(){
@@ -119,7 +120,7 @@
                 },
                 formRules:{
                     name:[{ required: true, message: ' ', trigger: 'blur' },
-                    { min: 3, max: 5, message: '长度在 3 到 5 个字符', trigger: 'blur' }],
+                    { min: 3, message: '长度在3个字符以上', trigger: 'blur' }],
                     type:[{ required: true, message: '请选择资源类型', trigger: 'blur' }],
                     category:[{ required: true, message: '请选择所属分类', trigger: 'blur' }],
                     point:[{ required: true, message: '请选择资源分数', trigger: 'blur' }],
@@ -165,21 +166,44 @@
         methods:{
             // 提交按钮的函数
             onSubmit(){
+            	var that=this;
                 this.fullscreenLoading = true;
-                this.$http.post(server.url + '/resourceCategories',{
-                    "resourceID": this.form.fileID,
-                    "categoryID": this.form.type,
-                    "resourceMajorID": this.form.category,
-                    "resourceName": this.form.name,
-                    "description": this.form.description,
-                    "point":this.form.point,
-                    "tag":this.form.tag
+                this.$axios({
+                	method:'put',
+                	url:server.url+'/uploadResourceMetaData',
+                	headers:{
+                		'Authorization':'Bearer '+localStorage.getItem('token'),
+                		'Content-Type':'application/json'
+                	},
+                	data:{
+	                    "resourceID": this.form.fileID,
+	                    "categoryID": this.form.type,
+	                    "resourceMajorID": this.form.category,
+	                    "resourceName": this.form.name,
+	                    "description": this.form.description,
+	                    "points":this.form.point,
+	                    "tags":this.form.tag.join(' ')
+                	}
                 }).then(function(response){
-                    this.fullscreenLoading = false;
-                },function(response){  
-                    console.error("初始化获取资源类型列表错误")
-                    this.fullscreenLoading = false;
-                });
+                	console.log(response);
+                    that.$notify({
+                        title: '发布成功',
+                        message: '稍后将转向首页',
+                        type: 'success'
+                    });
+                    that.loading=false;
+                    setTimeout(function(){
+                        that.$router.push('/');
+                    },2000)
+                	that.fullscreenLoading = false;
+                }).catch((res)=>{
+                	console.error(res);
+                	that.$notify.error({
+                        title: '发布失败',
+                        message: '请稍后重试'
+                    });
+                	that.fullscreenLoading = false;
+                })
             },
             // 获取资源类型列表
             getTypeList(){
@@ -206,6 +230,7 @@
             // 上传文件前判断大小（在这里可以补充上传文件的其他限制）
             beforeUpload(file){
                 var limitRule1=(file.size/1024/1024)<128;
+                console.error(limitRule1)
                 if(!limitRule1){
                     this.$notify.error({
                         title: '错误',
@@ -213,6 +238,22 @@
                         message: '上传的文件不可超过128MB'
                     });
                     console.error("上传文件不能超过128MB");
+                }else{
+				    let fd = new FormData();
+				    fd.append('resource',file);//传文件
+				    this.$axios({
+				    	method:'post',
+				    	url:server.url+'/uploadResource',
+				    	headers:{
+				    		'Authorization':'Bearer '+localStorage.getItem('token'),
+				    		'Content-Type':''
+				    	},
+				    	data:fd
+				    }).then(function(response){
+				    	console.log(response)
+				    }).catch((res)=>{
+				    	console.error(res)
+				    })
                 }
                 return limitRule1;
             },

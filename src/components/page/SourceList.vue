@@ -38,7 +38,7 @@
             </el-form>
         </el-card>
         <el-card>
-            <el-tabs v-model="tag" @tab-click="handleClick">
+            <el-tabs v-model="tab" @tab-click="swichTab">
                 <el-tab-pane label="最新上传" name="latestUpdate">
                     <el-card class='listCard' shadow='hover' v-for='(item, idx) in sourceList' :key="idx" @click.native='clickCard(item)'>
                         <el-row>
@@ -51,15 +51,26 @@
                                 <div class="subtitle">{{item.uploadTime}}</div>
                             </el-col>
                         </el-row>
-                    </el-card>
-                    
+                    </el-card>                
                 </el-tab-pane>
                 <el-tab-pane label="最多下载" name="mostDownload">
-
+                    <el-card class='listCard' shadow='hover' v-for='(item, idx) in sourceList' :key="idx" @click.native='clickCard(item)'>
+                        <el-row>
+                            <el-col :span='2' style="display:inline-block;max-width: 60px">
+                                <i class="el-icon-upload" style="font-size: 40px;text-align: center;color:#449CFA;padding-top: 4pt"></i>
+                            </el-col>
+                            <el-col :span='22' style="display: inline-block;vertical-align: top;">
+                                <div class="title">{{item.resourceName}}</div>       
+                                <div class="context">{{item.description}}</div>
+                                <div class="subtitle">{{item.uploadTime}}</div>
+                            </el-col>
+                        </el-row>
+                    </el-card>
                 </el-tab-pane>
                 <el-pagination
                   layout="prev, pager, next"
-                  :total="50"
+                  :total="page.pageNum"
+                  :page-size="page.pageSize"
                   :current-page='model.currentPage'
                   @current-change='currentPageChange'>
                 </el-pagination>
@@ -78,34 +89,84 @@
             return {
                 model:{
                     radioTypeList:'',
-                    radioTypeValue:0,
-                    selectCategoryList:0,
+                    radioTypeValue:-1,
+                    selectCategoryList:-1,
                     selectKeyword:[],
                     currentPage:1
                 },
                 typeList:[],
                 categoryList:[],
-                tag:'latestUpdate',
-                sourceList:[{resourceName:'QuantumdataDP1.4产品技术资料',description:'Teledyne LeCroy quantumdata 980 48G 用于HDMI 测试的协议分析 仪/发生器模块配备了HDMI Tx 和Rx 端口，支持HDMI 2.1 固定速率链 路和FEC 捕获分析和解码，最高可达48Gbps（12Gbps /通道）。 HDMI Rx 分析端口可提供固定速率链路的打包-超级模块，字符模块和 FRL 数据包以及底层TMDS 视频，协议，控制和元数据的可视性。',date:'2018年10月21日'},
-                    {resourceName:'Office 2007 Access Database Engine',description:'如果你的c#程序采用oledb方式连接access数据库,需要安装此 engine',date:'2018年10月20日'},
-                    {resourceName:'随机过程与应用',description:'机过程与应用pdf课件，本书内容包括：概率论基础，随机过程基础，泊松过程及其推广，马尔可夫过程，二阶矩过程，平稳过程，以及高阶统计量与非平稳过程',date:'2018年10月21日'}
+                tab:'latestUpdate',
+                sourceList:[{resourceName:'QuantumdataDP1.4产品技术资料',description:'Teledyne LeCroy quantumdata 980 48G 用于HDMI 测试的协议分析 仪/发生器模块配备了HDMI Tx 和Rx 端口，支持HDMI 2.1 固定速率链 路和FEC 捕获分析和解码，最高可达48Gbps（12Gbps /通道）。 HDMI Rx 分析端口可提供固定速率链路的打包-超级模块，字符模块和 FRL 数据包以及底层TMDS 视频，协议，控制和元数据的可视性。',date:'2018年10月21日',uploadTime: "2018-11-14 06:46:46"},
+                    {resourceName:'Office 2007 Access Database Engine',description:'如果你的c#程序采用oledb方式连接access数据库,需要安装此 engine',date:'2018年10月20日',uploadTime: "2018-11-14 06:46:46"},
+                    {resourceName:'随机过程与应用',description:'机过程与应用pdf课件，本书内容包括：概率论基础，随机过程基础，泊松过程及其推广，马尔可夫过程，二阶矩过程，平稳过程，以及高阶统计量与非平稳过程',date:'2018年10月21日',uploadTime: "2018-11-14 06:46:46"}
                     ],
+                page:{
+                    pageSize:0,
+                    pageNum:0
+                }
             }
         },
         watch:{
-            'form.agreement':function(val){
-                this.buttonLogic.submitBtn=val;
-            }
+
         },
         mounted:function(){
             this.initialization()
         },
         methods:{
+            /**
+             * 初始页面相关methods
+             **/
+
+            // 页面初始化
+            initialization(){
+                this.getCategoryList();
+                this.getTypeList();    
+
+                //setTimeout(3000,this.getResourceList(this.iniCategory,this.iniType,1,''))
+                this.getResourceList(this.model.selectCategoryList,this.model.radioTypeValue,this.model.currentPage,'',this.tab)
+
+                //this.getResourceList(this.categoryList[0].value,this.typeList[0].value,1,'');
+            },
+
+            // 获取资源类型列表
+            getTypeList(){
+                this.$http.get(server.url + '/resourceCategories',{}).then(function(response){
+                    // 把获取回来的东西push进去
+                    for(let i=0;i<response.data.data.length;i++){
+                        this.typeList.push({value:response.data.data[i].id,label:response.data.data[i].resourceCategoryName});
+                    }
+                    //this.model.radioTypeValue=this.typeList[0].value
+                },function(response){  
+                    console.error("初始化获取资源类型列表错误")
+                });
+            },
+            // 获取所属分类列表
+            getCategoryList(){
+                this.$http.get(server.url + '/resourceMajors',{}).then(function(response){
+                    // 把获取回来的东西push进去
+                    this.categoryList.push({value:-1,label:'全部分类'})
+                    for(let i=0;i<response.data.data.length;i++){
+                        this.categoryList.push({value:response.data.data[i].id,label:response.data.data[i].resourceMajorName});
+                    }
+                    //this.model.selectCategoryList=this.categoryList[0].value;
+                    console.log(response.data)
+                },function(response){  
+                    console.error("初始化获取所属分类列表错误")
+                });
+            },
+
+
+            /**
+             * 监听事件相关methods
+             **/
+
             // 监听换页事件
             currentPageChange(res){
+                console.log(res,'page')
                 this.model.currentPage=res;
                 var kw=this.model.selectKeyword.join(' ');
-                this.getResourceList(this.model.selectCategoryList,this.model.radioTypeValue,res-1,kw)
+                this.getResourceList(this.model.selectCategoryList,this.model.radioTypeValue,res-1,kw,this.tab)
             },
             // 监听单选框事件
             radioTypeChange(res){
@@ -116,18 +177,23 @@
                     }
                 }
                 var kw=this.model.selectKeyword.join(' ');
-                this.getResourceList(this.model.selectCategoryList,this.model.radioTypeValue,this.model.currentPage-1,kw)
+                this.getResourceList(this.model.selectCategoryList,this.model.radioTypeValue,this.model.currentPage-1,kw,this.tab)
                 
             },
             // 监听下拉菜单事件
             selectCategoryChanged(res){
                 var kw=this.model.selectKeyword.join(' ');
-                this.getResourceList(this.model.selectCategoryList,this.model.radioTypeValue,this.model.currentPage-1,kw)
+                this.getResourceList(this.model.selectCategoryList,this.model.radioTypeValue,this.model.currentPage-1,kw,this.tab)
             },
             // 监听关键字变化事件
             selectKeywordChange(res){
                 var kw=this.model.selectKeyword.join(' ');
-                this.getResourceList(this.model.selectCategoryList,this.model.radioTypeValue,this.model.currentPage-1,kw)
+                this.getResourceList(this.model.selectCategoryList,this.model.radioTypeValue,this.model.currentPage-1,kw,this.tab)
+            },
+            // 监听切换tab事件
+            swichTab(tab,event){
+                var kw=this.model.selectKeyword.join(' ');
+                this.getResourceList(this.model.selectCategoryList,this.model.radioTypeValue,this.model.currentPage-1,kw,this.tab)
             },
             // 监听点击卡片事件，处理页面跳转
             clickCard(res){
@@ -145,67 +211,30 @@
                         uploadTime:res.uploadTime
                     }
                 })
-            },
-            temp(){
-                var temp=this.categoryList;
-                console.log(temp)
-                this.categoryList.unshift();
-                console.log(this.categoryList[0])
-            },
-            // 页面初始化
-            initialization(){
-                this.getCategoryList();
-                this.getTypeList();
-                
-                //setTimeout(3000,this.temp())
-                //setTimeout(3000,this.getResourceList(this.iniCategory,this.iniType,1,''))
-                this.getResourceList(this.model.selectCategoryList,this.model.radioTypeValue,this.model.currentPage,'训练')
-                //this.getResourceList(this.categoryList[0].value,this.typeList[0].value,1,'');
-            },
-            // 获取资源类型列表
-            getTypeList(){
-                this.$http.get(server.url + '/resourceCategories',{}).then(function(response){
-                    // 把获取回来的东西push进去
-                    for(let i=0;i<response.data.data.length;i++){
-                        this.typeList.push({value:response.data.data[i].id,label:response.data.data[i].resourceCategoryName});
-                    }
-                    this.model.radioTypeValue=this.typeList[0].value
-                },function(response){  
-                    console.error("初始化获取资源类型列表错误")
-                });
-            },
-            // 获取所属分类列表
-            getCategoryList(){
-                this.$http.get(server.url + '/resourceMajors',{}).then(function(response){
-                    // 把获取回来的东西push进去
-                    for(let i=0;i<response.data.data.length;i++){
-                        this.categoryList.push({value:response.data.data[i].id,label:response.data.data[i].resourceMajorName});
-                    }
-                    this.model.selectCategoryList=this.categoryList[0].value;
-                    console.log(response.data)
-                },function(response){  
-                    console.error("初始化获取所属分类列表错误")
-                });
-            },
-            handleClick(tab,event){
-                console.log(tab,event)
-            },
+            },          
+
+
             // 获取资源列表
-            getResourceList(resourceMajorID,categoryID,pageID,keyword){
-                this.$http.get(server.url+'/searchResource/'+resourceMajorID+'/'+categoryID+'/'+pageID+'?keyword='+keyword,{}).then(function(response){
-                    //清空数组，在调试后移除
+            getResourceList(resourceMajorID,categoryID,pageID,keyword,tab){
+                console.log(resourceMajorID,categoryID,pageID,keyword,tab)
+                if(tab=='latestUpdate'){
+                    var requestURL=server.url+'/searchResource/time/'+resourceMajorID+'/'+categoryID+'/'+pageID+'?keyword='+keyword;
+                }else{
+                    var requestURL=server.url+'/searchResource/score/'+resourceMajorID+'/'+categoryID+'/'+pageID+'?keyword='+keyword;
+                }
+                this.$http.get(requestURL,{}).then(function(response){
                     this.sourceList.splice(0,this.sourceList.length)
-                    console.error(response.data.data)
-                    for(let i=0;i<response.data.data.length;i++){
-                        this.sourceList.push(response.data.data[i]);
+                    console.error(response.data.data.content)
+                    for(let i=0;i<response.data.data.content.length;i++){
+                        this.sourceList.push(response.data.data.content[i]);
                     }
+                    this.page.pageNum=response.data.data.pageable.pageNumber;
+                    this.page.pageSize=response.data.data.pageable.pageSize;
                 })
             }
-
-
         },
         created(){
-            this.cropImg = this.defaultSrc;
+
         }
     }
 </script>

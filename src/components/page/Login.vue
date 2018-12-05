@@ -14,12 +14,11 @@
                     </el-input>
                 </el-form-item>
                 <div class="login-btn">
-                    <el-button type="primary" @click="submitForm()" style='width: 100%'>登录</el-button>
+                    <el-button type="primary" @click="submitForm()" style='width: 100%' v-loading.fullscreen.lock="fullscreenLoading">登录</el-button>
                 </div>
                  <div class="login-btn">
                     <el-button type="primary" @click="toRegister()" style='width: 100%'>注册</el-button>
                 </div>
-                <p class="login-tips">Tips : 用户名和密码随便填。</p>
             </el-form>
         </div>
     </div>
@@ -31,8 +30,8 @@
         data: function(){
             return {
                 ruleForm: {
-                    username: 'student',
-                    password: 'password'
+                    username: '',
+                    password: ''
                 },
                 rules: {
                     username: [
@@ -41,25 +40,42 @@
                     password: [
                         { required: true, message: '请输入密码', trigger: 'blur' }
                     ]
-                }
+                },
+                fullscreenLoading:false
             }
         },
         methods: {
             toRegister(){
                 console.log("toRegister");
-                //localStorage.setItem('ms_username',this.ruleForm.username);
                 this.$router.push('/register');
             },
             submitForm() {
-                //localStorage.setItem('token','eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJxaWJhdHUiLCJleHAiOjE1NDE0OTQyODIsImlhdCI6MTU0MDg4OTQ4Mn0.pOc2dtnVS5io2ZugU-KYdxHxIt0-C1ic-9f-K34fiTsrQrKbygRO0vZ_YFfVsijFf44LrhlwoJNfxN2EYGPpxg')
+            	var that=this;
+            	this.fullscreenLoading=true;
                 this.$http.post(server.url + '/auth', {username:this.ruleForm.username,password:this.ruleForm.password}).then(response => {
-                    localStorage.setItem('token',response.data.token);
-                    console.log(response.data.token)
-                    localStorage.setItem('ms_username',this.ruleForm.username);
-                    this.$router.push('/');
+                		console.log(response.data.token)
+	                    localStorage.setItem('token',response.data.token);
+	                    localStorage.setItem('ms_username',this.ruleForm.username);
+	                    //this.$http.headers.common['Authorization']='Bearer ' + response.data.token;
+	                    that.fullscreenLoading=false;
+	                    that.$notify({
+	                        title: '登录成功',
+	                        message: '稍后将转向首页',
+	                        type: 'success',
+	                        duration:2000
+	                    });
+	                    setTimeout(function(){
+	                        that.$router.push('/');
+	                    },2000)
                    }, response => {
-                     console.log("error");
-                     console.log(response);
+                    console.log("error");
+                    console.log(response);
+                    that.fullscreenLoading=false;
+                    that.$notify.error({
+                        title: '登录失败',
+                        message: '用户名密码不匹配或网络错误',
+                        duration:2000
+                    });
                 });
             },
             getToken(){

@@ -34,6 +34,7 @@
 <script>
     import VueCropper  from 'vue-cropperjs';
     import server from '../../../config/index';
+    import axios from 'axios';
     export default {
         name: 'baseform',
         data: function(){
@@ -69,16 +70,22 @@
                 })
             },
             getDownloadList(val){
+                var that=this;
                 this.loading=true;
                 this.page.current=val;
-                this.$http.get(server.url+'/resource/myDownload/'+val,{}).then(function(response){
-                    this.page.total=response.data.data.total;
-                    this.page.size=response.data.data.pageSize;
-                    this.sourceList.splice(0,this.sourceList.length)
+                this.$axios({
+                    method:'get',
+                    url:server.url+'/resource/myDownload/'+val,
+                    headers:{Authorization:'Bearer '+localStorage.getItem('token')},
+                    data:{}
+                }).then(function(response){
+                    that.page.total=response.data.data.total;
+                    that.page.size=response.data.data.pageSize;
+                    that.sourceList.splice(0,that.sourceList.length)
                     for(let i=0;i<response.data.data.list.length;i++){
-                        this.sourceList.push(response.data.data.list[i]);
+                        that.sourceList.push(response.data.data.list[i]);
                     }
-                    this.loading=false;
+                    that.loading=false;
                 })
             }
         }
