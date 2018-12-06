@@ -16,7 +16,7 @@
                                 <el-upload
                                     :headers="uploadFunc.uploadHeaders"
                                     drag
-                                    action='http://localhost:8080'
+                                    action='http://www.baidu.com'
                                     style='width: 360px'
                                     :beforeUpload='beforeUpload'
                                     :on-success="uploadSuccess"

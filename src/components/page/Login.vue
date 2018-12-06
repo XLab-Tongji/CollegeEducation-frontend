@@ -1,7 +1,7 @@
 <template>
     <div class="login-wrap">
         <div class="ms-login">
-            <div class="ms-title">后台管理系统</div>
+            <div class="ms-title">学习平台</div>
             <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="0px" class="ms-content">
                 <el-form-item prop="username">
                     <el-input v-model="ruleForm.username" placeholder="username">
@@ -13,10 +13,10 @@
                         <el-button slot="prepend" icon="el-icon-lx-lock"></el-button>
                     </el-input>
                 </el-form-item>
-                <div class="login-btn">
+                <div class="login-btn" style="width: 100%;height: 36px;margin-bottom: 10px;text-align: center;">
                     <el-button type="primary" @click="submitForm()" style='width: 100%' v-loading.fullscreen.lock="fullscreenLoading">登录</el-button>
                 </div>
-                 <div class="login-btn">
+                 <div class="login-btn" style="width: 100%;height: 36px;margin-bottom: 10px;text-align: center;">
                     <el-button type="primary" @click="toRegister()" style='width: 100%'>注册</el-button>
                 </div>
             </el-form>
@@ -114,18 +114,5 @@
     }
     .ms-content{
         padding: 30px 30px;
-    }
-    .login-btn{
-        text-align: center;
-    }
-    .login-btn button{
-        width:100%;
-        height:36px;
-        margin-bottom: 10px;
-    }
-    .login-tips{
-        font-size:12px;
-        line-height:30px;
-        color:#fff;
     }
 </style>
