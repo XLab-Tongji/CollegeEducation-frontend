@@ -7,22 +7,22 @@
         </div>
         <el-card style='margin-bottom: 8pt'>
             <el-row id='info'>
-                <el-col :span='2' style='display: inline-block; max-width: 84pt'>
+                <el-col :span='2' style='display: inline-block; max-width: 84pt;min-width: 72pt;margin-bottom: 4pt'>
                     <i class="el-icon-upload" style="font-size: 60pt;text-align: center;color:#449CFA;padding-top: 4pt;padding-left: 8pt;padding-right: 16pt"></i>
                 </el-col>
                 <el-col :span='22' style="display: inline-block;vertical-align: top;">
                     <div style="margin-bottom: 4pt">
                         <div class="sourceTitle" style="display: inline-block;">{{this.$route.params.resourceName}}</div>
                         <div style="display: inline-block;vertical-align: top;padding-top: 2pt;margin-left: 4pt">
-                            <el-tag>标签1</el-tag>
-                            <el-tag>标签2</el-tag>
+                            <el-tag>资源平均分：{{resourceDetail.avgScore}}</el-tag>
+                            <el-tag type="success">下载需要{{this.$route.params.points}}积分</el-tag>
                         </div>
                     </div>
                     <div class="context">{{this.$route.params.description}}</div>
                     <div style="margin-top: 12pt">
                         <el-button size='mini' icon='el-icon-lx-group'>分享</el-button>
                         <el-button-group style="display: inline-block;" id='thumb'>
-                          <el-button size='mini' :type='thumb.up' @click='thumbUp'>赞</el-button>
+                          <el-button size='mini' :type='thumb.up' @click='thumbUp'>赞({{resourceDetail.suggestInfoNum}})</el-button>
                           <el-button size='mini' :type='thumb.down' @click='thumbDown'>踩</el-button>
                         </el-button-group>
                         <el-button size='mini' @click='downloadBtn'>下载资源</el-button>
@@ -130,14 +130,23 @@
         name: 'download',
         data: function(){
             return {
+            	resourceDetail:{
+            		avgScore:'暂无评分',
+            		uploaderName:'',
+            		downloadTimes:'没人下载',
+            		favouriteNum:'没人收藏',
+            		suggestInfoNum:0	
+            	},
+            	
                 model:{
                     radioTypeList:'',
                     selectCategoryList:'',
                     selectKeyword:''
                 },
+                uploaderName:'',
                 typeList:[],
                 categoryList:[],
-                tag:'latestUpdate',
+                tab:'latestUpdate',
                 sourceList:[],
                 commentList:[ ],
                 commentPublish:{
@@ -181,40 +190,71 @@
         methods:{
             // 监听点赞按钮
             thumbUp(){
+                var that=this;
                 let loadingInstance = Loading.service({
                     target:'#thumb',
                     fullscreen:false
                 });
                 if(this.thumb.up==''){
-                    this.$http.post(server.url+'/resource/suggest/make/'+this.$route.params.resourceID,{}).then(function(response){
-                        this.thumb.up='success'
-                        this.thumb.down=''
+                    this.$axios({
+                        method:'post',
+                        url:server.url+'/resource/suggest/make/'+that.$route.params.resourceID,
+                        headers:{
+                            'Authorization':'Bearer '+localStorage.getItem('token')
+                        }
+                    }).then(function(response){
+                        that.thumb.up='success'
+                        that.thumb.down=''
+                        that.resourceDetail.suggestInfoNum++;
                         loadingInstance.close()
                     })
                 }else if(this.thumb.up=='success'){
-                    this.$http.delete(server.url+'/resource/suggest/undo/'+this.$route.params.resourceID,{}).then(function(response){
-                        this.thumb.up=''
-                        this.thumb.down=''
+                    this.$axios({
+                        method:'delete',
+                        url:server.url+'/resource/suggest/undo/'+that.$route.params.resourceID,
+                        headers:{
+                            'Authorization':'Bearer '+localStorage.getItem('token')
+                        }
+                    }).then(function(response){
+                        that.thumb.up=''
+                        that.thumb.down=''
+                        that.resourceDetail.suggestInfoNum--;
                         loadingInstance.close()
                     })
                 }
             },
             // 监听点踩按钮
             thumbDown(){
+                var that=this;
                 let loadingInstance = Loading.service({
                     target:'#thumb',
                     fullscreen:false,
                 });
                 if(this.thumb.down==''){
-                    this.$http.post(server.url+'/resource/suggest/dislike/'+this.$route.params.resourceID,{}).then(function(response){
-                        this.thumb.down='info'
-                        this.thumb.up=''
+                    this.$axios({
+                        method:'post',
+                        url:server.url+'/resource/suggest/dislike/'+that.$route.params.resourceID,
+                        headers:{
+                            'Authorization':'Bearer '+localStorage.getItem('token')
+                        }
+                    }).then(function(response){
+                    	if(that.thumb.up=='success'){
+                    		that.resourceDetail.suggestInfoNum--;
+                    	}
+                        that.thumb.down='info'
+                        that.thumb.up=''
                         loadingInstance.close()
                     })
                 }else if(this.thumb.down=='info'){
-                    this.$http.delete(server.url+'/resource/suggest/undo/'+this.$route.params.resourceID,{}).then(function(response){
-                        this.thumb.up=''
-                        this.thumb.down=''
+                    this.$axios({
+                        method:'delete',
+                        url:server.url+'/resource/suggest/undo/'+that.$route.params.resourceID,
+                        headers:{
+                            'Authorization':'Bearer '+localStorage.getItem('token')
+                        }
+                    }).then(function(response){
+                        that.thumb.up=''
+                        that.thumb.down=''
                         loadingInstance.close()
                     })
                 }
@@ -223,6 +263,7 @@
             // TODO:相关资源推荐无法跳转
             clickCard(res){
                 this.$route.params.resourceID=res.resourceID;
+                this.$route.params.id=res.id;
                 this.$route.params.uploaderID=res.uploaderID;
                 this.$route.params.categoryID=res.categoryID;
                 this.$route.params.resourceMajorID=res.resourceMajorID;
@@ -230,15 +271,23 @@
                 this.$route.params.description=res.description;
                 this.$route.params.downloadTimes=res.downloadTimes;
                 this.$route.params.uploadTime=res.uploadTime;
+                this.$route.params.points=res.points; 
             },
         	// 获取评论
         	requestComment(pageID){
-                this.$http.get(server.url+'/resource/comments/'+this.$route.params.resourceID+'/'+pageID.toString(),{}).then(function(response){
-                	this.commentList.splice(0,this.commentList.length);
-                	this.commentPages.total=response.data.data.total;
-                    this.commentPages.size=response.data.data.pageSize;
+                var that=this;
+                this.$axios({
+                    method:'get',
+                    url:server.url+'/resource/comments/'+that.$route.params.resourceID+'/'+pageID.toString(),
+                    headers:{
+                        'Authorization':'Bearer '+localStorage.getItem('token')
+                    }
+                }).then(function(response){
+                	that.commentList.splice(0,that.commentList.length);
+                	that.commentPages.total=response.data.data.total;
+                    that.commentPages.size=response.data.data.pageSize;
                 	for(let i=0;i<response.data.data.list.length;i++){
-                		this.commentList.push(response.data.data.list[i])
+                		that.commentList.push(response.data.data.list[i])
                 	}
                 })
         	},
@@ -248,10 +297,17 @@
             },
             // 获取相关资源
             requestRelatedResource(pageID){
-                this.$http.get(server.url+'/resource/recommend/'+this.$route.params.resourceMajorID+'/'+this.$route.params.categoryID+'/'+pageID.toString(),{}).then(function(response){
-                    this.sourceList.splice(0,this.sourceList.length);
+                var that=this;
+                this.$axios({
+                    method:'get',
+                    url:server.url+'/resource/recommend/'+that.$route.params.resourceMajorID+'/'+that.$route.params.categoryID+'/'+pageID.toString(),
+                    headers:{
+                        'Authorization':'Bearer '+localStorage.getItem('token')
+                    }
+                }).then(function(response){
+                    that.sourceList.splice(0,that.sourceList.length);
                     for(let i=0;i<response.data.data.list.length;i++){
-                        this.sourceList.push(response.data.data.list[i])
+                        that.sourceList.push(response.data.data.list[i])
                     }
                 })
             },
@@ -267,16 +323,26 @@
             onClickDialogPublish(){
                 this.showLoading=true;
                 this.commentPublish.dialogFormVisible=false;
-                this.$http.post(server.url+'/resource/comment/make',{
-                      "resourceID": this.$route.params.resourceID,
-                      "comment": this.commentPublish.content,
-                      "score": this.commentPublish.rate,
-                      "commentTitle": this.commentPublish.title
+                var that=this;
+                this.$axios({
+                    method:'post',
+                    url:server.url+'/resource/comment/make',
+                    headers:{
+                        'Authorization':'Bearer '+localStorage.getItem('token'),
+                        'Content-Type':'application/json'
+                    },
+                    data:{
+                      "resourceID": that.$route.params.resourceID,
+                      "comment": that.commentPublish.content,
+                      "score": that.commentPublish.rate,
+                      "commentTitle": that.commentPublish.title
+                    }
                 }).then(function(response){
-                    this.showLoading=false;
-                    this.requestComment(1);
+                	that.getResourceDetail()
+                    that.showLoading=false;
+                    that.requestComment(1);
                     // 显示第一页
-                    this.$message({
+                    that.$message({
                       message: '评论发布成功',
                       type: 'success'
                     });
@@ -296,69 +362,121 @@
                 
             },
             init(){
+                var that=this;
                 let loadingInstance = Loading.service({
                     target:'#info',
                     fullscreen:false
                 });
-                this.$http.get(server.url+'/resource/user/history/'+this.$route.params.resourceID,{}).then(function(response){
+                this.$axios({
+                    method:'get',
+                    url:server.url+'/resource/user/history/'+that.$route.params.resourceID,
+                    headers:{
+                        'Authorization':'Bearer '+localStorage.getItem('token')
+                    }
+                }).then(function(response){
                         if(response.data.data.favourite==0){
-                            this.collectionBind='primary';
-                            this.collectionButtonInfo='收藏资源';
+                            that.collectionBind='primary';
+                            that.collectionButtonInfo='收藏资源';
                         }else if(response.data.data.favourite==1){
-                            this.collectionBind='danger';
-                            this.collectionButtonInfo='取消收藏';
+                            that.collectionBind='danger';
+                            that.collectionButtonInfo='取消收藏';
                         }
                         if(response.data.data.suggested==-1){
-                            this.thumb.up='';
-                            this.thumb.down='';
+                            that.thumb.up='';
+                            that.thumb.down='';
                         }else if(response.data.data.suggested==0){
-                            this.thumb.up='';
-                            this.thumb.down='info';
+                            that.thumb.up='';
+                            that.thumb.down='info';
                         }else if(response.data.data.suggested==1){
-                            this.thumb.up='success';
-                            this.thumb.down='';
+                            that.thumb.up='success';
+                            that.thumb.down='';
                         }
                         loadingInstance.close();
                     })
-
-
-
+                this.getResourceDetail();
+            },
+            // 获取资源评分等信息
+            getResourceDetail(){
+            	var that=this;
+            	this.$axios({
+                	method:'get',
+                	url:server.url+'/resource/detail/'+that.$route.params.resourceID,
+                	headers:{'Authorization':'Bearer '+localStorage.getItem('token')},
+                }).then(function(response){
+                	console.log(response)
+                	if('resourceAvgScore' in response.data.data.commentInfo){
+                		that.resourceDetail.avgScore=response.data.data.commentInfo.resourceAvgScore.toFixed(2).toString();
+                	}else{
+                		that.resourceDetail.avgScore='暂无评分'
+                	}
+                	that.resourceDetail.uploaderName=response.data.data.uploaderInfo.uploaderName;
+                	if('downloadTimes' in response.data.data){
+                		that.resourceDetail.downloadTimes=response.data.data.downloadTimes;
+                	}else{
+                		that.resourceDetail.downloadTimes='没人下载'
+                	}
+                	if('favouriteNum' in response.data.data){
+                		that.resourceDetail.favouriteNum=response.data.data.favouriteNum;
+                	}else{
+                		that.resourceDetail.favouriteNum='没人收藏'
+                	}
+                	if('suggestedNum' in response.data.data.suggestInfo){
+                		that.resourceDetail.suggestInfoNum=response.data.data.suggestInfo.suggestedNum;
+                	}else{
+                		that.resourceDetail.suggestInfoNum=0
+                	}
+                	
+                	
+                })
             },
             // 监听收藏按钮
             collection(){
+                var that=this;
                 let loadingInstance = Loading.service({
                     target:'#collection',
                     fullscreen:false,
                 });
                 if(this.collectionBind=='danger'){
                     // 已经收藏
-                    this.$http.delete(server.url+'/resource/favourite/dislike/'+this.$route.params.resourceID,{}).then(function(response){
+                    this.$axios({
+                        method:'delete',
+                        url:server.url+'/resource/favourite/dislike/'+that.$route.params.resourceID,
+                        headers:{
+                            'Authorization':'Bearer '+localStorage.getItem('token')
+                        }
+                    }).then(function(response){
                         if(response.status==200){
                             // 做出取消收藏成功的动作
-                            this.collectionBind='primary';
-                            this.collectionButtonInfo='收藏资源';
-                            this.$message({
+                            that.collectionBind='primary';
+                            that.collectionButtonInfo='收藏资源';
+                            that.$message({
                               message: '取消收藏成功',
                               type: 'success'
                             });
                         }else{
-                            this.$message.error('咦？取消收藏失败了，请再试一次');
+                            that.$message.error('咦？取消收藏失败了，请再试一次');
                         }
                         loadingInstance.close();
                     })
                 }else{
                     // 没有收藏
-                    this.$http.post(server.url+'/resource/favourite/like/'+this.$route.params.resourceID,{}).then(function(response){
+                    this.$axios({
+                        method:'post',
+                        url:server.url+'/resource/favourite/like/'+that.$route.params.resourceID,
+                        headers:{
+                            'Authorization':'Bearer '+localStorage.getItem('token')
+                        }
+                    }).then(function(response){
                         if(response.status==200){
                             // 做出收藏成功的动作
-                            this.collectionBind='danger';
-                            this.collectionButtonInfo='取消收藏';
-                            this.$message({
+                            that.collectionBind='danger';
+                            that.collectionButtonInfo='取消收藏';
+                            that.$message({
                               message: '您已成功收藏资源',
                               type: 'success'
                             });
                         }else{
-                            this.$message.error('咦？收藏失败了，请再试一次');
+                            that.$message.error('咦？收藏失败了，请再试一次');
                         }
                         loadingInstance.close();
                     })
@@ -405,6 +523,11 @@
         margin-top: 4pt;
         font-size: 8pt;
         color:darkgrey;
+    }
+    .uploaderInfo{
+    	margin-bottom: 4pt;
+        font-size: 8pt;
+        color:#449CFA;
     }
     .context{
         font-size:10pt;

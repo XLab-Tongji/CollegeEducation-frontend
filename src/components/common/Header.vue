@@ -4,7 +4,7 @@
         <div class="collapse-btn" @click="collapseChage">
             <i class="el-icon-menu"></i>
         </div>
-        <div class="logo">后台管理系统</div>
+        <div class="logo">教育平台 XLab</div>
         <div class="header-right">
             <div class="header-user-con">
                 <!-- 全屏显示 -->
@@ -25,20 +25,14 @@
                 </div>
                 -->
                 <!-- 用户头像 -->
-                <div class="user-avator"><img src="static/img/img.jpg"></div>
+                <div class="user-avator"><img :src="srcImg"></div>
                 <!-- 用户名下拉菜单 -->
                 <el-dropdown class="user-name" trigger="click" @command="handleCommand">
                     <span class="el-dropdown-link">
                         {{username}} <i class="el-icon-caret-bottom"></i>
                     </span>
                     <el-dropdown-menu slot="dropdown">
-                        <a href="http://blog.gdfengshuo.com/about/" target="_blank">
-                            <el-dropdown-item>关于作者</el-dropdown-item>
-                        </a>
-                        <a href="https://github.com/lin-xin/vue-manage-system" target="_blank">
-                            <el-dropdown-item>项目仓库</el-dropdown-item>
-                        </a>
-                        <el-dropdown-item divided  command="loginout">退出登录</el-dropdown-item>
+                        <el-dropdown-item command="loginout">退出登录</el-dropdown-item>
                     </el-dropdown-menu>
                 </el-dropdown>
             </div>
@@ -47,13 +41,15 @@
 </template>
 <script>
     import bus from '../common/bus';
+    import axios from 'axios';
     export default {
         data() {
             return {
                 collapse: false,
                 fullscreen: false,
                 name: 'linxin',
-                message: 2
+                message: 2,
+                srcImg:''
             }
         },
         computed:{
@@ -61,6 +57,23 @@
                 let username = localStorage.getItem('ms_username');
                 return username ? username : this.name;
             }
+        },
+        mounted:function(){
+            // 头像不显示的问题待解决
+            var that=this;
+            console.log("HHH")
+            this.$axios({
+                        method:'get',
+                        url:server.url+'/user/getIcon',
+                        headers:{'Authorization':'Bearer '+localStorage.getItem('token')},
+                        responseType:'arraybuffer',
+                    }).then(function(response){
+                        var src='data:image/jpeg;base64,'+btoa(new Uint8Array(response.data).reduce((data,byte)=>data+String.fromCharCode(byte),''));
+                        that.srcImg=src;
+                        console.log(src)
+                }).catch((response)=>{
+                    console.error(response)
+            })
         },
         methods:{
             // 用户名下拉菜单选择事件

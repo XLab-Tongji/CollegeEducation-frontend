@@ -83,6 +83,7 @@
 <script>
     import VueCropper  from 'vue-cropperjs';
     import server from '../../../config/index';
+    import axios from 'axios';
     export default {
         name: 'download',
         data: function(){
@@ -131,28 +132,34 @@
 
             // 获取资源类型列表
             getTypeList(){
-                this.$http.get(server.url + '/resourceCategories',{}).then(function(response){
+                var that=this;
+                this.$axios({
+                    method:'get',
+                    url:server.url + '/resourceCategories',
+                    headers:{"Authorization":"Bearer "+localStorage.getItem("token")}
+                }).then(function(response){
                     // 把获取回来的东西push进去
                     for(let i=0;i<response.data.data.length;i++){
-                        this.typeList.push({value:response.data.data[i].id,label:response.data.data[i].resourceCategoryName});
+                        that.typeList.push({value:response.data.data[i].id,label:response.data.data[i].resourceCategoryName});
                     }
                     //this.model.radioTypeValue=this.typeList[0].value
-                },function(response){  
-                    console.error("初始化获取资源类型列表错误")
                 });
             },
             // 获取所属分类列表
             getCategoryList(){
-                this.$http.get(server.url + '/resourceMajors',{}).then(function(response){
+                var that=this;
+                this.$axios({
+                    method:'get',
+                    url:server.url + '/resourceMajors',
+                    headers:{"Authorization":"Bearer "+localStorage.getItem('token')}
+                }).then(function(response){
                     // 把获取回来的东西push进去
-                    this.categoryList.push({value:-1,label:'全部分类'})
+                    that.categoryList.push({value:-1,label:'全部分类'})
                     for(let i=0;i<response.data.data.length;i++){
-                        this.categoryList.push({value:response.data.data[i].id,label:response.data.data[i].resourceMajorName});
+                        that.categoryList.push({value:response.data.data[i].id,label:response.data.data[i].resourceMajorName});
                     }
                     //this.model.selectCategoryList=this.categoryList[0].value;
                     console.log(response.data)
-                },function(response){  
-                    console.error("初始化获取所属分类列表错误")
                 });
             },
 
@@ -208,7 +215,8 @@
                         resourceName:res.resourceName,
                         description:res.description,
                         downloadTimes:res.downloadTimes,
-                        uploadTime:res.uploadTime
+                        uploadTime:res.uploadTime,
+                        points:res.points
                     }
                 })
             },          
@@ -222,14 +230,19 @@
                 }else{
                     var requestURL=server.url+'/searchResource/score/'+resourceMajorID+'/'+categoryID+'/'+pageID+'?keyword='+keyword;
                 }
-                this.$http.get(requestURL,{}).then(function(response){
-                    this.sourceList.splice(0,this.sourceList.length)
+                var that=this;
+                this.$axios({
+                    method:'get',
+                    url:requestURL,
+                    headers:{'Authorization':'Bearer '+localStorage.getItem('token')},
+                }).then(function(response){
+                    that.sourceList.splice(0,that.sourceList.length)
                     console.error(response.data.data.content)
                     for(let i=0;i<response.data.data.content.length;i++){
-                        this.sourceList.push(response.data.data.content[i]);
+                        that.sourceList.push(response.data.data.content[i]);
                     }
-                    this.page.pageNum=response.data.data.pageable.pageNumber;
-                    this.page.pageSize=response.data.data.pageable.pageSize;
+                    that.page.pageNum=response.data.data.pageable.pageNumber;
+                    that.page.pageSize=response.data.data.pageable.pageSize;
                 })
             }
         },

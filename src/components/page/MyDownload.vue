@@ -65,7 +65,8 @@
                         resourceName:res.resourceName,
                         description:res.description,
                         downloadTimes:res.downloadTimes,
-                        uploadTime:res.uploadTime
+                        uploadTime:res.uploadTime,
+                        points:res.points
                     }
                 })
             },

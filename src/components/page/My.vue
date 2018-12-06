@@ -25,7 +25,10 @@
                         <div class="infoTag">我的收藏</div>
                     </div>
                 </div>
-
+            </el-card>
+            <el-card style="background-color: white;padding-top: 4pt;margin-top: 8pt">
+                <i class="el-icon-star-on" style="color:#449CFA;"> 我的积分</i>
+                <i style="float: right;color:#3399ff;font-weight: bold">{{userInfo.leftPoints}}</i>
             </el-card>
         </el-col>
 
@@ -60,6 +63,7 @@
                     mySuggestedNum:0,
                     avgScore:0,
                     suggestedRate:0,
+                    leftPoints:0,
                 }
             }
         },
@@ -83,6 +87,7 @@
                 url:server.url+'/user/detail/',
                 headers:{Authorization:'Bearer '+localStorage.getItem('token')},
             }).then(function(response){
+                console.log(response)
                 that.userInfo.username=response.data.data.username;
                 that.userInfo.myUploadNum=response.data.data.myUploadNum;
                 that.userInfo.myDownloadNum=response.data.data.myDownloadNum;
@@ -91,6 +96,7 @@
                 that.userInfo.avgScore=response.data.data.avgScore;
                 that.userInfo.suggestedRate=response.data.data.suggestedRate;
                 that.userInfo.loading=false;
+                that.userInfo.leftPoints=response.data.data.leftPoints;
                 if(!that.userInfo.avgScore){that.userInfo.avgScore=0;}
                 if(!that.userInfo.suggestedRate){that.userInfo.suggestedRate=0;}
             })
@@ -112,6 +118,8 @@
                     that.userInfo.avgScore=response.data.data.avgScore;
                     that.userInfo.suggestedRate=response.data.data.suggestedRate;
                     that.userInfo.loading=false;
+                    that.userInfo.leftPoints=response.data.data.leftPoints;
+                    console.log(response.data)
                     if(!that.userInfo.avgScore){that.userInfo.avgScore=0;}
                     if(!that.userInfo.suggestedRate){that.userInfo.suggestedRate=0;}
                 })

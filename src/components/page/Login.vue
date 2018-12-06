@@ -26,6 +26,7 @@
 
 <script>
     import server from '../../../config/index';
+    import axios from 'axios';
     export default {
         data: function(){
             return {

@@ -240,7 +240,7 @@
                         method:'get',
                         url:server.url + '/register/university/' + val,
                         data:{},
-                        header:{}  
+                        headers:{}  
                     }).then(function(response){
                         var majorIn = response.data.data;
                         for(let i=0;i<majorIn.length;i++){
@@ -291,7 +291,7 @@
                         method:'get',
                         url:server.url + '/register/university/',
                         data:{},
-                        header:{}  
+                        headers:{}  
                     }).then(function(response){
                         var universityList = response.data.data;
                         for(let i=0;i<universityList.length;i++){

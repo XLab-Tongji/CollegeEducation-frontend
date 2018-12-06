@@ -207,25 +207,31 @@
             },
             // 获取资源类型列表
             getTypeList(){
-                this.$http.get(server.url + '/resourceCategories',{}).then(function(response){
+            	var that=this;
+            	this.$axios({
+            		method:'get',
+            		url:server.url + '/resourceCategories',
+            		headers:{'Authorization':'Bearer '+localStorage.getItem('token')}
+            	}).then(function(response){
                     // 把获取回来的东西push进去
                     for(let i=0;i<response.data.data.length;i++){
-                        this.options.type.push({value:response.data.data[i].id,label:response.data.data[i].resourceCategoryName});
+                        that.options.type.push({value:response.data.data[i].id,label:response.data.data[i].resourceCategoryName});
                     }
-                },function(response){  
-                    console.error("初始化获取资源类型列表错误")
-                });
+                })
             },
             // 获取所属分类列表
             getCategoryList(){
-                this.$http.get(server.url + '/resourceMajors',{}).then(function(response){
+            	var that=this;
+            	this.$axios({
+            		method:'get',
+            		url:server.url + '/resourceMajors',
+            		headers:{'Authorization':'Bearer '+localStorage.getItem('token')}
+            	}).then(function(response){
                     // 把获取回来的东西push进去
                     for(let i=0;i<response.data.data.length;i++){
-                        this.options.category.push({value:response.data.data[i].id,label:response.data.data[i].resourceMajorName});
+                        that.options.category.push({value:response.data.data[i].id,label:response.data.data[i].resourceMajorName});
                     }
-                },function(response){  
-                    console.error("初始化获取所属分类列表错误")
-                });
+                })
             },
             // 上传文件前判断大小（在这里可以补充上传文件的其他限制）
             beforeUpload(file){
@@ -265,11 +271,14 @@
             // 点击删除后从服务器删除文件
             uploadRemove(file, fileList){
                 var resourceID=this.fileID;
-                this.$http.get(server.url + '/deleteResource/'+resourceID,{}).then(function(response){
-                    this.fileID='';
-                },function(response){  
-                    console.error("初始化获取资源类型列表错误")
-                });
+                var that=this;
+                this.$axios({
+                	method:'get',
+                	url:server.url + '/deleteResource/'+resourceID,
+                	headers:{'Authorization':'Bearer '+localStorage.getItem('token')}
+                }).then(function(response){
+                    that.fileID='';
+                })
             },
             setImage(e){
                 const file = e.target.files[0];
