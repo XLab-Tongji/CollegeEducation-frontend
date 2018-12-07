@@ -29,7 +29,6 @@
                         
                         <el-button size='mini' style='margin-left: 1pt' @click='editComment'>发表评论</el-button>
                         <el-button id='collection' size='mini' @click='collection' style='margin-left: 1pt' v-bind:type='collectionBind'>{{collectionButtonInfo}}</el-button>
-
                     </div>
                 </el-col>
             </el-row>            
@@ -70,10 +69,6 @@
                         <el-pagination :total="commentPages.total" :page-size='commentPages.size' layout="prev, pager, next" @current-change="commentPageChange"></el-pagination>
                     </div>
                     <div id='commentPublish' style="margin-top: 16pt;padding-left: 4pt;padding-right: 4pt">
-                        <!--
-                            <el-button type='primary' plain @click='editComment'>我也要写评论</el-button>
-                        -->
-
                         <!--弹出填写评论对话框-->
                         <el-dialog title="发布评论" :visible.sync="commentPublish.dialogFormVisible">
                           <el-form ref="commentPublish" :model="commentPublish" style='width: 98%;margin:auto' :rules='commentPublishRules'>
@@ -109,12 +104,6 @@
                     </el-card>
                 </el-tab-pane>
             </el-tabs>
-
-
-            <el-row>
-                
- 
-            </el-row>
         </el-card>
 
     </div>
@@ -351,7 +340,6 @@
             // 监听下载按钮
             // TODO: 下载文件类型需要做判断，目前只能下载PDF Version
             downloadBtn(){
-                console.error('Bearer '+localStorage.getItem('token'))
                 axios.get(server.url+'/downloadResource/'+this.$route.params.resourceID,{
                     headers:{Authorization:'Bearer '+localStorage.getItem('token')}
                 },{responseType:'arraybuffer'}).then((res)=>{
@@ -361,6 +349,7 @@
                 }).catch(function(res){});
                 
             },
+            // 页面初始化执行的函数
             init(){
                 var that=this;
                 let loadingInstance = Loading.service({
@@ -403,30 +392,17 @@
                 	url:server.url+'/resource/detail/'+that.$route.params.resourceID,
                 	headers:{'Authorization':'Bearer '+localStorage.getItem('token')},
                 }).then(function(response){
-                	console.log(response)
-                	if('resourceAvgScore' in response.data.data.commentInfo){
-                		that.resourceDetail.avgScore=response.data.data.commentInfo.resourceAvgScore.toFixed(2).toString();
+                	if(response.data.data.commentInfo.resourceAvgScore!=null){
+                		that.resourceDetail.avgScore=response.data.data.commentInfo.resourceAvgScore.toFixed(2);
                 	}else{
                 		that.resourceDetail.avgScore='暂无评分'
                 	}
                 	that.resourceDetail.uploaderName=response.data.data.uploaderInfo.uploaderName;
-                	if('downloadTimes' in response.data.data){
-                		that.resourceDetail.downloadTimes=response.data.data.downloadTimes;
-                	}else{
-                		that.resourceDetail.downloadTimes='没人下载'
-                	}
-                	if('favouriteNum' in response.data.data){
-                		that.resourceDetail.favouriteNum=response.data.data.favouriteNum;
-                	}else{
-                		that.resourceDetail.favouriteNum='没人收藏'
-                	}
-                	if('suggestedNum' in response.data.data.suggestInfo){
+                	if(response.data.data.suggestInfo!=null){
                 		that.resourceDetail.suggestInfoNum=response.data.data.suggestInfo.suggestedNum;
                 	}else{
                 		that.resourceDetail.suggestInfoNum=0
                 	}
-                	
-                	
                 })
             },
             // 监听收藏按钮
@@ -482,10 +458,9 @@
                     })
                 }
             }
-
         },
         created(){
-            this.cropImg = this.defaultSrc;
+
         }
     }
 </script>

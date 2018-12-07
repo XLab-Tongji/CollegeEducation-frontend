@@ -8,7 +8,6 @@
                 canvas-color="transparent"
                 :show-loading="true"
                 :prevent-white-space="true"
-                accept="image/png"
                 :file-size-limit="81920"
                 @file-type-mismatch="onFileTypeMismatch"
                 @file-size-exceed="onFileSizeExceed"
@@ -59,8 +58,7 @@
                                     :value="item.value">
                                 </el-option>
                             </el-select>
-                        </el-form-item>
-                        
+                        </el-form-item>     
                     </el-col>
                     <el-col :span='12'>
                         <el-form-item prop="gender">
@@ -234,6 +232,7 @@
             this.getUniversityList();
         },
         watch:{
+            // 获取专业信息
             'ruleForm.university':function(val){
                 var that=this;
                 this.$axios({
@@ -266,25 +265,27 @@
                             'Content-Type':'multipart/form-data'
                         }  
                     }).then(function(res){
-                        console.log(res)
+                        console.log('上传头像：',res)
                     })
                }, 'image/jpeg', 0.8) // 80% compressed jpeg file
              },
-            // 控制头像大小和格式
+            // 控制头像格式
             onFileTypeMismatch (file) {
                this.$message.error('头像仅支持JPG/JPEG/PNG/TIF/TIFF/ICON格式');
             },
+            // 控制头像大小
             onFileSizeExceed (file) {
                this.$message.error('头像不要超过80kb哦，请重试！');
             },
             // 监听完成上传
             onFileLoaded(){
-                
+                this.$message.success('头像上传成功！拖动或滑动鼠标滑轮裁剪！');
             },
+            // 监听跳转登录页
             toLogin(){
-                console.log("toLogin");
                 this.$router.push('/login');
             },
+            // 获取大学列表
             getUniversityList(){
                 var that=this;
                 this.$axios({
@@ -300,10 +301,9 @@
                         }
                 })
             },
+            // 监听注册按钮
             register() {
                 this.loading=true;
-                // To Be Done:判断表单提交前的所有字段合法性
-
                 if(this.ruleForm.birthday==''||this.ruleForm.startYear==''||this.ruleForm.birthday==null||this.ruleForm.startYear==null){
                     this.$notify.error({
                     title: '注册失败',
@@ -329,14 +329,12 @@
                         },
                         headers:{}  
                     }).then(function(response){
-                        console.log(response)
                         that.$axios({
                             method:'post',
                             url:server.url + '/auth',
                             data:{username:that.ruleForm.uName,password:that.ruleForm.password},
                             headers:{}
                         }).then(function(response){
-                            console.log(response)
                             localStorage.setItem('token',response.data.token);
                             localStorage.setItem('ms_username',that.ruleForm.uName);
                             that.uploadCroppedImage(response.data.token)

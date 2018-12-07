@@ -14,12 +14,14 @@
                         <div style="display: inline-block; vertical-align: top;">
                             <el-col style="margin-bottom:20pt;">
                                 <el-upload
-                                    :headers="uploadFunc.uploadHeaders"
+                                    ref='upload'
+                                    v-loading='uploadFunc.uploadLoading'
+                                    element-loading-text="拼命上传中"
+                                    :limit='1'
                                     drag
-                                    action='http://www.baidu.com'
+                                    action='http://localhost:8080'
                                     style='width: 360px'
-                                    :beforeUpload='beforeUpload'
-                                    :on-success="uploadSuccess"
+                                    :http-request='beforeUpload'
                                     >
                                     <i class="el-icon-upload"></i>
                                     <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
@@ -133,12 +135,7 @@
                 },
                 // 上传文件的接口
                 uploadFunc:{
-                    uploadURL:server.url+"/uploadResource",
-                    uploadHeaders:{
-                        'Authorization':localStorage.getItem('token'),
-                        'Content-Type':'multipart/form-data'
-                        // 这里需要更换成Authorization
-                    }
+                    uploadLoading:false
                 },
                 buttonLogic:{
                     submitBtn:false,
@@ -185,11 +182,11 @@
 	                    "tags":this.form.tag.join(' ')
                 	}
                 }).then(function(response){
-                	console.log(response);
                     that.$notify({
                         title: '发布成功',
                         message: '稍后将转向首页',
-                        type: 'success'
+                        type: 'success',
+                        duration:2000
                     });
                     that.loading=false;
                     setTimeout(function(){
@@ -197,12 +194,12 @@
                     },2000)
                 	that.fullscreenLoading = false;
                 }).catch((res)=>{
-                	console.error(res);
                 	that.$notify.error({
                         title: '发布失败',
                         message: '请稍后重试'
                     });
                 	that.fullscreenLoading = false;
+                    console.error("发布资源：",res);
                 })
             },
             // 获取资源类型列表
@@ -233,20 +230,20 @@
                     }
                 })
             },
-            // 上传文件前判断大小（在这里可以补充上传文件的其他限制）
-            beforeUpload(file){
-                var limitRule1=(file.size/1024/1024)<128;
-                console.error(limitRule1)
+            // 上传文件前判断大小（在这里可以补充上传文件的其他限制）并完成上传
+            beforeUpload(content){
+                var that=this;
+                var limitRule1=(content.file.size/1024/1024)<128;
                 if(!limitRule1){
                     this.$notify.error({
                         title: '错误',
                         position:'bottom-right',
                         message: '上传的文件不可超过128MB'
                     });
-                    console.error("上传文件不能超过128MB");
                 }else{
+                    that.uploadFunc.uploadLoading=true;
 				    let fd = new FormData();
-				    fd.append('resource',file);//传文件
+				    fd.append('resource',content.file);//传文件
 				    this.$axios({
 				    	method:'post',
 				    	url:server.url+'/uploadResource',
@@ -256,59 +253,36 @@
 				    	},
 				    	data:fd
 				    }).then(function(response){
-				    	console.log(response)
+                        if(response.data.message=="resource type invalid"){
+                            that.$notify({
+                              title: '上传失败',
+                              message: '该文件格式不受支持',
+                              type: 'error'
+                            });
+                            that.$refs.upload.clearFiles();
+                            that.uploadFunc.uploadLoading=false;
+                            return;
+                        }
+                        that.$notify({
+                          title: '上传成功',
+                          message: '文件上传成功，填写其他信息完成发布',
+                          type: 'success'
+                        });
+                        that.uploadFunc.uploadLoading=false;
+                        content.onSuccess(response,content.file)
+                        that.form.fileID=response.data.data;
 				    }).catch((res)=>{
-				    	console.error(res)
+                        that.uploadFunc.uploadLoading=false;
+                        that.$notify({
+                          title: '上传失败',
+                          message: '请稍后再试',
+                          type: 'error'
+                        });
+                        console.error("上传文件失败：",res)
 				    })
                 }
                 return limitRule1;
             },
-            // 成功完成上传的返回
-            uploadSuccess(response, file, fileList){
-                console.log(response.data.data);
-                this.form.fileID=response.data.data;
-            },
-            // 点击删除后从服务器删除文件
-            uploadRemove(file, fileList){
-                var resourceID=this.fileID;
-                var that=this;
-                this.$axios({
-                	method:'get',
-                	url:server.url + '/deleteResource/'+resourceID,
-                	headers:{'Authorization':'Bearer '+localStorage.getItem('token')}
-                }).then(function(response){
-                    that.fileID='';
-                })
-            },
-            setImage(e){
-                const file = e.target.files[0];
-                if (!file.type.includes('image/')) {
-                    return;
-                }
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    this.dialogVisible = true;
-                    this.imgSrc = event.target.result;
-                    this.$refs.cropper && this.$refs.cropper.replace(event.target.result);
-                };
-                reader.readAsDataURL(file);
-            },
-            cropImage () {
-                this.cropImg = this.$refs.cropper.getCroppedCanvas().toDataURL();
-            },
-            cancelCrop(){
-                this.dialogVisible = false;
-                this.cropImg = this.defaultSrc;
-            },
-            imageuploaded(res) {
-                console.log(res)
-            },
-            handleError(){
-                this.$notify.error({
-                    title: '上传失败',
-                    message: '图片上传接口上传失败，可更改为自己的服务器接口'
-                });
-            }
         },
         created(){
             this.cropImg = this.defaultSrc;

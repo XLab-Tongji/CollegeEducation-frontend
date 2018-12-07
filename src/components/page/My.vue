@@ -78,7 +78,7 @@
                         var src='data:image/jpeg;base64,'+btoa(new Uint8Array(response.data).reduce((data,byte)=>data+String.fromCharCode(byte),''));
                         that.srcImg=src;
                 }).catch((response)=>{
-                    console.error(response)
+                    console.error('获取头像：',response)
             })
             var that=this;
             this.userInfo.loading=true;
@@ -87,7 +87,6 @@
                 url:server.url+'/user/detail/',
                 headers:{Authorization:'Bearer '+localStorage.getItem('token')},
             }).then(function(response){
-                console.log(response)
                 that.userInfo.username=response.data.data.username;
                 that.userInfo.myUploadNum=response.data.data.myUploadNum;
                 that.userInfo.myDownloadNum=response.data.data.myDownloadNum;
@@ -119,7 +118,6 @@
                     that.userInfo.suggestedRate=response.data.data.suggestedRate;
                     that.userInfo.loading=false;
                     that.userInfo.leftPoints=response.data.data.leftPoints;
-                    console.log(response.data)
                     if(!that.userInfo.avgScore){that.userInfo.avgScore=0;}
                     if(!that.userInfo.suggestedRate){that.userInfo.suggestedRate=0;}
                 })

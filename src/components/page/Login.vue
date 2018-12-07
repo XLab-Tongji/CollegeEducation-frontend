@@ -4,12 +4,12 @@
             <div class="ms-title">学习平台</div>
             <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="0px" class="ms-content">
                 <el-form-item prop="username">
-                    <el-input v-model="ruleForm.username" placeholder="username">
+                    <el-input v-model="ruleForm.username" placeholder="用户名">
                         <el-button slot="prepend" icon="el-icon-lx-people"></el-button>
                     </el-input>
                 </el-form-item>
                 <el-form-item prop="password">
-                    <el-input type="password" placeholder="password" v-model="ruleForm.password"> 
+                    <el-input type="password" placeholder="密码" v-model="ruleForm.password"> 
                         <el-button slot="prepend" icon="el-icon-lx-lock"></el-button>
                     </el-input>
                 </el-form-item>
@@ -47,17 +47,14 @@
         },
         methods: {
             toRegister(){
-                console.log("toRegister");
                 this.$router.push('/register');
             },
             submitForm() {
             	var that=this;
             	this.fullscreenLoading=true;
                 this.$http.post(server.url + '/auth', {username:this.ruleForm.username,password:this.ruleForm.password}).then(response => {
-                		console.log(response.data.token)
 	                    localStorage.setItem('token',response.data.token);
 	                    localStorage.setItem('ms_username',this.ruleForm.username);
-	                    //this.$http.headers.common['Authorization']='Bearer ' + response.data.token;
 	                    that.fullscreenLoading=false;
 	                    that.$notify({
 	                        title: '登录成功',
@@ -69,8 +66,7 @@
 	                        that.$router.push('/');
 	                    },2000)
                    }, response => {
-                    console.log("error");
-                    console.log(response);
+                    console.log('登录失败：',response);
                     that.fullscreenLoading=false;
                     that.$notify.error({
                         title: '登录失败',

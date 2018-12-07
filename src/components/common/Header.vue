@@ -25,7 +25,9 @@
                 </div>
                 -->
                 <!-- 用户头像 -->
-                <div class="user-avator"><img :src="srcImg"></div>
+                <!--
+                    <div class="user-avator"><img :src="srcImg"></div>
+                -->
                 <!-- 用户名下拉菜单 -->
                 <el-dropdown class="user-name" trigger="click" @command="handleCommand">
                     <span class="el-dropdown-link">
@@ -59,7 +61,7 @@
             }
         },
         mounted:function(){
-            // 头像不显示的问题待解决
+            /* 头像不显示的问题待解决
             var that=this;
             console.log("HHH")
             this.$axios({
@@ -74,6 +76,7 @@
                 }).catch((response)=>{
                     console.error(response)
             })
+            */
         },
         methods:{
             // 用户名下拉菜单选择事件
@@ -179,7 +182,8 @@
         color: #fff;
     }
     .user-name{
-        margin-left: 10px;
+        margin-left: 0px;
+        padding-bottom: 5px
     }
     .user-avator{
         margin-left: 20px;

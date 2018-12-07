@@ -80,8 +80,6 @@
                     headers:{Authorization:'Bearer '+localStorage.getItem('token')},
                     data:{}
                 }).then(function(response){
-                    //清空数组，在调试后移除
-                    console.log(response.data.data)
                     that.page.total=response.data.data.total;
                     that.page.size=response.data.data.pageSize;
                     that.sourceList.splice(0,that.sourceList.length)
