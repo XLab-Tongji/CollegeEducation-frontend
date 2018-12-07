@@ -343,9 +343,10 @@
                 axios.get(server.url+'/downloadResource/'+this.$route.params.resourceID,{
                     headers:{Authorization:'Bearer '+localStorage.getItem('token')}
                 },{responseType:'arraybuffer'}).then((res)=>{
+                    console.log(res)
                     let blob = new Blob([res.data],{type:'application/pdf'});
                     let objectUrl=URL.createObjectURL(blob);
-                    window.location.href=objectUrl;
+                    //window.location.href=objectUrl;
                 }).catch(function(res){});
                 
             },

@@ -37,7 +37,7 @@
                 </el-form-item>
             </el-form>
         </el-card>
-        <el-card>
+        <el-card v-loading="showLoading" element-loading-text="稍等一下下喏">
             <el-tabs v-model="tab" @tab-click="swichTab">
                 <el-tab-pane label="最新上传" name="latestUpdate">
                     <el-card class='listCard' shadow='hover' v-for='(item, idx) in sourceList' :key="idx" @click.native='clickCard(item)'>
@@ -90,22 +90,20 @@
             return {
                 model:{
                     radioTypeList:'',
-                    radioTypeValue:-1,
-                    selectCategoryList:-1,
+                    radioTypeValue:0,
+                    selectCategoryList:0,
                     selectKeyword:[],
                     currentPage:1
                 },
                 typeList:[],
                 categoryList:[],
                 tab:'latestUpdate',
-                sourceList:[{resourceName:'QuantumdataDP1.4产品技术资料',description:'Teledyne LeCroy quantumdata 980 48G 用于HDMI 测试的协议分析 仪/发生器模块配备了HDMI Tx 和Rx 端口，支持HDMI 2.1 固定速率链 路和FEC 捕获分析和解码，最高可达48Gbps（12Gbps /通道）。 HDMI Rx 分析端口可提供固定速率链路的打包-超级模块，字符模块和 FRL 数据包以及底层TMDS 视频，协议，控制和元数据的可视性。',date:'2018年10月21日',uploadTime: "2018-11-14 06:46:46"},
-                    {resourceName:'Office 2007 Access Database Engine',description:'如果你的c#程序采用oledb方式连接access数据库,需要安装此 engine',date:'2018年10月20日',uploadTime: "2018-11-14 06:46:46"},
-                    {resourceName:'随机过程与应用',description:'机过程与应用pdf课件，本书内容包括：概率论基础，随机过程基础，泊松过程及其推广，马尔可夫过程，二阶矩过程，平稳过程，以及高阶统计量与非平稳过程',date:'2018年10月21日',uploadTime: "2018-11-14 06:46:46"}
-                    ],
+                sourceList:[],
                 page:{
                     pageSize:0,
                     pageNum:0
-                }
+                },
+                showloading:false
             }
         },
         watch:{
@@ -125,7 +123,7 @@
                 this.getTypeList();    
 
                 //setTimeout(3000,this.getResourceList(this.iniCategory,this.iniType,1,''))
-                this.getResourceList(this.model.selectCategoryList,this.model.radioTypeValue,this.model.currentPage,'',this.tab)
+                this.getResourceList(this.model.selectCategoryList,this.model.radioTypeValue,this.model.currentPage-1,'',this.tab)
 
                 //this.getResourceList(this.categoryList[0].value,this.typeList[0].value,1,'');
             },
@@ -139,6 +137,7 @@
                     headers:{"Authorization":"Bearer "+localStorage.getItem("token")}
                 }).then(function(response){
                     // 把获取回来的东西push进去
+                    that.typeList.push({value:0,label:'全部类型'})
                     for(let i=0;i<response.data.data.length;i++){
                         that.typeList.push({value:response.data.data[i].id,label:response.data.data[i].resourceCategoryName});
                     }
@@ -154,12 +153,11 @@
                     headers:{"Authorization":"Bearer "+localStorage.getItem('token')}
                 }).then(function(response){
                     // 把获取回来的东西push进去
-                    that.categoryList.push({value:-1,label:'全部分类'})
+                    that.categoryList.push({value:0,label:'全部分类'})
                     for(let i=0;i<response.data.data.length;i++){
                         that.categoryList.push({value:response.data.data[i].id,label:response.data.data[i].resourceMajorName});
                     }
                     //this.model.selectCategoryList=this.categoryList[0].value;
-                    console.log(response.data)
                 });
             },
 
@@ -184,22 +182,28 @@
                     }
                 }
                 var kw=this.model.selectKeyword.join(' ');
+                this.model.currentPage=1;
                 this.getResourceList(this.model.selectCategoryList,this.model.radioTypeValue,this.model.currentPage-1,kw,this.tab)
                 
             },
             // 监听下拉菜单事件
             selectCategoryChanged(res){
                 var kw=this.model.selectKeyword.join(' ');
+                this.model.currentPage=1;
                 this.getResourceList(this.model.selectCategoryList,this.model.radioTypeValue,this.model.currentPage-1,kw,this.tab)
             },
             // 监听关键字变化事件
             selectKeywordChange(res){
                 var kw=this.model.selectKeyword.join(' ');
+                this.model.currentPage=1;
+                console.error('切换关键字',this.model.currentPage-1)
                 this.getResourceList(this.model.selectCategoryList,this.model.radioTypeValue,this.model.currentPage-1,kw,this.tab)
             },
             // 监听切换tab事件
             swichTab(tab,event){
+                console.log(this.tab)
                 var kw=this.model.selectKeyword.join(' ');
+                this.model.currentPage=1;
                 this.getResourceList(this.model.selectCategoryList,this.model.radioTypeValue,this.model.currentPage-1,kw,this.tab)
             },
             // 监听点击卡片事件，处理页面跳转
@@ -225,25 +229,49 @@
             // 获取资源列表
             getResourceList(resourceMajorID,categoryID,pageID,keyword,tab){
                 console.log(resourceMajorID,categoryID,pageID,keyword,tab)
+                this.showLoading=true;
+                var that=this;
                 if(tab=='latestUpdate'){
                     var requestURL=server.url+'/searchResource/time/'+resourceMajorID+'/'+categoryID+'/'+pageID+'?keyword='+keyword;
+                    this.$axios({
+                        method:'get',
+                        url:requestURL,
+                        headers:{'Authorization':'Bearer '+localStorage.getItem('token')},
+                    }).then(function(response){
+                        that.showLoading=false;
+                        console.log(requestURL)
+                        console.log(response)
+                        that.sourceList.splice(0,that.sourceList.length)
+                        console.error(response.data.data.content)
+                        for(let i=0;i<response.data.data.content.length;i++){
+                            that.sourceList.push(response.data.data.content[i]);
+                        }
+                        that.page.pageNum=response.data.data.totalElements;
+                        that.page.pageSize=response.data.data.size;
+                    }).catch((res)=>{
+                        console.error('按时间查询：',res)
+                        that.showLoading=false;
+                    })
                 }else{
                     var requestURL=server.url+'/searchResource/score/'+resourceMajorID+'/'+categoryID+'/'+pageID+'?keyword='+keyword;
+                    this.$axios({
+                        method:'get',
+                        url:requestURL,
+                        headers:{'Authorization':'Bearer '+localStorage.getItem('token')},
+                    }).then(function(response){
+                        that.showLoading=false;
+                        that.sourceList.splice(0,that.sourceList.length)
+                        for(let i=0;i<response.data.data.list.length;i++){
+                            that.sourceList.push(response.data.data.list[i]);
+                        }
+                        that.page.pageNum=response.data.data.total;
+                        that.page.pageSize=response.data.data.pageSize;
+                    }).catch((res)=>{
+                        console.error('按分数查询：',res)
+                        that.showLoading=false;
+                    })
                 }
-                var that=this;
-                this.$axios({
-                    method:'get',
-                    url:requestURL,
-                    headers:{'Authorization':'Bearer '+localStorage.getItem('token')},
-                }).then(function(response){
-                    that.sourceList.splice(0,that.sourceList.length)
-                    console.error(response.data.data.content)
-                    for(let i=0;i<response.data.data.content.length;i++){
-                        that.sourceList.push(response.data.data.content[i]);
-                    }
-                    that.page.pageNum=response.data.data.pageable.pageNumber;
-                    that.page.pageSize=response.data.data.pageable.pageSize;
-                })
+
             }
         },
         created(){
