@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div style="min-width: 1200px">
         <div class="crumbs">
             <el-breadcrumb separator="/">
                 <el-breadcrumb-item><i class="el-icon-lx-upload"></i> 资源详情</el-breadcrumb-item>
@@ -340,15 +340,18 @@
             // 监听下载按钮
             // TODO: 下载文件类型需要做判断，目前只能下载PDF Version
             downloadBtn(){
-                axios.get(server.url+'/downloadResource/'+this.$route.params.resourceID,{
-                    headers:{Authorization:'Bearer '+localStorage.getItem('token')}
-                },{responseType:'arraybuffer'}).then((res)=>{
-                    console.log(res)
-                    let blob = new Blob([res.data],{type:'application/pdf'});
+                var that=this;
+                this.$axios({
+                    method:'get',
+                    url:server.url+'/downloadResource/'+this.$route.params.resourceID,
+                    headers:{'Authorization':'Bearer '+localStorage.getItem('token')},
+                    responseType:'arraybuffer'
+                }).then(function(res){
+                    var responseType=res.headers['content-type']
+                    let blob = new Blob([res.data],{type:responseType});
                     let objectUrl=URL.createObjectURL(blob);
-                    //window.location.href=objectUrl;
-                }).catch(function(res){});
-                
+                    window.location.href=objectUrl;
+                })
             },
             // 页面初始化执行的函数
             init(){

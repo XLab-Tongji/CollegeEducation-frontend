@@ -103,7 +103,7 @@
                     pageSize:0,
                     pageNum:0
                 },
-                showloading:false
+                showLoading:false
             }
         },
         watch:{
