@@ -53,7 +53,7 @@
                         </el-row>
                     </el-card>                
                 </el-tab-pane>
-                <el-tab-pane label="最多下载" name="mostDownload">
+                <el-tab-pane label="最高分数" name="mostDownload">
                     <el-card class='listCard' shadow='hover' v-for='(item, idx) in sourceList' :key="idx" @click.native='clickCard(item)'>
                         <el-row>
                             <el-col :span='2' style="display:inline-block;max-width: 60px">
@@ -168,7 +168,6 @@
 
             // 监听换页事件
             currentPageChange(res){
-                console.log(res,'page')
                 this.model.currentPage=res;
                 var kw=this.model.selectKeyword.join(' ');
                 this.getResourceList(this.model.selectCategoryList,this.model.radioTypeValue,res-1,kw,this.tab)
@@ -201,7 +200,6 @@
             },
             // 监听切换tab事件
             swichTab(tab,event){
-                console.log(this.tab)
                 var kw=this.model.selectKeyword.join(' ');
                 this.model.currentPage=1;
                 this.getResourceList(this.model.selectCategoryList,this.model.radioTypeValue,this.model.currentPage-1,kw,this.tab)
@@ -228,7 +226,6 @@
 
             // 获取资源列表
             getResourceList(resourceMajorID,categoryID,pageID,keyword,tab){
-                console.log(resourceMajorID,categoryID,pageID,keyword,tab)
                 this.showLoading=true;
                 var that=this;
                 if(tab=='latestUpdate'){
@@ -239,10 +236,7 @@
                         headers:{'Authorization':'Bearer '+localStorage.getItem('token')},
                     }).then(function(response){
                         that.showLoading=false;
-                        console.log(requestURL)
-                        console.log(response)
                         that.sourceList.splice(0,that.sourceList.length)
-                        console.error(response.data.data.content)
                         for(let i=0;i<response.data.data.content.length;i++){
                             that.sourceList.push(response.data.data.content[i]);
                         }
@@ -253,7 +247,7 @@
                         that.showLoading=false;
                     })
                 }else{
-                    var requestURL=server.url+'/searchResource/score/'+resourceMajorID+'/'+categoryID+'/'+pageID+'?keyword='+keyword;
+                    var requestURL=server.url+'/searchResource/score/'+resourceMajorID+'/'+categoryID+'/'+(pageID+1)+'?keyword='+keyword;
                     this.$axios({
                         method:'get',
                         url:requestURL,

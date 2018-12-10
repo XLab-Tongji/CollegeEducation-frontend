@@ -164,14 +164,17 @@
         },
         watch:{
             $route(){
+                this.init();
             	this.requestComment(1);
-
+                this.requestRelatedResource(1);
+                this.getResourceDetail();
             }
         },
         mounted:function(){
             this.init();
         	this.requestComment(1);
             this.requestRelatedResource(1);
+            this.getResourceDetail();
         },
         destroyed: function () {
             // 目前离开页面，页面即刻被销毁
@@ -287,6 +290,9 @@
             // 获取相关资源
             requestRelatedResource(pageID){
                 var that=this;
+                if(typeof(that.$route.params.resourceMajorID)=='undefined'||typeof(that.$route.params.categoryID)=='undefined'){
+                    return;
+                }
                 this.$axios({
                     method:'get',
                     url:server.url+'/resource/recommend/'+that.$route.params.resourceMajorID+'/'+that.$route.params.categoryID+'/'+pageID.toString(),
@@ -340,6 +346,11 @@
             // 监听下载按钮
             // TODO: 下载文件类型需要做判断，目前只能下载PDF Version
             downloadBtn(){
+                const loading = this.$loading({
+                  lock: true,
+                  text: '已扣除'+this.$route.params.points+'积分，正在开启下载，请稍后',
+                  background: 'rgba(0, 0, 0, 0.7)'
+                });
                 var that=this;
                 this.$axios({
                     method:'get',
@@ -351,6 +362,7 @@
                     let blob = new Blob([res.data],{type:responseType});
                     let objectUrl=URL.createObjectURL(blob);
                     window.location.href=objectUrl;
+                    loading.close();
                 })
             },
             // 页面初始化执行的函数
@@ -386,7 +398,6 @@
                         }
                         loadingInstance.close();
                     })
-                this.getResourceDetail();
             },
             // 获取资源评分等信息
             getResourceDetail(){
@@ -401,7 +412,6 @@
                 	}else{
                 		that.resourceDetail.avgScore='暂无评分'
                 	}
-                	that.resourceDetail.uploaderName=response.data.data.uploaderInfo.uploaderName;
                 	if(response.data.data.suggestInfo!=null){
                 		that.resourceDetail.suggestInfoNum=response.data.data.suggestInfo.suggestedNum;
                 	}else{
