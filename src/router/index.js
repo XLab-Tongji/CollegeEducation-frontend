@@ -73,7 +73,7 @@ export default new Router({
                         {
                             path: '/topic-list',
                             component: resolve => require(['../components/page/TopicTable.vue'], resolve),
-                            meta: { title: '话题列表' }
+                            meta: { title: '文章列表' }
                         },
                         {
                             path: '/blackboard-list',
@@ -95,20 +95,26 @@ export default new Router({
                             name: 'QuestionList',
                             component: resolve => require(['../components/page/QuestionList.vue'], resolve),
                             meta: { title: '问题答疑'}
-                        }
+                        },
+                        {
+                            path: '/topic-details',
+                            name: 'TopicDetails',
+                            component: resolve => require(['../components/page/TopicDetails.vue'], resolve),
+                            meta: { title: '文章详情'}
+                        },
+                        {
+                            path: '/blackboard-details',
+                            name: 'BoardDetails',
+                            component: resolve => require(['../components/page/BoardDetails.vue'], resolve),
+                            meta: { title: '黑板报详情'}
+                        },
+                        {
+                            path: '/question-details',
+                            name: 'QuestionDetails',
+                            component: resolve => require(['../components/page/QuestionDetails.vue'], resolve),
+                            meta: { title: '问题详情'}
+                        },
                     ]
-                },
-                {
-                    path: '/topic-details/:id',
-                    name: 'TopicDetails',
-                    component: resolve => require(['../components/page/TopicDetails.vue'], resolve),
-                    meta: { title: '话题详情'}
-                },
-                {
-                    path: '/blackboard-details/:id',
-                    name: 'BoardDetails',
-                    component: resolve => require(['../components/page/BoardDetails.vue'], resolve),
-                    meta: { title: '黑板报详情'}
                 },
                 {
                     path: '/source-list',

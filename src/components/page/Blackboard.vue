@@ -20,29 +20,12 @@
                     <!-- 选择分类 -->
                     <el-select value="" v-model="sid" size="mini" style="width: 200px" placeholder="请选择类别">
                         <el-option
-                            v-for="item in sectorStates"
-                            :key="item.value"
-                            :label="item.label"
-                            :value="item.value">
+                            v-for="item in sectors"
+                            :key="item.SectorId"
+                            :label="item.SectorName"
+                            :value="item.SectorId">
                         </el-option>
                     </el-select>
-                    <!-- 添加标签 -->
-                    <el-tag
-                        :key="tag"
-                        v-for="tag in SectorName"
-                        closable
-                        :disable-transitions="false"
-                        class="tag"
-                        @close="handleClose(tag)">
-                        {{tag}}
-                    </el-tag>
-                    <el-input
-                        v-if="tagInputVisible" v-model="tagValue" ref="saveTagInput"
-                        size="mini" style="width: 80px" maxlength="10"
-                        @keyup.space.native="handleInputConfirm"
-                        @blur="handleInputConfirm">
-                    </el-input>
-                    <el-button v-else type="primary" size="mini" @click="showInput">+Tag</el-button>
                 </div>
 
                 <!----- 保存和发表按键 ----->
@@ -66,7 +49,7 @@
                 this.sinaData.push({alt: data[i].phrase, src: data[i].icon});
             }
             this.editor.customConfig.onchange = () => {
-                var t = this.editor.txt.text();
+                let t = this.editor.txt.text();
                 // 限制字数
                 if(this.count > 200) {
                     this.$message({type: 'error', message: '字数超出范围！'});
@@ -114,36 +97,9 @@
             this.editor.customConfig.debug = location.href.indexOf('wangeditor_debug_mode=1') > 0; // 开启debug模式
             this.editor.create();
             this.editor.config.customUploadInit = this.UPLOADER(this.editor).init();
+            this.getSectors();
         },
         methods: {
-            // 删除tag
-            handleClose(tag) {
-                this.Sectorname.splice(this.SectorName.indexOf(tag), 1);
-            },
-            // 添加tag
-            showInput() {
-                this.tagInputVisible = true;
-                this.$nextTick(_ => {
-                    this.$refs.saveTagInput.$refs.input.focus();
-                });
-            },
-            // 失去焦点时确认添加tag
-            handleInputConfirm : function() {
-                if (this.tagValue === ' ') {
-                    this.tagValue = '';
-                    return;
-                }
-                let tagValue = this.tagValue;
-                for(var i in this.SectorName){
-                    if(this.SectorName[i] === tagValue) {
-                        this.$message({type: 'error', message: '该标签已添加'});
-                        return;
-                    }
-                }
-                this.SectorName.push(tagValue);
-                this.tagInputVisible = false;
-                this.tagValue = '';
-            },
             // 读取版块名称
             /*
             loadSectorState(){
@@ -173,7 +129,7 @@
             },
             */
             // 存入草稿箱
-            saveInDrafts(){
+            saveInDrafts: function(){
                 this.loading = true;
                 this.editor.$textElem.attr('contenteditable', false);
                 this.draft.draft_name = this.blackboard.blackboard_name;
@@ -203,7 +159,7 @@
                 });
             },
             // 发布
-            postOn(){
+            postOn: function(){
                 if(this.blackboard.blackboard_name === '') {
                     this.$message({type: 'error', message: '请输入标题！'});
                     return
@@ -227,7 +183,7 @@
                         this.loading = false;
                         this.isSaved = true;
                         this.$message({type: 'success', message: '已发表，页面即将跳转'});
-                        this.$router.push('/topic');
+                        this.$router.push('/blackboard-list');
                     }
                     else{
                         this.loading = false;
@@ -242,7 +198,35 @@
                     this.loading = false;
                     this.$message({type: 'error', message: '发表失败'});
                 });
-            }
+            },
+            // 获取标签
+            getSectors: function() {
+                if (this.sectors.length === 0) {
+                    this.$http.get(server.url + '/sector/get', {headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}}).then((response) => {
+                        if (response.status === 200) {
+                            var sectorList = JSON.parse(response.bodyText);
+                            var i = 0;
+                            while (i < sectorList.data.length) {
+                                this.sectors.push({
+                                    SectorId: sectorList.data[i].SectorId,
+                                    SectorName: sectorList.data[i].SectorName
+                                });
+                                i++;
+                            }
+                        } else {
+                            this.$message({type: 'error', message: '加载失败!'});
+                        }
+                    }, (response) => {
+                        if (response.status === 403) {
+                            this.$message({type: 'error', message: response.response.data});
+                        } else {
+                            this.$message({type: 'error', message: '加载失败!'});
+                        }
+                    }).catch((response) => {
+                        this.$message({type: 'error', message: '加载失败!'});
+                    })
+                }
+            },
         },
 
         data() {
@@ -251,14 +235,11 @@
                 sinaData: [], // 新浪表情数组
                 // emoji数组
                 emojiData: ['😀','😃','😄','😁','😆','😅','😂','🤣','😇','😊','🙂','🙃','😉','😌','😍','😘','😗','😙','😚','😋','😛','😝','😜','🤪','🤨','🧐','🤓','😎','🤩','😏','😒','😞','😔','😟','😕','🙁','☹️','😣','😖','😫','😩','😢','😭','😤','😠','😡','🤬','🤯','😳','😱','😨','😰','😥','😓','🤗','🤔','🤭','🤫','🤥','😶','😐','😑','😬','🙄','😯','😦','😧','😮','😲','😴','😪','😵','🤐','🤧','😷','😈','👿','💩','👻','🤲','🙌','👏','🤝','👍','👎','👊','✊','🤛','🤜','🤞','✌','🤟','👌','👈','👉','👆','👇','👋','🤙','💪','🙏','👀','🙇‍','🙅‍','🙆‍','🙋‍','🤦‍','🤷‍','💅','🌝','🌚','❤️','💔','❣️','💕','💓','💗','💖','❌','✅','⭕️','💯','❗️','❓','⁉️','📝'],
-                tagInputVisible: false, // 添加标签后显示组件
                 count: 0, // 当前输入的字数
-                tagValue: '', // 用户每次输入的标签内容
                 loading: false, // 加载状态
                 isSaved: false, // 是否已经保存
-                sectorStates: [{value: '1', label: '计算机软件及计算机应用'}, {value: '2', label: '互联网技术'}, {value: '3', label: '电信技术'}], // 分类列表
-                SectorName: [], // 所有已经添加的标签内容
                 sid: '', // 标签ID
+                sectors: [], // 可选标签
                 // 黑板报实体
                 blackboard: {
                     sector_id: 0,
@@ -328,16 +309,9 @@
         margin-top: 17px;
     }
 
-    .selectp .tag {
-        background-color: #f7ffff;
-        color: #0a9894;
-        margin-left: 5px;
-    }
-
     .selectp button {
         background-color: #1ac7c3;
         border-color: #1ac7c3;
-        margin-left: 10px;
     }
 
     .post {

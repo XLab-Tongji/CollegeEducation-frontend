@@ -12,17 +12,17 @@
                         <el-col :span="3">
                             <el-row>
                                 <div>
-                                    <el-card shadow="never" style="height: 100px; width: 100px">
-                                        <!-- 显示头像 -->
-                                    </el-card>
+                                    <div><img :src="authorImg" class="img" /></div>
                                 </div>
                             </el-row>
                             <el-row style="padding-top: 10px;font-size: 12px;width: 100px">
-                                <div align="center">用户名</div>
+                                <div align="center">{{blackboard.USERNAME}}</div>
                             </el-row>
                         </el-col>
                         <el-col :span="21" style="padding-left: 20px">
-                            <el-row style="font-size: 14px; width: 78%; min-height: 120px; line-height: 24px">{{blackboard.blackboard_text | htmlDecode}}</el-row>
+                            <el-row style="font-size: 14px; width: 78%; min-height: 120px; line-height: 24px">
+                                <div id="text"></div>
+                            </el-row>
                             <el-row style="font-size: 12px;margin-top: 30px;padding-right: 170px">
                                 <el-col :span="15"><div style="padding-top: 8px">{{blackboard.blackboard_date}}</div></el-col>
                                 <el-col :span="3"><div align="right"><el-button type="text" @click="collect()" v-loading="collectLoading" style="color: #6A6A6A"><i  class="fa fa-star fa-lg" v-show="isCollected" aria-hidden="true" style="margin-right: 5px;color: #FFE100"></i><i class="fa fa-star-o fa-lg" v-show="!isCollected" aria-hidden="true" style="margin-right: 5px; color: #6A6A6A;"></i>收藏</el-button></div></el-col>
@@ -43,14 +43,10 @@
                                 <el-row style="margin: 15px 0">
                                     <el-col :span="4">
                                         <el-row>
-                                            <div>
-                                                <el-card shadow="never" style="height: 100px; width: 100px">
-                                                    <!-- 显示头像 -->
-                                                </el-card>
-                                            </div>
+                                            <div><img :src="replyImg[scope.$index]" class="img" /></div>
                                         </el-row>
                                         <el-row style="padding-top: 10px;font-size: 12px;width: 100px">
-                                            <div align="center">用户名</div>
+                                            <div align="center">{{scope.row.username}}</div>
                                         </el-row>
                                     </el-col>
                                     <el-col :span="20">
@@ -97,6 +93,8 @@
             this.getParams();
             if (this.blackboard.praise_id !== -1) this.isLiked = true;
             if (this.blackboard.favourite_id !== -1) this.isCollected = true;
+            const container = document.getElementById('text');
+            container.appendChild(this.createNode(this.blackboard.blackboard_text));
             this.loadComments();
         },
         data() {
@@ -109,6 +107,9 @@
                 commentText: '', // 发表评论内容
                 isLiked: false, // 点赞状态
                 isCollected: false, // 收藏状态
+                authorImg: '', // 楼主头像
+                replyImg: [], // 评论头像
+                page: 0, // 当前页数
                 // 收藏实体
                 favoriteEntity: {
                     topic_id: 0,
@@ -130,7 +131,8 @@
         },
         methods: {
             getParams: function () {
-                this.blackboard = this.$route.query.blackboard
+                this.blackboard = this.$route.query.index;
+                this.page = this.$route.query.page;
             },
             goBack: function() {
                 this.$router.go(-1);
@@ -215,6 +217,7 @@
             // 加载评论
             loadComments: function() {
                 this.comments = [];
+                this.replyImg = [];
                 this.$http.get(server.url + '/blackboard/reply/get?TopicId=' + this.blackboard.blackboard_id, {headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}}).then((response) => {
                     if (response.status === 200) {
                         let commentList = JSON.parse(response.bodyText);
@@ -227,7 +230,19 @@
                                 ReplyText: commentList.data[i].ReplyText,
                                 ReplyDate: commentList.data[i].ReplyDate,
                                 ClickingRate: commentList.data[i].ClickingRate,
-                                PraiseCount: commentList.data[i].PraiseCount
+                                PraiseCount: commentList.data[i].PraiseCount,
+                                username: commentList.data[i].username
+                            });
+                            this.$http.get(server.url + '/user/image/get?userID=' + commentList.data[i].UserId, {headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}}).then((response) => {
+                                if (response.status === 200) {
+                                    this.replyImg.push(JSON.parse(response.bodyText).data);
+                                } else {
+                                    this.$message({type: 'error', message: '头像加载失败!'});
+                                }
+                            }, (response) => {
+                                this.$message({type: 'error', message: '头像加载失败!'});
+                            }).catch((response) => {
+                                this.$message({type: 'error', message: '头像加载失败!'});
                             });
                             i++;
                         }
@@ -267,17 +282,26 @@
                     this.$message({type: 'error', message: '请重试'});
                 });
             },
-        },
-        filters: {
-            htmlDecode: function(val) {
-                //1.首先动态创建一个容器标签元素，如DIV
-                var temp = document.createElement("div");
-                //2.然后将要转换的字符串设置为这个元素的innerHTML(ie，火狐，google都支持)
-                temp.innerHTML = val;
-                //3.最后返回这个元素的innerText(ie支持)或者textContent(火狐，google支持)，即得到经过HTML解码的字符串了。
-                var output = temp.innerText || temp.textContent;
-                temp = null;
-                return output;
+            // 获取楼主头像
+            getAuthorImg: function() {
+                this.$http.get(server.url + '/user/image/get?userID=' + this.article.UserId, {headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}}).then((response) => {
+                    if (response.status === 200) {
+                        this.replyImg.push(JSON.parse(response.bodyText).data);
+                    } else {
+                        this.$message({type: 'error', message: '头像加载失败!'});
+                    }
+                }, (response) => {
+                    this.$message({type: 'error', message: '头像加载失败!'});
+                }).catch((response) => {
+                    this.$message({type: 'error', message: '头像加载失败!'});
+                });
+            },
+            // 显示内容
+            createNode: function(val) {
+                const template = `<div class='child'>${val}</div>`;
+                let tempNode = document.createElement('div');
+                tempNode.innerHTML = template;
+                return tempNode.firstChild;
             }
         },
         watch: {
@@ -288,5 +312,9 @@
 </script>
 
 <style scoped>
-
+    .img {
+        width: 80px;
+        height: 80px;
+        border-radius: 10px;
+    }
 </style>

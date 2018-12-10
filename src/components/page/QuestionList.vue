@@ -1,7 +1,7 @@
 <template>
     <div>
         <link rel="stylesheet" href="../../../node_modules/font-awesome/css/font-awesome.min.css">
-        <el-row gutter="20">
+        <el-row :gutter="20">
             <el-col :span="16" align="right">
                 <el-card class="box-card">
                     <div class="item">
@@ -16,44 +16,46 @@
                                 </template>
                                 <!-- 问题列表 -->
                                 <template slot-scope="scope">
-                                    <div style="padding-top: 10px; padding-bottom: 10px">
-                                        <el-row gutter="15">
-                                            <!-- 头像 -->
-                                            <el-col :span="4">
-                                                <div><img :src="scope.row.picture_path" class="img"/></div>
-                                            </el-col>
-                                            <!-- 其他信息 -->
-                                            <el-col :span="20">
-                                                <el-row>
-                                                    <div style="font-size: 13.5px; padding-left: 2px">{{scope.row.question_title}}</div>
-                                                </el-row>
-                                                <el-row style="margin-top: 5px">
-                                                    <div style="white-space: nowrap; text-overflow:ellipsis; overflow:hidden;font-size: 13px;padding-left: 3px">{{scope.row.question_text}}</div>
-                                                </el-row>
-                                                <el-row gutter="10" style="margin-top: 6px">
-                                                    <el-col :span="4">
-                                                        <div>
-                                                            <div style="border-right: solid 1px #E1E1E1"><el-tag color="#fff" style="color: #AAAAAA; border-color: #AAAAAA">{{scope.row.sector_name}}</el-tag></div>
-                                                        </div>
-                                                    </el-col>
-                                                    <el-col :span="6">
-                                                        <el-rate
-                                                            v-model="scope.row.question_evaluation"
-                                                            disabled
-                                                            show-score
-                                                            text-color="#ff9900"
-                                                            score-template="{value}" style="zoom: 80%; padding-top: 6px">
-                                                        </el-rate>
-                                                    </el-col>
-                                                    <el-col :span="14">
-                                                        <div style="font-size: 12px; margin-left: 5px; color: #AAAAAA">
-                                                            {{scope.row.question_participate}}人参与
-                                                        </div>
-                                                    </el-col>
-                                                </el-row>
-                                            </el-col>
-                                        </el-row>
-                                    </div>
+                                    <el-button style="border-color: #fff" @click="goDetails(scope.$index)">
+                                        <div style="padding-top: 10px; padding-bottom: 10px">
+                                            <el-row :gutter="15">
+                                                <!-- 图片 -->
+                                                <el-col :span="4">
+                                                    <div><img :src="scope.row.picture_path" class="img"/></div>
+                                                </el-col>
+                                                <!-- 其他信息 -->
+                                                <el-col :span="20">
+                                                    <el-row>
+                                                        <div style="font-size: 13.5px; padding-left: 2px">{{scope.row.question_title}}</div>
+                                                    </el-row>
+                                                    <el-row style="margin-top: 5px">
+                                                        <div style="white-space: nowrap; text-overflow:ellipsis; overflow:hidden;font-size: 13px;padding-left: 3px">{{scope.row.question_text}}</div>
+                                                    </el-row>
+                                                    <el-row :gutter="10" style="margin-top: 6px">
+                                                        <el-col :span="4">
+                                                            <div>
+                                                                <div style="border-right: solid 1px #E1E1E1"><el-tag color="#fff" style="color: #AAAAAA; border-color: #AAAAAA">{{scope.row.sector_name}}</el-tag></div>
+                                                            </div>
+                                                        </el-col>
+                                                        <el-col :span="6">
+                                                            <el-rate
+                                                                v-model="scope.row.question_evaluation"
+                                                                disabled
+                                                                show-score
+                                                                text-color="#ff9900"
+                                                                score-template="{value}" style="zoom: 80%; padding-top: 6px">
+                                                            </el-rate>
+                                                        </el-col>
+                                                        <el-col :span="14">
+                                                            <div style="font-size: 12px; margin-left: 5px; color: #AAAAAA">
+                                                                {{scope.row.question_participate}}人参与
+                                                            </div>
+                                                        </el-col>
+                                                    </el-row>
+                                                </el-col>
+                                            </el-row>
+                                        </div>
+                                    </el-button>
                                 </template>
                             </el-table-column>
                         </el-table>
@@ -120,12 +122,13 @@
                         var j = (page * count < this.totalCount ? page * count : this.totalCount);
                         while (i < j) {
                             this.questions.push({
+                                question_ID: questionList.data[i].question_ID,
+                                question_sector_ID: questionList.data[i].question_sector_ID,
                                 question_title: questionList.data[i].question_title,
                                 sector_name: questionList.data[i].sector_name,
                                 user_ID: questionList.data[i].user_ID,
                                 question_text: questionList.data[i].question_text,
                                 question_date: questionList.data[i].question_date,
-                                answer_ID: questionList.data[i].answer_ID,
                                 answer_count: questionList.data[i].answer_count,
                                 clicking_rate: questionList.data[i].clicking_rate,
                                 question_evaluation: questionList.data[i].question_evaluation,
@@ -137,7 +140,7 @@
                         }
                     } else {
                         this.loading = false;
-                        this.$message({type: 'error', message: '文章加载失败!'});
+                        this.$message({type: 'error', message: '加载失败!'});
                     }
                 }, (response) => {
                     if (response.status === 403) {
@@ -145,11 +148,11 @@
                         this.$message({type: 'error', message: response.response.data});
                     } else {
                         this.loading = false;
-                        this.$message({type: 'error', message: '文章加载失败!'});
+                        this.$message({type: 'error', message: '加载失败!'});
                     }
                 }).catch((response) => {
                     this.loading = false;
-                    this.$message({type: 'error', message: '文章加载失败!'});
+                    this.$message({type: 'error', message: '加载失败!'});
                 })
             },
             // 翻页
@@ -158,8 +161,18 @@
                 this.loading = true;
                 this.loadBlogs(currentPage, this.pageSize);
             },
+            // 跳转至详情页面
+            goDetails: function(index) {
+                this.$router.push({
+                    path: '/question-details',
+                    name: 'QuestionDetails',
+                    query: {
+                        index: this.questions[index]
+                    }
+                })
+            }
         },
-        mounted() {
+        mounted: function() {
             // 生成二维码
             let qrcode = new QRCode('qrcode',{
                 width: 150, // 设置宽度，单位像素

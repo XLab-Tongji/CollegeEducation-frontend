@@ -9,13 +9,30 @@
                 <div>
                     <!-- 输入搜索内容 -->
                     <el-input
-                        placeholder="查找内容"
-                        clearable="true"
-                        prefix-icon="el-icon-search"
+                        placeholder="请输入关键字"
+                        clearable
                         v-model="keywords"
                         style="width: 250px"
+                        v-show="searchType !== 2"
                         size="mini">
                     </el-input>
+                    <!-- 选择标签 -->
+                    <el-select
+                        v-model="sectorKeyword"
+                        multiple
+                        collapse-tags
+                        filterable
+                        placeholder="请输入关键字"
+                        style="width: 250px"
+                        v-show="searchType === 2"
+                        size="mini">
+                        <el-option
+                            v-for="item in sectors"
+                            :key="item.SectorId"
+                            :label="item.SectorName"
+                            :value="item.SectorName">
+                        </el-option>
+                    </el-select>
                     <!-- 选择搜索类型 -->
                     <el-select value="" v-model="searchType" class="type-select" size="mini">
                         <el-option
@@ -27,12 +44,6 @@
                     </el-select>
                     <!-- 搜索键 -->
                     <el-button type="primary" icon="el-icon-search" @click="search" class="search-button" size="mini">搜索</el-button>
-                    <!-- 选择标签 -->
-                    <div style="float: right" v-show="searchType === 2">
-                        <el-checkbox v-model="tagKeyword" label="计算机软件及计算机应用" border size="mini" @change="search"></el-checkbox>
-                        <el-checkbox v-model="tagKeyword" label="互联网技术" border size="mini" @change="search"></el-checkbox>
-                        <el-checkbox v-model="tagKeyword" label="电信技术" border size="mini" @change="search"></el-checkbox>
-                    </div>
                 </div>
                 <el-table
                     ref="multipleTable"
@@ -54,7 +65,7 @@
                         label="作者"
                         align="center">
                         <template slot-scope="scope">
-                            <p style="font-size: 12px; color: #6A6A6A">id: {{scope.row.UserId}} </p>
+                            <p style="font-size: 12px; color: #6A6A6A">{{scope.row.USERNAME}} </p>
                             <p style="font-size: 9px; color: #6A6A6A">发表于 {{scope.row.TopicDate}}</p>
                         </template>
                     </el-table-column>
@@ -93,8 +104,10 @@
                         layout="prev, pager, next"
                         :total="totalCount"
                         class="page-change"
-                        :current-page="currentPage"
-                        @current-change="currentChange" v-show="articles.length > 0">
+                        :current-page.sync="currentPage"
+                        @current-change="currentChange(currentPage)"
+                        v-show="articles.length > 0"
+                        v-loading="loading">
                     </el-pagination>
                 </div>
             </el-card>
@@ -112,13 +125,13 @@
                 articles: [], // 存储文章信息
                 loading: false, // 文章加载状态
                 searchType: 0, // 搜索类型
-                currentPage: 1, // 当前位于第几页
+                currentPage: 0, // 当前位于第几页
+                historyPage: 0, // 转换前位于第几页
                 totalCount: -1, // 文章总数
                 pageSize: 5, // 每页显示多少文章
                 keywords: '', // 输入的关键词
-                titleKeyword: '', // 按标题搜索关键词
                 sectorKeyword: [], // 按标签和全部搜索关键词
-                tagKeyword: [], // 选择的标签关键词
+                sectors: [], // 可选择的标签关键词
                 searchUrl: '/article/all?userID=1&SectorId=1&keywords=',
                 // 搜索类型
                 searchOptions: [{
@@ -133,30 +146,27 @@
                 }]
             }
         },
-
-        mounted: function () {
+        mounted: function() {
             this.loading = true;
-            this.loadBlogs(1, this.pageSize);
+            let page = Number(localStorage.getItem('pageT'));
+            if (page <= 0) page = 1;
+            this.currentChange(page);
+            this.getSectors();
         },
 
         methods: {
             // 搜索
             search: function() {
-                if(this.keywords === '' && this.tagKeyword.length === 0) {
+                if(this.keywords === '' && this.sectorKeyword.length === 0) {
                     this.searchUrl = '/article/all?userID=1&SectorId=1&keywords=';
                 }
                 else {
                     // 按标题
                     if (this.searchType === 1) {
-                        this.titleKeyword = this.keywords;
-                        this.searchUrl = '/article/all?userID=1&SectorId=1&keywords=' + this.titleKeyword;
+                        this.searchUrl = '/article/all?userID=1&SectorId=1&keywords=' + this.keywords;
                     }
                     // 按标签和全部
                     else {
-                        this.sectorKeyword = [];
-                        for (var i = 0; i < this.tagKeyword.length; i++) {
-                            this.sectorKeyword.push(this.tagKeyword[i]);
-                        }
                         if(this.keywords !== '') {
                             let k = this.keywords.trim().split(/\s+/);
                             for (var i = 0; i < k.length; i++) {
@@ -167,16 +177,17 @@
                         for(var i = 0; i < this.sectorKeyword.length;i++){
                             this.searchUrl += '&SectorName=' + this.sectorKeyword[i];
                         }
+                        this.sectorKeyword = [];
                     }
                 }
                 this.currentChange(1);
             },
             // 翻页
+            // 页面跳转有问题
             currentChange: function (currentPage) {
                 this.currentPage = currentPage;
                 this.loading = true;
-                this.loadBlogs(currentPage, this.pageSize);
-
+                this.loadBlogs(this.currentPage, this.pageSize);
             },
             // 加载文章
             loadBlogs: function (page, count) {
@@ -190,6 +201,9 @@
                         var j = (page * count < this.totalCount ? page * count : this.totalCount);
                         while (i < j) {
                             this.articles.push({
+                                publish_id: articleList.data[i].publish_id,
+                                publish_type_id: articleList.data[i].publish_type_id,
+                                sector_use_id: articleList.data[i].sector_use_id,
                                 UserId: articleList.data[i].UserId,
                                 TopicDate: articleList.data[i].TopicDate,
                                 ReplyCount: articleList.data[i].ReplyCount,
@@ -202,7 +216,8 @@
                                 sectorName: articleList.data[i].sectorName,
                                 sectorState: articleList.data[i].sectorState,
                                 praise_id: articleList.data[i].praise_id,
-                                favourite_id: articleList.data[i].favourite_id
+                                favourite_id: articleList.data[i].favourite_id,
+                                USERNAME: articleList.data[i].USERNAME
                             });
                             i++;
                         }
@@ -223,22 +238,57 @@
                     this.$message({type: 'error', message: '文章加载失败!'});
                 })
             },
+            // 获取标签
+            getSectors: function() {
+                if (this.sectors.length === 0) {
+                    this.$http.get(server.url + '/sector/get', {headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}}).then((response) => {
+                        if (response.status === 200) {
+                            var sectorList = JSON.parse(response.bodyText);
+                            var i = 0;
+                            while (i < sectorList.data.length) {
+                                this.sectors.push({
+                                    SectorId: sectorList.data[i].SectorId,
+                                    SectorName: sectorList.data[i].SectorName
+                                });
+                                i++;
+                            }
+                        } else {
+                            this.$message({type: 'error', message: '加载失败!'});
+                        }
+                    }, (response) => {
+                        if (response.status === 403) {
+                            this.$message({type: 'error', message: response.response.data});
+                        } else {
+                            this.$message({type: 'error', message: '加载失败!'});
+                        }
+                    }).catch((response) => {
+                        this.$message({type: 'error', message: '加载失败!'});
+                    })
+                }
+            },
             // 跳转至详情页面
             goDetails: function(index) {
+                localStorage.setItem('pageT',JSON.stringify(this.currentPage));
+                this.$http.post(server.url + '/article/browse', this.articles[index], {headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}}).then(response => { }, response => {
+                    this.$message({type: 'error', message: '加载错误'});
+                }).catch((response) => {
+                    this.$message({type: 'error', message: '加载错误'});
+                });
                 this.$router.push({
                     path: '/topic-details',
                     name: 'TopicDetails',
                     query: {
-                        article: this.articles[index]
+                        index: this.articles[index],
+                        page: this.currentPage
                     }
                 })
             }
         },
 
         filters:{
-            // 去除文字的html标签
+            // 将图片转换成文字显示
             filterHtml: function(val) {
-                return val.replace(/<[^>]*>/g, "");//去除文字的<...></...>标签
+                return val.replace(/<img(.*?)>/g, "[图片]")
             },
             // 显示emoji
             htmlDecode: function(val) {

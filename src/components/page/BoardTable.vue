@@ -8,13 +8,30 @@
                 <div>
                     <!-- 输入搜索内容 -->
                     <el-input
-                        placeholder="查找内容"
-                        clearable="true"
-                        prefix-icon="el-icon-search"
+                        placeholder="请输入关键字"
+                        clearable
                         v-model="keywords"
                         style="width: 250px"
+                        v-show="searchType !== 2"
                         size="mini">
                     </el-input>
+                    <!-- 选择标签 -->
+                    <el-select
+                        v-model="sectorKeyword"
+                        multiple
+                        collapse-tags
+                        filterable
+                        placeholder="请输入关键字"
+                        style="width: 250px"
+                        v-show="searchType === 2"
+                        size="mini">
+                        <el-option
+                            v-for="item in sectors"
+                            :key="item.SectorId"
+                            :label="item.SectorName"
+                            :value="item.SectorName">
+                        </el-option>
+                    </el-select>
                     <!-- 选择搜索类型 -->
                     <el-select value="" v-model="searchType" class="type-select" size="mini">
                         <el-option
@@ -26,12 +43,6 @@
                     </el-select>
                     <!-- 搜索键 -->
                     <el-button type="primary" icon="el-icon-search" @click="search" class="search-button" size="mini">搜索</el-button>
-                    <!-- 选择标签 -->
-                    <div style="float: right" v-show="searchType === 2">
-                        <el-checkbox v-model="tagKeyword" label="计算机软件及计算机应用" border size="mini" @change="search"></el-checkbox>
-                        <el-checkbox v-model="tagKeyword" label="互联网技术" border size="mini" @change="search"></el-checkbox>
-                        <el-checkbox v-model="tagKeyword" label="电信技术" border size="mini" @change="search"></el-checkbox>
-                    </div>
                 </div>
                 <el-table
                     ref="multipleTable"
@@ -45,7 +56,7 @@
                         width="500" style="text-align: center">
                         <template slot-scope="scope">
                             <p class="margin-top: 10px;"><el-button type="text" @click="goDetails(scope.$index)" style="font-size: 14px; font-weight: bold; color: #0A9894">{{ scope.row.blackboard_name }}</el-button></p>
-                            <p class="topic-content"> {{scope.row.blackboard_text | filterHtml | htmlDecode}}</p>
+                            <p class="topic-content"> {{scope.row.blackboard_text | imgEncode | sEncode | htmlDecode}}</p>
                         </template>
                     </el-table-column>
                     <!-- 作者 -->
@@ -53,7 +64,7 @@
                         label="作者"
                         align="center">
                         <template slot-scope="scope">
-                            <p style="font-size: 12px; color: #6A6A6A">id: {{scope.row.user_id}} </p>
+                            <p style="font-size: 12px; color: #6A6A6A">{{scope.row.USERNAME}} </p>
                             <p style="font-size: 9px; color: #6A6A6A">发表于 {{scope.row.blackboard_date}}</p>
                         </template>
                     </el-table-column>
@@ -93,7 +104,8 @@
                         :total="totalCount"
                         class="page-change"
                         :current-page="currentPage"
-                        @current-change="currentChange" v-show="blackboards.length > 0">
+                        v-model="currentPage"
+                        @current-change="currentChange" v-show="blackboards.length > 0" v-loading="loading">
                     </el-pagination>
                 </div>
             </el-card>
@@ -114,9 +126,8 @@
                 totalCount: -1, // 黑板报总数
                 pageSize: 5, // 每页显示多少黑板报
                 keywords: '', // 输入的关键词
-                titleKeyword: '', // 按标题搜索关键词
                 sectorKeyword: [], // 按标签和全部搜索关键词
-                tagKeyword: [], // 选择的标签关键词
+                sectors: [], // 可选择的标签
                 searchUrl: '/blackboard/get?userID=1&SectorId=1&keywords=',
                 // 搜索类型
                 searchOptions: [{
@@ -134,44 +145,42 @@
 
         mounted: function () {
             this.loading = true;
-            this.loadBlackboards(1, this.pageSize);
+            let page = Number(localStorage.getItem('pageB'));
+            if (page <= 0) page = 1;
+            this.currentChange(page);
+            this.getSectors();
         },
 
         methods: {
             // 搜索
             search: function() {
-                if(this.keywords === '' && this.tagKeyword.length === 0) {
+                if(this.keywords === '' && this.sectorKeyword.length === 0) {
                     this.searchUrl = '/blackboard/get?userID=1&SectorId=1&keywords=';
                 }
                 else {
                     // 按标题
                     if (this.searchType === 1) {
-                        this.titleKeyword = this.keywords;
-                        this.searchUrl = '/blackboard/get?userID=1&SectorId=1&keywords=' + this.titleKeyword;
+                        this.searchUrl = '/article/all?userID=1&SectorId=1&keywords=' + this.keywords;
                     }
                     // 按标签和全部
                     else {
-                        this.sectorKeyword = [];
-                        for (var i = 0; i < this.tagKeyword.length; i++) {
-                            this.sectorKeyword.push(this.tagKeyword[i]);
-                        }
-                        if(this.keywords !== '') {
+                        if (this.keywords !== '') {
                             let k = this.keywords.trim().split(/\s+/);
                             for (var i = 0; i < k.length; i++) {
                                 this.sectorKeyword.push(k[i]);
                             }
                         }
-                        this.searchUrl = '/blackboard/get?userID=1&SectorId=' + this.searchType;
-                        for(var i = 0; i < this.sectorKeyword.length;i++){
+                        this.searchUrl = '/article/all?userID=1&SectorId=' + this.searchType;
+                        for (var i = 0; i < this.sectorKeyword.length; i++) {
                             this.searchUrl += '&SectorName=' + this.sectorKeyword[i];
                         }
+                        this.sectorKeyword = [];
                     }
                 }
                 this.currentChange(1);
             },
             // 翻页
             currentChange: function (currentPage) {
-                this.currentPage = currentPage;
                 this.loading = true;
                 this.loadBlackboards(currentPage, this.pageSize);
 
@@ -188,6 +197,8 @@
                         var j = (page * count < this.totalCount ? page * count : this.totalCount);
                         while (i < j) {
                             this.blackboards.push({
+                                publish_id: blackboardList.data[i].publish_id,
+                                publish_type_id: blackboardList.data[i].publish_type_id,
                                 blackboard_id: blackboardList.data[i].blackboard_id,
                                 user_id: blackboardList.data[i].user_id,
                                 sector_id: blackboardList.data[i].sector_id,
@@ -200,7 +211,8 @@
                                 favorite_count: blackboardList.data[i].favorite_count,
                                 sectorName: blackboardList.data[i].sectorName,
                                 praise_id: blackboardList.data[i].praise_id,
-                                favourite_id: blackboardList.data[i].favourite_id
+                                favourite_id: blackboardList.data[i].favourite_id,
+                                USERNAME: blackboardList.data[i].USERNAME
                             });
                             i++;
                         }
@@ -221,22 +233,59 @@
                     this.$message({type: 'error', message: '黑板报加载失败!'});
                 })
             },
+            // 获取标签
+            getSectors: function() {
+                this.$http.get(server.url + '/sector/get', {headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}}).then((response) => {
+                    if (response.status === 200) {
+                        var sectorList = JSON.parse(response.bodyText);
+                        var i = 0;
+                        while (i < sectorList.length) {
+                            this.sectors.push({
+                                SectorId: sectorList.data[i].SectorId,
+                                SectorName: sectorList.data[i].SectorName
+                            });
+                            i++;
+                        }
+                    } else {
+                        this.loading = false;
+                        this.$message({type: 'error', message: '加载失败!'});
+                    }
+                }, (response) => {
+                    if (response.status === 403) {
+                        this.loading = false;
+                        this.$message({type: 'error', message: response.response.data});
+                    } else {
+                        this.loading = false;
+                        this.$message({type: 'error', message: '加载失败!'});
+                    }
+                }).catch((response) => {
+                    this.loading = false;
+                    this.$message({type: 'error', message: '加载失败!'});
+                })
+            },
             // 跳转至详情页面
             goDetails: function(index) {
+                localStorage.setItem('pageB',JSON.stringify(this.currentPage));
+                // 点击量变化
                 this.$router.push({
                     path: '/blackboard-details',
                     name: 'BoardDetails',
                     query: {
-                        blackboard: this.blackboards[index]
+                        index: this.blackboards[index],
+                        page: this.currentPage
                     }
                 })
             }
         },
 
         filters:{
-            // 去除文字的html标签
-            filterHtml: function(val) {
-                return val.replace(/<[^>]*>/g, "");//去除文字的<...></...>标签
+            // 将图片转换成文字显示
+            imgEncode: function(val) {
+                if(val !== null) return val.replace(/<img src="http:\/\/tjce-image(.*?)>/g, "[图片]")
+            },
+            // 将表情转换成文字显示
+            sEncode: function(val) {
+                if(val !== null) return val.replace(/<img(.*?)>/g, "[表情]")
             },
             // 显示emoji
             htmlDecode: function(val) {

@@ -11,18 +11,16 @@
                     <el-row style="color: #6A6A6A">
                         <el-col :span="3">
                             <el-row>
-                                <div>
-                                    <el-card shadow="never" style="height: 100px; width: 100px">
-                                        <!-- 显示头像 -->
-                                    </el-card>
-                                </div>
+                                <div><img :src="authorImg" class="img"/></div>
                             </el-row>
                             <el-row style="padding-top: 10px;font-size: 12px;width: 100px">
-                                <div align="center">用户名</div>
+                                <div align="center">{{article.USERNAME}}</div>
                             </el-row>
                         </el-col>
                         <el-col :span="21" style="padding-left: 20px">
-                            <el-row style="font-size: 14px; width: 78%; min-height: 120px; line-height: 24px">{{article.TopicText}}</el-row>
+                            <el-row style="font-size: 14px; width: 78%; min-height: 120px; line-height: 24px">
+                                <div id="text"></div>
+                            </el-row>
                             <el-row style="font-size: 12px;margin-top: 30px;padding-right: 170px">
                                 <el-col :span="15"><div style="padding-top: 8px">{{article.TopicDate}}</div></el-col>
                                 <el-col :span="3"><div align="right"><el-button type="text" @click="collect()" v-loading="collectLoading" style="color: #6A6A6A"><i  class="fa fa-star fa-lg" v-show="isCollected" aria-hidden="true" style="margin-right: 5px;color: #FFE100"></i><i class="fa fa-star-o fa-lg" v-show="!isCollected" aria-hidden="true" style="margin-right: 5px; color: #6A6A6A;"></i>收藏</el-button></div></el-col>
@@ -43,14 +41,10 @@
                             <el-row style="margin: 15px 0">
                                 <el-col :span="4">
                                     <el-row>
-                                        <div>
-                                            <el-card shadow="never" style="height: 100px; width: 100px">
-                                                <!-- 显示头像 -->
-                                            </el-card>
-                                        </div>
+                                        <div><img :src="replyImg[scope.$index]" class="img"/></div>
                                     </el-row>
                                     <el-row style="padding-top: 10px;font-size: 12px;width: 100px">
-                                        <div align="center">用户名</div>
+                                        <div align="center">{{scope.row.username}}</div>
                                     </el-row>
                                 </el-col>
                                 <el-col :span="20">
@@ -97,6 +91,9 @@
             this.getParams();
             if (this.article.praise_id !== -1) this.isLiked = true;
             if (this.article.favourite_id !== -1) this.isCollected = true;
+            const container = document.getElementById('text');
+            container.appendChild(this.createNode(this.article.TopicText));
+            this.getAuthorImg();
             this.loadComments();
         },
         data() {
@@ -109,6 +106,9 @@
                 commentText: '', // 发表评论内容
                 isLiked: false, // 点赞状态
                 isCollected: false, // 收藏状态
+                page: 0, // 当前页数
+                authorImg: '', // 楼主头像
+                replyImg: [], // 评论头像
                 // 收藏实体
                 favoriteEntity: {
                     topic_id: 0,
@@ -129,9 +129,12 @@
             }
         },
         methods: {
+            // 获取上一页面传递的参数
             getParams: function () {
-                this.article = this.$route.query.article
+                this.article = this.$route.query.index;
+                this.page = this.$route.query.page;
             },
+            // 返回上一页面
             goBack: function() {
                 this.$router.go(-1);
             },
@@ -139,7 +142,6 @@
             like: function() {
                 if(this.isLiked === false) {
                     // 1为userID，需要获取
-                    // article.SectorName有问题
                     this.$http.post(server.url + '/article/like', this.article, {params: {userID:1}, headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}}).then(response => {
                         if (response.status === 200){
                             this.likeLoading = true;
@@ -158,7 +160,6 @@
                 }
                 else {
                     // 1为userID，需要获取
-                    // article.SectorName有问题
                     this.$http.post(server.url + '/article/like/delete', this.article, {params: {userID:1}, headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}}).then(response => {
                         if (response.status === 200){
                             this.likeLoading = true;
@@ -217,6 +218,7 @@
             // 加载评论
             loadComments: function() {
                 this.comments = [];
+                this.replyImg = [];
                 this.$http.get(server.url + '/article/reply/get?TopicId=' + this.article.TopicId, {headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}}).then((response) => {
                     if (response.status === 200) {
                         let commentList = JSON.parse(response.bodyText);
@@ -229,7 +231,19 @@
                                 ReplyText: commentList.data[i].ReplyText,
                                 ReplyDate: commentList.data[i].ReplyDate,
                                 ClickingRate: commentList.data[i].ClickingRate,
-                                PraiseCount: commentList.data[i].PraiseCount
+                                PraiseCount: commentList.data[i].PraiseCount,
+                                username: commentList.data[i].username
+                            });
+                            this.$http.get(server.url + '/user/image/get?userID=' + commentList.data[i].UserId, {headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}}).then((response) => {
+                                if (response.status === 200) {
+                                    this.replyImg.push(JSON.parse(response.bodyText).data);
+                                } else {
+                                    this.$message({type: 'error', message: '头像加载失败!'});
+                                }
+                            }, (response) => {
+                                this.$message({type: 'error', message: '头像加载失败!'});
+                            }).catch((response) => {
+                                this.$message({type: 'error', message: '头像加载失败!'});
                             });
                             i++;
                         }
@@ -246,7 +260,7 @@
                     this.$message({type: 'error', message: '评论加载失败!'});
                 })
             },
-            // 评论
+            // 发表评论
             postComment: function() {
                 this.replyEntity.TopicId = this.article.TopicId;
                 this.replyEntity.ReplyText = this.commentText;
@@ -269,6 +283,27 @@
                     this.$message({type: 'error', message: '请重试'});
                 });
             },
+            // 获取楼主头像
+            getAuthorImg: function() {
+                this.$http.get(server.url + '/user/image/get?userID=' + this.article.UserId, {headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}}).then((response) => {
+                    if (response.status === 200) {
+                        this.replyImg.push(JSON.parse(response.bodyText).data);
+                    } else {
+                        this.$message({type: 'error', message: '头像加载失败!'});
+                    }
+                }, (response) => {
+                    this.$message({type: 'error', message: '头像加载失败!'});
+                }).catch((response) => {
+                    this.$message({type: 'error', message: '头像加载失败!'});
+                });
+            },
+            // 显示文章内容
+            createNode: function(val) {
+                const template = `<div class='child'>${val}</div>`;
+                let tempNode = document.createElement('div');
+                tempNode.innerHTML = template;
+                return tempNode.firstChild;
+            }
         },
         watch: {
             // 监测路由变化,只要变化了就调用获取路由参数方法将数据存储本组件即可
@@ -278,5 +313,10 @@
 </script>
 
 <style scoped>
+    .img {
+        width: 80px;
+        height: 80px;
+        border-radius: 10px;
+    }
 
 </style>
