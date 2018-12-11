@@ -36,7 +36,7 @@
                                                             <div style="border-right: solid 1px #E1E1E1"><el-tag color="#fff" style="color: #AAAAAA; border-color: #AAAAAA">{{scope.row.sector_name}}</el-tag></div>
                                                         </div>
                                                     </el-col>
-                                                    <el-col :span="6">
+                                                    <el-col :span="7">
                                                         <el-rate
                                                             v-model="scope.row.question_evaluation"
                                                             disabled
@@ -45,7 +45,7 @@
                                                             score-template="{value}" style="zoom: 80%; padding-top: 6px">
                                                         </el-rate>
                                                     </el-col>
-                                                    <el-col :span="14">
+                                                    <el-col :span="13">
                                                         <div style="font-size: 12px; margin-left: 5px; color: #AAAAAA">
                                                             {{scope.row.question_participate}}人参与
                                                         </div>
