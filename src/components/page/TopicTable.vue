@@ -146,7 +146,7 @@
                 }]
             }
         },
-        mounted: function() {
+        created: function() {
             this.loading = true;
             let page = Number(localStorage.getItem('pageT'));
             if (page <= 0) page = 1;
@@ -278,8 +278,7 @@
                     path: '/topic-details',
                     name: 'TopicDetails',
                     query: {
-                        index: this.articles[index],
-                        page: this.currentPage
+                        index: this.articles[index]
                     }
                 })
             }

@@ -143,7 +143,7 @@
             }
         },
 
-        mounted: function () {
+        created: function () {
             this.loading = true;
             let page = Number(localStorage.getItem('pageB'));
             if (page <= 0) page = 1;
@@ -266,13 +266,16 @@
             // 跳转至详情页面
             goDetails: function(index) {
                 localStorage.setItem('pageB',JSON.stringify(this.currentPage));
-                // 点击量变化
+                this.$http.post(server.url + '/blackboard/browse', this.blackboards[index], {headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}}).then(response => { }, response => {
+                    this.$message({type: 'error', message: '加载错误'});
+                }).catch((response) => {
+                    this.$message({type: 'error', message: '加载错误'});
+                });
                 this.$router.push({
                     path: '/blackboard-details',
                     name: 'BoardDetails',
                     query: {
-                        index: this.blackboards[index],
-                        page: this.currentPage
+                        index: this.blackboards[index]
                     }
                 })
             }

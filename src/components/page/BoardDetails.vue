@@ -109,7 +109,6 @@
                 isCollected: false, // 收藏状态
                 authorImg: '', // 楼主头像
                 replyImg: [], // 评论头像
-                page: 0, // 当前页数
                 // 收藏实体
                 favoriteEntity: {
                     topic_id: 0,
@@ -132,7 +131,6 @@
         methods: {
             getParams: function () {
                 this.blackboard = this.$route.query.index;
-                this.page = this.$route.query.page;
             },
             goBack: function() {
                 this.$router.go(-1);

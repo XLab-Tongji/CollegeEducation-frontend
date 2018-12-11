@@ -21,6 +21,7 @@
                             <el-row style="font-size: 14px; width: 78%; min-height: 120px; line-height: 24px">
                                 <div id="text"></div>
                             </el-row>
+                            <!-- 收藏/评论/点赞按键 -->
                             <el-row style="font-size: 12px;margin-top: 30px;padding-right: 170px">
                                 <el-col :span="15"><div style="padding-top: 8px">{{article.TopicDate}}</div></el-col>
                                 <el-col :span="3"><div align="right"><el-button type="text" @click="collect()" v-loading="collectLoading" style="color: #6A6A6A"><i  class="fa fa-star fa-lg" v-show="isCollected" aria-hidden="true" style="margin-right: 5px;color: #FFE100"></i><i class="fa fa-star-o fa-lg" v-show="!isCollected" aria-hidden="true" style="margin-right: 5px; color: #6A6A6A;"></i>收藏</el-button></div></el-col>
@@ -30,7 +31,6 @@
                         </el-col>
                     </el-row>
                 </div>
-            <!-- 收藏/评论/点赞按键 -->
             </el-card>
             <!-- 评论列表 -->
             <div style="margin-top: 10px">
@@ -106,7 +106,6 @@
                 commentText: '', // 发表评论内容
                 isLiked: false, // 点赞状态
                 isCollected: false, // 收藏状态
-                page: 0, // 当前页数
                 authorImg: '', // 楼主头像
                 replyImg: [], // 评论头像
                 // 收藏实体
@@ -132,7 +131,6 @@
             // 获取上一页面传递的参数
             getParams: function () {
                 this.article = this.$route.query.index;
-                this.page = this.$route.query.page;
             },
             // 返回上一页面
             goBack: function() {

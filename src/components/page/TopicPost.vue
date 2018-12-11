@@ -139,7 +139,6 @@
                 this.loading = true;
                 this.editor.$textElem.attr('contenteditable', false);
                 this.article.sectorName = this.SectorName;
-                alert(this.article.sectorName[0])
                 var t = new Date();
                 this.article.TopicDate = t.format("yyyy-MM-dd HH:mm:ss");
                 this.$http.post(server.url + '/article/save', this.article, {headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}}).then(response => {
@@ -148,7 +147,13 @@
                         this.loading = false;
                         this.isSaved = true;
                         this.$message({type: 'success', message: '已发表，页面即将跳转'});
-                        this.$router.push('/topic');
+                        this.$router.push({
+                            path: '/topic-list',
+                            name: 'TopicList',
+                            query: {
+                                index: 1
+                            }
+                        });
                     }
                     else{
                         this.loading = false;

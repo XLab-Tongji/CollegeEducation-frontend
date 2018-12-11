@@ -72,11 +72,13 @@ export default new Router({
                     children:[
                         {
                             path: '/topic-list',
+                            name: 'TopicList',
                             component: resolve => require(['../components/page/TopicTable.vue'], resolve),
                             meta: { title: '文章列表' }
                         },
                         {
                             path: '/blackboard-list',
+                            name: 'BlackboardList',
                             component: resolve => require(['../components/page/BoardTable.vue'], resolve),
                             meta: { title: '黑板报列表' }
                         },
@@ -86,12 +88,12 @@ export default new Router({
                             meta: { title: '发表文章'}
                         },
                         {
-                            path: '/blackboard',
+                            path: '/blackboard-post',
                             component: resolve => require(['../components/page/Blackboard.vue'], resolve),
                             meta: { title: '发表黑板报'}
                         },
                         {
-                            path: '/question',
+                            path: '/question-list',
                             name: 'QuestionList',
                             component: resolve => require(['../components/page/QuestionList.vue'], resolve),
                             meta: { title: '问题答疑'}
