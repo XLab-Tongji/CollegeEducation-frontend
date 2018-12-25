@@ -75,7 +75,7 @@
                     </el-table>
                 </el-card>
             </div>
-            <div id="postComment">
+            <div>
                 <!-- 发表评论 -->
                 <div style="margin-top: 20px;font-size: 14px;font-weight: bold;color: #6A6A6A">发表评论</div>
                 <el-input type="textarea" v-model="commentText" placeholder="输入评论内容（400字以内）" maxlength="400" :autosize="{ minRows: 9, maxRows: 9}" style="margin-top: 15px;"></el-input>

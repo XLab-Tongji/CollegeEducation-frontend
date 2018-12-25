@@ -30,7 +30,7 @@
                                                 <el-row style="margin-top: 5px">
                                                     <div style="white-space: nowrap; text-overflow:ellipsis; overflow:hidden;font-size: 13px;padding-left: 3px">{{scope.row.question_text}}</div>
                                                 </el-row>
-                                                <el-row :gutter="10" style="margin-top: 6px">
+                                                <el-row :gutter="0" style="margin-top: 6px">
                                                     <el-col :span="4">
                                                         <div>
                                                             <div style="border-right: solid 1px #E1E1E1"><el-tag color="#fff" style="color: #AAAAAA; border-color: #AAAAAA">{{scope.row.sector_name}}</el-tag></div>

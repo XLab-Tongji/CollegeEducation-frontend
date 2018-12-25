@@ -65,15 +65,27 @@ export default new Router({
                     meta: { title: 'markdown编辑器' }    
                 },
                 {
-                    path: '/topic',
-                    component: resolve => require(['../components/page/TopicList.vue'], resolve),
+                    path: '/forum',
+                    component: resolve => require(['../components/page/Forum.vue'], resolve),
                     meta: { title: '论坛' },
-                    redirect: '/topic-list',
+                    redirect: '/class-list',
                     children:[
+                        {
+                            path: '/class-list',
+                            name: 'ClassList',
+                            component: resolve => require(['../components/page/ClassList.vue'], resolve),
+                            meta: { title: '班级列表' }
+                        },
+                        {
+                            path: '/class-settings',
+                            name: 'ClassSettings',
+                            component: resolve => require(['../components/page/ClassSettings.vue'], resolve),
+                            meta: { title: '管理班级' }
+                        },
                         {
                             path: '/topic-list',
                             name: 'TopicList',
-                            component: resolve => require(['../components/page/TopicTable.vue'], resolve),
+                            component: resolve => require(['../components/page/TopicList.vue'], resolve),
                             meta: { title: '文章列表' }
                         },
                         {

@@ -70,7 +70,7 @@
                                        
                     {
                         icon: 'el-icon-question',
-                        index: 'topic',
+                        index: 'forum',
                         title: '论坛'
                     },
                     
