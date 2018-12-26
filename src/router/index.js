@@ -136,7 +136,7 @@ export default new Router({
                     meta: { title: '下载资源' },
                 },
                 {
-                    path: '/source-page',
+                    path: '/source-page:resourceID&:id&:uploaderID&:categoryID&:resourceMajorID&:resourceName&:description&:uploadTime&:points',
                     name:'SourcePage',
                     component: resolve => require(['../components/page/SourcePage.vue'], resolve),
                     meta: { title: '资源详情' }

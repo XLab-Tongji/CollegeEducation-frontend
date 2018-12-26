@@ -341,6 +341,10 @@
                       message: '评论发布成功',
                       type: 'success'
                     });
+                    that.commentPublish.content='';
+                    that.commentPublish.rate=0;
+                    that.commentPublish.title='';
+                    
                 })
             },
             // 监听下载按钮

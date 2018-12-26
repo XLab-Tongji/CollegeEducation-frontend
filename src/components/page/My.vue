@@ -45,6 +45,7 @@
 </template>
 
 <script>
+    inject:['reload'];
     import VueCropper  from 'vue-cropperjs';
     import server from '../../../config/index';
     import axios from 'axios';
@@ -68,6 +69,7 @@
             }
         },
         mounted:function(){
+            this.reload();
             var that=this;
             this.$axios({
                         method:'get',

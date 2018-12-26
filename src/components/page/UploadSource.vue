@@ -106,6 +106,7 @@
     import server from '../../../config/index';
     import axios from 'axios';
     export default {
+    	inject:['reload'],
         name: 'upload',
         data: function(){
             return {
@@ -184,13 +185,14 @@
                 }).then(function(response){
                     that.$notify({
                         title: '发布成功',
-                        message: '稍后将转向首页',
+                        message: '感谢您的贡献',
                         type: 'success',
                         duration:2000
                     });
                     that.loading=false;
                     setTimeout(function(){
-                        that.$router.push('/');
+                    	that.reload();
+                        //that.$router.push('/');
                     },2000)
                 	that.fullscreenLoading = false;
                 }).catch((res)=>{
