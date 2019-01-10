@@ -1,6 +1,7 @@
 <template>
     <div>
         <link rel="stylesheet" href="../../../node_modules/font-awesome/css/font-awesome.min.css">
+        <link rel="stylesheet" href="../../../node_modules/wangeditor/release/wangEditor.min.css">
         <!----- 话题列表 ----->
         <div>
             <!----- 搜索栏 ----->
@@ -111,18 +112,97 @@
                 </div>
             </el-card>
         </div>
-
+        <!-- 发布文章 -->
+        <div style="margin-top: 40px">
+            <div>
+                <el-card v-loading="postLoading">
+                    <div slot="header" style="height: 15px; font-size: 14px; font-weight: bold; padding-left: 1rem">
+                        发表文章
+                    </div>
+                    <!----- 输入标题 ----->
+                    <div align="left">
+                        <el-input v-model="article.TopicTitle" size="small" maxlength="25"
+                                  placeholder="请输入标题..."
+                                  style="width: 350px">
+                        </el-input>
+                    </div>
+                    <!----- 编辑器 ----->
+                    <div id="editor" style="margin-top: 20px"></div>
+                    <div>
+                        <!-- 添加标签 -->
+                        <div style="margin-top: 20px">
+                            <el-select
+                                value=""
+                                v-model="SectorName"
+                                multiple
+                                filterable
+                                allow-create
+                                default-first-option
+                                placeholder="添加标签" style="width: 40%">
+                                <el-option
+                                    v-for="item in sectors"
+                                    :key="item.SectorId"
+                                    :label="item.SectorName"
+                                    :value="item.SectorName">
+                                </el-option>
+                            </el-select>
+                            <el-button @click="saveInDrafts" style="margin-left: 570px">保存到草稿箱</el-button>
+                            <el-button type="primary" @click="postOn" style="margin-left: 10px">发布</el-button>
+                        </div>
+                    </div>
+                </el-card>
+            </div>
+        </div>
     </div>
 </template>
 
 <script>
     import server from '../../../config/index';
+    import WangEditor from 'wangeditor';
+    import data from '../../data/sina-data.js'
+    import {UPLOADER} from '../../tools/utils.js'
 
     export default{
+        name: 'editor',
+        mounted: function(){
+            for(var i = 0;i < data.length;i++){
+                this.sinaData.push({alt: data[i].phrase, src: data[i].icon});
+            }
+            this.editor.customConfig.menus = [
+                'link',  // 插入链接
+                'quote',  // 引用
+                'emoticon',  // 表情
+                'image',  // 插入图片
+                'code',  // 插入代码
+                'undo',  // 撤销
+                'redo'  // 重复
+            ];
+            this.editor.customConfig.onchange = () => {
+                this.article.TopicText = this.editor.txt.html();
+            };
+            this.editor.customConfig.emotions = [
+                {
+                    // tab 的标题
+                    title: '新浪',
+                    // type -> 'emoji' / 'image'
+                    type: 'image',
+                    // content -> 数组
+                    content: this.sinaData
+                },
+                {
+                    title: 'emoji',
+                    type: 'emoji',
+                    content: this.emojiData
+                }];
+            this.editor.customConfig.debug = location.href.indexOf('wangeditor_debug_mode=1') > 0; // 开启debug模式
+            this.editor.create();
+            this.editor.config.customUploadInit = this.UPLOADER(this.editor).init();
+        },
         data() {
             return {
                 articles: [], // 存储文章信息
                 loading: false, // 文章加载状态
+                postLoading: false,
                 searchType: 0, // 搜索类型
                 currentPage: 0, // 当前位于第几页
                 historyPage: 0, // 转换前位于第几页
@@ -142,7 +222,35 @@
                 }, {
                     value: 2,
                     label: '按标签'
-                }]
+                }],
+                editor: new WangEditor('#editor'), // 编辑器
+                sinaData: [], // 新浪表情数组
+                // emoji数组
+                emojiData: ['😀','😃','😄','😁','😆','😅','😂','🤣','😇','😊','🙂','🙃','😉','😌','😍','😘','😗','😙','😚','😋','😛','😝','😜','🤪','🤨','🧐','🤓','😎','🤩','😏','😒','😞','😔','😟','😕','🙁','☹️','😣','😖','😫','😩','😢','😭','😤','😠','😡','🤬','🤯','😳','😱','😨','😰','😥','😓','🤗','🤔','🤭','🤫','🤥','😶','😐','😑','😬','🙄','😯','😦','😧','😮','😲','😴','😪','😵','🤐','🤧','😷','😈','👿','💩','👻','🤲','🙌','👏','🤝','👍','👎','👊','✊','🤛','🤜','🤞','✌','🤟','👌','👈','👉','👆','👇','👋','🤙','💪','🙏','👀','🙇‍','🙅‍','🙆‍','🙋‍','🤦‍','🤷‍','💅','🌝','🌚','❤️','💔','❣️','💕','💓','💗','💖','❌','✅','⭕️','💯','❗️','❓','⁉️','📝'],
+                SectorName: [], // 所有已经添加的标签内容
+                // 发表文章实体
+                article: {
+                    SectorId: 0,
+                    TopicTitle: '',
+                    TopicText: '',
+                    TopicDate: new Date(),
+                    UserId: 1, // 不知道如何获取
+                    ReplyCount: 0,
+                    ClickingRate: 0,
+                    PraiseCount: 0,
+                    sectorName: [],
+                    favorite_count: 0
+                },
+                // 草稿实体
+                draft: {
+                    user_id: 1,
+                    publish_type_id: 0,
+                    sectorName: [],
+                    draft_name: '',
+                    draft_text: '',
+                    write_date: new Date()
+                },
+                UPLOADER // 图片上传组件
             }
         },
         created: function() {
@@ -171,6 +279,7 @@
                             for (var i = 0; i < k.length; i++) {
                                 this.sectorKeyword.push(k[i]);
                             }
+                            this.keywords = '';
                         }
                         this.searchUrl = '/article/all?userID=1&SectorId=' + this.searchType;
                         for(var i = 0; i < this.sectorKeyword.length;i++){
@@ -281,13 +390,80 @@
                     }
                 })
             },
-            change:function (data){
-                let dv=document.getElementById(data);
-                if(dv.className=='show')
-                    dv.removeAttribute("class");
-                else
-                    dv.setAttribute("class", "show");
-            }
+            // 存入草稿箱
+            saveInDrafts: function() {
+                this.postLoading = true;
+                this.editor.$textElem.attr('contenteditable', false);
+                this.draft.draft_name = this.article.TopicTitle;
+                this.draft.draft_text = this.article.TopicText;
+                this.draft.sectorName = this.SectorName;
+                var t = new Date();
+                this.draft.write_date = t.format("yyyy-MM-dd HH:mm:ss");
+                this.$http.post(server.url + '/draft/save', this.draft, {headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}}).then(response => {
+                    if (response.status == 200){
+                        this.editor.$textElem.attr('contenteditable', true);
+                        this.postLoading = false;
+                        this.$message({type: 'success', message: '文章已保存'});
+                    }
+                    else{
+                        this.postLoading = false;
+                        this.editor.$textElem.attr('contenteditable', true);
+                        this.$message({type: 'error', message: '保存失败'});
+                    }
+                }, response => {
+                    this.editor.$textElem.attr('contenteditable', true);
+                    this.postLoading = false;
+                    this.$message({type: 'error', message: '保存失败'});
+                }).catch((response) => {
+                    this.postLoading = false;
+                    this.$message({type: 'error', message: '保存失败'});
+                });
+            },
+            // 发布
+            postOn: function() {
+                if(this.article.TopicTitle === '') {
+                    this.$message({type: 'error', message: '请输入标题！'});
+                    return
+                }
+                if(this.article.TopicText === '') {
+                    this.$message({type: 'error', message: '请输入内容！'});
+                    return
+                }
+                if(this.SectorName === []) {
+                    this.$message({type: 'error', message: '请添加标签！'});
+                    return
+                }
+                this.postLoading = true;
+                this.editor.$textElem.attr('contenteditable', false);
+                this.article.sectorName = this.SectorName;
+                var t = new Date();
+                this.article.TopicDate = t.format("yyyy-MM-dd HH:mm:ss");
+                this.$http.post(server.url + '/article/save', this.article, {headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}}).then(response => {
+                    if (response.status == 200){
+                        this.editor.$textElem.attr('contenteditable', true);
+                        this.$message({type: 'success', message: '发表成功'});
+                        this.postLoading = false;
+                        this.article.TopicTitle = '';
+                        this.article.TopicText = '';
+                        this.editor.txt.clear();
+                        this.SectorName = [];
+                        this.loading = true;
+                        this.loadBlogs(1, this.pageSize);
+                    }
+                    else{
+                        this.postLoading = false;
+                        this.editor.$textElem.attr('contenteditable', true);
+                        this.$message({type: 'error', message: '发表失败'});
+                    }
+                }, response => {
+                    this.editor.$textElem.attr('contenteditable', true);
+                    this.postLoading = false;
+                    this.$message({type: 'error', message: '发表失败'});
+                }).catch((response) => {
+                    this.postLoading = false;
+                    this.$message({type: 'error', message: '保存失败'});
+                });
+            },
         },
 
         filters:{

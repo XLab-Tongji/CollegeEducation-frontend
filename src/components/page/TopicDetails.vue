@@ -13,7 +13,7 @@
                             <el-row>
                                 <div><img :src="authorImg" class="img"/></div>
                             </el-row>
-                            <el-row style="padding-top: 10px;font-size: 12px;width: 100px">
+                            <el-row style="padding-top: 10px;font-size: 12px;width: 80px">
                                 <div align="center">{{article.USERNAME}}</div>
                             </el-row>
                         </el-col>
@@ -43,7 +43,7 @@
                                     <el-row>
                                         <div><img :src="replyImg[scope.$index]" class="img"/></div>
                                     </el-row>
-                                    <el-row style="padding-top: 10px;font-size: 12px;width: 100px">
+                                    <el-row style="padding-top: 10px;font-size: 12px;width: 80px">
                                         <div align="center">{{scope.row.username}}</div>
                                     </el-row>
                                 </el-col>
@@ -232,15 +232,15 @@
                                 PraiseCount: commentList.data[i].PraiseCount,
                                 username: commentList.data[i].username
                             });
-                            this.$http.get(server.url + '/user/image/get?userID=' + commentList.data[i].UserId, {headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}}).then((response) => {
-                                if (response.status === 200) {
-                                    this.replyImg.push(JSON.parse(response.bodyText).data);
+                            this.$http.get(server.url + '/user/image/get?userID=' + commentList.data[i].UserId, {headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}}).then((res) => {
+                                if (res.status === 200) {
+                                    this.replyImg.push(JSON.parse(res.bodyText).data);
                                 } else {
                                     this.$message({type: 'error', message: '头像加载失败!'});
                                 }
-                            }, (response) => {
+                            }, (res) => {
                                 this.$message({type: 'error', message: '头像加载失败!'});
-                            }).catch((response) => {
+                            }).catch((res) => {
                                 this.$message({type: 'error', message: '头像加载失败!'});
                             });
                             i++;
@@ -285,7 +285,7 @@
             getAuthorImg: function() {
                 this.$http.get(server.url + '/user/image/get?userID=' + this.article.UserId, {headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}}).then((response) => {
                     if (response.status === 200) {
-                        this.replyImg.push(JSON.parse(response.bodyText).data);
+                        this.authorImg = JSON.parse(response.bodyText).data;
                     } else {
                         this.$message({type: 'error', message: '头像加载失败!'});
                     }

@@ -1,8 +1,9 @@
 <template>
     <div>
         <link rel="stylesheet" href="../../../node_modules/font-awesome/css/font-awesome.min.css">
+        <link rel="stylesheet" href="../../../node_modules/wangeditor/release/wangEditor.min.css">
         <!----- 搜索栏 ----->
-        <div style="margin-top: 20px; margin-left: 160px">
+        <div style="margin-top: 20px; margin-left: 170px">
             <!-- 输入搜索内容 -->
             <el-input
                 placeholder="请输入关键字"
@@ -54,16 +55,61 @@
                        </div>
                        <div class="card-body">
                            <div id="spy-example1" data-spy="scroll" data-target="#navbar-example1" data-offset="65" style="font-size: 13px;position: relative; height: 200px; overflow: auto; margin-top: .5rem; overflow-y: scroll;">
-                               <div style="min-height: 110px">{{item.blackboard_text | imgEncode | sEncode | htmlDecode}}</div>
+                               <div style="min-height: 110px">
+                                   <div :id="item.blackboard_id"></div>
+                               </div>
                                <div style="font-size: 12px; color: #6A6A6A">{{item.USERNAME}} </div>
                                <div style="font-size: 9px; color: #6A6A6A">发表于 {{item.blackboard_date}}</div>
                                <div style="font-size: 11px; color: #6A6A6A">分类：{{item.sectorName}} </div>
                                <div align="center" style="margin-top: 5px">
-                                   <el-button type="text" style="color: #6A6A6A" @click="goDetails(item)"><i class="fa fa-commenting-o" aria-hidden="true" style="margin-right: 5px;"></i>评论</el-button>
+                                   <el-button type="text" style="color: #6A6A6A" @click="loadComments(item.blackboard_id)"><i class="fa fa-commenting-o" aria-hidden="true" style="margin-right: 5px;"></i>评论</el-button>
                                    <el-button type="text" @click="collect(item)" v-loading="collectLoading" style="color: #6A6A6A; margin-left: 30px"><i  class="fa fa-star" v-show="item.is_collected" aria-hidden="true" style="margin-right: 5px;color: #FFE100"></i><i class="fa fa-star-o" v-show="!item.is_collected" aria-hidden="true" style="margin-right: 5px; color: #6A6A6A;"></i>收藏</el-button>
                                    <el-button type="text" @click="like(item)" v-loading="likeLoading" style="color: #6A6A6A; margin-left: 30px"><i class="fa fa-thumbs-o-up" v-show="item.is_praised" aria-hidden="true" style="margin-right: 5px;color: #FF7B00;"></i><i class="fa fa-thumbs-o-up" v-show="!item.is_praised" aria-hidden="true" style="margin-right: 5px; color: #6A6A6A;"></i>{{item.praise_count}}</el-button>
                                </div>
                            </div>
+                       </div>
+                       <div>
+                           <el-dialog title="评论列表" :visible.sync="dialogVisible1">
+                               <div>
+                                   <el-card shadow="never">
+                                       <el-table :data="comments" v-loading="commentLoading" :default-sort="{prop: 'ReplyDate', order: 'ascending'}" style="padding-top: 0">
+                                           <el-table-column label="评论" style="color: #6A6A6A;">
+                                               <template slot-scope="scope">
+                                                   <el-row style="margin: 15px 0">
+                                                       <el-col :span="6">
+                                                           <el-row>
+                                                               <div><img :src="replyImg[scope.$index]" class="img" /></div>
+                                                           </el-row>
+                                                           <el-row style="padding-top: 10px;font-size: 12px;width: 80px">
+                                                               <div align="center">{{scope.row.username}}</div>
+                                                           </el-row>
+                                                       </el-col>
+                                                       <el-col :span="18">
+                                                           <el-row style="min-height: 120px">
+                                                               <p style="font-size: 14px;line-height: 24px">{{scope.row.ReplyText}}</p>
+                                                           </el-row>
+                                                           <el-row style="margin-top: 30px">
+                                                               <div style="font-size: 12px;padding-top: 8px">{{scope.row.ReplyDate}}</div>
+                                                           </el-row>
+                                                       </el-col>
+                                                   </el-row>
+                                               </template>
+                                           </el-table-column>
+                                           <el-table-column label="按时间" width="80px" sortable prop="ReplyDate" style="margin: 15px 0">
+                                               <template slot-scope="scope">
+
+                                               </template>
+                                           </el-table-column>
+                                       </el-table>
+                                   </el-card>
+                               </div>
+                               <div>
+                                   <!-- 发表评论 -->
+                                   <div style="margin-top: 20px;font-size: 14px;font-weight: bold;color: #6A6A6A">发表评论</div>
+                                   <el-input type="textarea" v-model="commentText" placeholder="输入评论内容（400字以内）" maxlength="400" :autosize="{ minRows: 9, maxRows: 9}" style="margin-top: 15px;"></el-input>
+                                   <el-button type="primary" @click="postComment(item.blackboard_id)" style="background-color: #1ac7c3; border-color: #1ac7c3;margin-top: 15px" size="mini">发表</el-button>
+                               </div>
+                           </el-dialog>
                        </div>
                    </el-card>
                </el-col>
@@ -79,30 +125,114 @@
                        </div>
                        <div class="card-body">
                            <div id="spy-example2" data-spy="scroll" data-target="#navbar-example1" data-offset="65" style="font-size: 13px;position: relative; height: 200px; overflow: auto; margin-top: .5rem; overflow-y: scroll;">
-                               <div style="min-height: 110px">{{item.blackboard_text | imgEncode | sEncode | htmlDecode}}</div>
+                               <div style="min-height: 110px">
+                                   <div :id="item.blackboard_id"></div>
+                               </div>
                                <div style="font-size: 12px; color: #6A6A6A">{{item.USERNAME}} </div>
                                <div style="font-size: 9px; color: #6A6A6A">发表于 {{item.blackboard_date}}</div>
                                <div style="font-size: 11px; color: #6A6A6A">分类：{{item.sectorName}} </div>
                                <div align="center" style="margin-top: 5px">
-                                   <el-button type="text" style="color: #6A6A6A" @click="goDetails(item)"><i class="fa fa-commenting-o" aria-hidden="true" style="margin-right: 5px;"></i>评论</el-button>
+                                   <el-button type="text" style="color: #6A6A6A" @click="loadComments(item.blackboard_id)"><i class="fa fa-commenting-o" aria-hidden="true" style="margin-right: 5px;"></i>评论</el-button>
                                    <el-button type="text" @click="collect(item)" v-loading="collectLoading" style="color: #6A6A6A; margin-left: 30px"><i  class="fa fa-star" v-show="item.is_collected" aria-hidden="true" style="margin-right: 5px;color: #FFE100"></i><i class="fa fa-star-o" v-show="!item.is_collected" aria-hidden="true" style="margin-right: 5px; color: #6A6A6A;"></i>收藏</el-button>
                                    <el-button type="text" @click="like(item)" v-loading="likeLoading" style="color: #6A6A6A; margin-left: 30px"><i class="fa fa-thumbs-o-up" v-show="item.is_praised" aria-hidden="true" style="margin-right: 5px;color: #FF7B00;"></i><i class="fa fa-thumbs-o-up" v-show="!item.is_praised" aria-hidden="true" style="margin-right: 5px; color: #6A6A6A;"></i>{{item.praise_count}}</el-button>
                                </div>
                        </div>
                        </div>
+                       <div>
+                           <el-dialog title="评论列表" :visible.sync="dialogVisible1">
+                               <div>
+                                   <el-card shadow="never">
+                                       <el-table :data="comments" v-loading="commentLoading" :default-sort="{prop: 'ReplyDate', order: 'ascending'}" style="padding-top: 0">
+                                           <el-table-column label="评论" style="color: #6A6A6A;">
+                                               <template slot-scope="scope">
+                                                   <el-row style="margin: 15px 0">
+                                                       <el-col :span="6">
+                                                           <el-row>
+                                                               <div><img :src="replyImg[scope.$index]" class="img" /></div>
+                                                           </el-row>
+                                                           <el-row style="padding-top: 10px;font-size: 12px;width: 80px">
+                                                               <div align="center">{{scope.row.username}}</div>
+                                                           </el-row>
+                                                       </el-col>
+                                                       <el-col :span="18">
+                                                           <el-row style="min-height: 120px">
+                                                               <p style="font-size: 14px;line-height: 24px">{{scope.row.ReplyText}}</p>
+                                                           </el-row>
+                                                           <el-row style="margin-top: 30px">
+                                                               <div style="font-size: 12px;padding-top: 8px">{{scope.row.ReplyDate}}</div>
+                                                           </el-row>
+                                                       </el-col>
+                                                   </el-row>
+                                               </template>
+                                           </el-table-column>
+                                           <el-table-column label="按时间" width="80px" sortable prop="ReplyDate" style="margin: 15px 0">
+                                               <template slot-scope="scope">
+
+                                               </template>
+                                           </el-table-column>
+                                       </el-table>
+                                   </el-card>
+                               </div>
+                               <div>
+                                   <!-- 发表评论 -->
+                                   <div style="margin-top: 20px;font-size: 14px;font-weight: bold;color: #6A6A6A">发表评论</div>
+                                   <el-input type="textarea" v-model="commentText" placeholder="输入评论内容（400字以内）" maxlength="400" :autosize="{ minRows: 9, maxRows: 9}" style="margin-top: 15px;"></el-input>
+                                   <el-button type="primary" @click="postComment(item.blackboard_id)" style="margin-top: 15px">发表</el-button>
+                               </div>
+                           </el-dialog>
+                       </div>
                    </el-card>
                </el-col>
            </el-row>
+        </div>
+        <!-- 发表黑板报 -->
+        <div style="margin-top: 40px; width: 962px; margin-left: 168px">
+            <div>
+                <el-card v-loading="postLoading">
+                    <div slot="header" style="height: 15px; font-size: 14px; font-weight: bold; padding-left: 1rem">
+                        发表黑板报
+                    </div>
+                    <!----- 输入标题 ----->
+                    <div align="left">
+                        <el-input v-model="blackboard.blackboard_name" size="small" maxlength="25"
+                                  placeholder="请输入标题..."
+                                  style="width: 350px">
+                        </el-input>
+                    </div>
+                    <!----- 编辑器 ----->
+                    <div id="editor" style="margin-top: 20px"></div>
+                    <!----- 提示字数限制 ----->
+                    <div align="right" style="font-size: 12px;color: #A6A6A6;">{{count}} / 200</div>
+                    <div>
+                        <!-- 选择分类 -->
+                        <el-select value="" v-model="sid" style="width: 200px; margin-top: 10px" placeholder="请选择类别">
+                            <el-option
+                                v-for="item in sectors"
+                                :key="item.SectorId"
+                                :label="item.SectorName"
+                                :value="item.SectorId">
+                            </el-option>
+                        </el-select>
+                        <el-button @click="saveInDrafts" style="margin-left: 530px">保存到草稿箱</el-button>
+                        <el-button type="primary" @click="postOn" style="margin-left: 10px">发布</el-button>
+                    </div>
+                </el-card>
+            </div>
         </div>
     </div>
 </template>
 
 <script>
     import server from '../../../config/index';
+    import WangEditor from 'wangeditor';
+    import data from '../../data/sina-data.js'
+    import {UPLOADER} from '../../tools/utils'
 
     export default{
+        name: 'editor',
         data() {
             return {
+                dialogVisible1: false,
                 blackboards: [], // 存储黑板报信息
                 loading: false, // 黑板报加载状态
                 searchType: 0, // 搜索类型
@@ -113,6 +243,10 @@
                 sectorKeyword: [], // 按标签和全部搜索关键词
                 sectors: [], // 可选择的标签
                 searchUrl: '/blackboard/get?userID=1&SectorId=1&keywords=',
+                comments: [], // 存储评论信息
+                commentLoading: false, // 评论加载状态
+                commentText: '', // 发表评论内容
+                replyImg: [], // 评论头像
                 // 搜索类型
                 searchOptions: [{
                     value: 0,
@@ -126,11 +260,50 @@
                 }],
                 collectLoading: false, // 收藏状态改变
                 likeLoading: false, // 点赞状态改变
+                postLoading: false,
+                editor: new WangEditor('#editor'), // 编辑器
+                sinaData: [], // 新浪表情数组
+                // emoji数组
+                emojiData: ['😀','😃','😄','😁','😆','😅','😂','🤣','😇','😊','🙂','🙃','😉','😌','😍','😘','😗','😙','😚','😋','😛','😝','😜','🤪','🤨','🧐','🤓','😎','🤩','😏','😒','😞','😔','😟','😕','🙁','☹️','😣','😖','😫','😩','😢','😭','😤','😠','😡','🤬','🤯','😳','😱','😨','😰','😥','😓','🤗','🤔','🤭','🤫','🤥','😶','😐','😑','😬','🙄','😯','😦','😧','😮','😲','😴','😪','😵','🤐','🤧','😷','😈','👿','💩','👻','🤲','🙌','👏','🤝','👍','👎','👊','✊','🤛','🤜','🤞','✌','🤟','👌','👈','👉','👆','👇','👋','🤙','💪','🙏','👀','🙇‍','🙅‍','🙆‍','🙋‍','🤦‍','🤷‍','💅','🌝','🌚','❤️','💔','❣️','💕','💓','💗','💖','❌','✅','⭕️','💯','❗️','❓','⁉️','📝'],
+                count: 0, // 当前输入的字数
+                sid: '', // 标签ID
+                // 黑板报实体
+                blackboard: {
+                    sector_id: 0,
+                    blackboard_name: '',
+                    blackboard_text: '',
+                    blackboard_date: new Date(),
+                    user_id: 1, // 不知道如何获取
+                    reply_count: 0,
+                    clicking_rate: 0,
+                    praise_count: 0,
+                    favorite_count: 0
+                },
+                // 草稿实体
+                draft: {
+                    user_id: 1,
+                    publish_type_id: 1,
+                    sector_id: 0,
+                    draft_name: '',
+                    draft_text: '',
+                    write_date: new Date()
+                },
+                UPLOADER, // 图片上传组件
                 // 收藏实体
                 favoriteEntity: {
                     topic_id: 0,
                     user_id: 1, // 需要获取
                     collection_time: new Date(),
+                    type: 1
+                },
+                // 评论实体
+                replyEntity: {
+                    TopicId: -1,
+                    UserId: 1, // 需要获取
+                    ReplyText: '',
+                    ReplyDate: new Date(),
+                    ClickingRate: 0,
+                    PraiseCount: 0,
                     type: 1
                 }
             }
@@ -143,7 +316,69 @@
             this.currentChange(page);
             this.getSectors();
         },
+        mounted() {
+            for(var i = 0;i < data.length;i++){
+                this.sinaData.push({alt: data[i].phrase, src: data[i].icon});
+            }
+            this.editor.customConfig.onchange = () => {
+                let t = this.editor.txt.text();
+                // 限制字数
+                if(this.count > 200) {
+                    this.$message({type: 'error', message: '字数超出范围！'});
+                    var str = t.substring(0, 200);
+                    this.editor.txt.text(str);
+                }
+                this.count = t.length;
+                this.blackboard.blackboard_text = this.editor.txt.html();
+            };
+            this.editor.customConfig.menus = [
+                'head',  // 标题
+                'bold',  // 粗体
+                'fontSize',  // 字号
+                'fontName',  // 字体
+                'italic',  // 斜体
+                'underline',  // 下划线
+                'foreColor',  // 文字颜色
+                'link',  // 插入链接
+                'list',  // 列表
+                'justify',  // 对齐方式
+                'quote',  // 引用
+                'emoticon',  // 表情
+                'image',  // 插入图片
+                'table',  // 表格
+                'code',  // 插入代码
+                'undo',  // 撤销
+                'redo'  // 重复
+            ];
+            this.editor.customConfig.emotions = [
+                {
+                    // tab 的标题
+                    title: '新浪',
+                    // type -> 'emoji' / 'image'
+                    type: 'image',
+                    // content -> 数组
+                    content: this.sinaData
+                },
+                {
+                    title: 'emoji',
+                    type: 'emoji',
+                    content: this.emojiData
+                }];
+            this.editor.customConfig.debug = location.href.indexOf('wangeditor_debug_mode=1') > 0; // 开启debug模式
+            this.editor.create();
+            this.editor.config.customUploadInit = this.UPLOADER(this.editor).init();
+        },
+        updated : function(){
+            for (var j = 0;j < this.blackboards.length;j++) {
+                this.loadText(this.blackboards[j]);
+            }
+            this.$nextTick(function(){
+                for (var j = 0;j < this.blackboards.length;j++) {
+                    this.loadText(this.blackboards[j]);
+                }
+            });
 
+        },
         methods: {
             // 搜索
             search: function() {
@@ -183,7 +418,6 @@
             loadBlackboards: function (page, count) {
                 this.blackboards = [];
                 this.$http.get(server.url + this.searchUrl, {headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}}).then((response) => {
-                    this.loading = false;
                     if (response.status === 200) {
                         var blackboardList = JSON.parse(response.bodyText);
                         this.totalCount = blackboardList.data.length;
@@ -214,6 +448,7 @@
                             if (blackboardList.data[i].favourite_id !== -1) this.blackboards[i].is_collected = true;
                             i++;
                         }
+                        this.loading = false;
                     } else {
                         this.loading = false;
                         this.$message({type: 'error', message: '黑板报加载失败!'});
@@ -233,44 +468,31 @@
             },
             // 获取标签
             getSectors: function() {
-                this.$http.get(server.url + '/sector/get', {headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}}).then((response) => {
-                    if (response.status === 200) {
-                        var sectorList = JSON.parse(response.bodyText);
-                        var i = 0;
-                        while (i < sectorList.length) {
-                            this.sectors.push({
-                                SectorId: sectorList.data[i].SectorId,
-                                SectorName: sectorList.data[i].SectorName
-                            });
-                            i++;
+                if (this.sectors.length === 0) {
+                    this.$http.get(server.url + '/sector/get', {headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}}).then((response) => {
+                        if (response.status === 200) {
+                            var sectorList = JSON.parse(response.bodyText);
+                            var i = 0;
+                            while (i < sectorList.data.length) {
+                                this.sectors.push({
+                                    SectorId: sectorList.data[i].SectorId,
+                                    SectorName: sectorList.data[i].SectorName
+                                });
+                                i++;
+                            }
+                        } else {
+                            this.$message({type: 'error', message: '加载失败!'});
                         }
-                    } else {
-                        this.loading = false;
+                    }, (response) => {
+                        if (response.status === 403) {
+                            this.$message({type: 'error', message: response.response.data});
+                        } else {
+                            this.$message({type: 'error', message: '加载失败!'});
+                        }
+                    }).catch((response) => {
                         this.$message({type: 'error', message: '加载失败!'});
-                    }
-                }, (response) => {
-                    if (response.status === 403) {
-                        this.loading = false;
-                        this.$message({type: 'error', message: response.response.data});
-                    } else {
-                        this.loading = false;
-                        this.$message({type: 'error', message: '加载失败!'});
-                    }
-                }).catch((response) => {
-                    this.loading = false;
-                    this.$message({type: 'error', message: '加载失败!'});
-                })
-            },
-            // 跳转至详情页面
-            goDetails: function(val) {
-                localStorage.setItem('pageB',JSON.stringify(this.currentPage));
-                this.$router.push({
-                    path: '/blackboard-details',
-                    name: 'BoardDetails',
-                    query: {
-                        index: val
-                    }
-                })
+                    })
+                }
             },
             // 点赞和取消点赞
             like: function(val) {
@@ -349,17 +571,165 @@
                     });
                 }
             },
+            // 加载评论
+            loadComments: function(id) {
+                this.comments = [];
+                this.replyImg = [];
+                this.$http.get(server.url + '/blackboard/reply/get?TopicId=' + id, {headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}}).then((response) => {
+                    if (response.status === 200) {
+                        let commentList = JSON.parse(response.bodyText);
+                        var i = 0;
+                        while (i < commentList.data.length) {
+                            this.comments.push({
+                                ReplyId: commentList.data[i].ReplyId,
+                                TopicId: commentList.data[i].TopicId,
+                                UserId: commentList.data[i].UserId,
+                                ReplyText: commentList.data[i].ReplyText,
+                                ReplyDate: commentList.data[i].ReplyDate,
+                                ClickingRate: commentList.data[i].ClickingRate,
+                                PraiseCount: commentList.data[i].PraiseCount,
+                                username: commentList.data[i].username
+                            });
+                            this.$http.get(server.url + '/user/image/get?userID=' + commentList.data[i].UserId, {headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}}).then((res) => {
+                                if (res.status === 200) {
+                                    this.replyImg.push(JSON.parse(res.bodyText).data);
+                                } else {
+                                    this.$message({type: 'error', message: '头像加载失败!'});
+                                }
+                            }, (res) => {
+                                this.$message({type: 'error', message: '头像加载失败!'});
+                            }).catch((res) => {
+                                this.$message({type: 'error', message: '头像加载失败!'});
+                            });
+                            i++;
+                        }
+                    } else {
+                        this.$message({type: 'error', message: '评论加载失败!'});
+                    }
+                }, (response) => {
+                    if (response.status === 403) {
+                        this.$message({type: 'error', message: response.response.data});
+                    } else {
+                        this.$message({type: 'error', message: '评论加载失败!'});
+                    }
+                }).catch((response) => {
+                    this.$message({type: 'error', message: '评论加载失败!'});
+                })
+                this.dialogVisible1 = true;
+            },
+            // 评论
+            postComment: function(id) {
+                this.replyEntity.TopicId = id;
+                this.replyEntity.ReplyText = this.commentText;
+                var t = new Date();
+                this.replyEntity.ReplyDate = t.format("yyyy-MM-dd HH:mm:ss");
+                this.$http.post(server.url + '/blackboard/reply', this.replyEntity, {headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}}).then(response => {
+                    if (response.status === 200){
+                        this.$message({type: 'success', message: '评论成功'});
+                        this.commentLoading = true;
+                        this.loadComments(id);
+                        this.commentText = '';
+                        this.commentLoading = false;
+                    }
+                    else{
+                        this.$message({type: 'error', message: '请重试'});
+                    }
+                }, response => {
+                    this.$message({type: 'error', message: '请重试'});
+                }).catch((response) => {
+                    this.$message({type: 'error', message: '请重试'});
+                });
+            },
+            // 存入草稿箱
+            saveInDrafts: function(){
+                this.postLoading = true;
+                this.editor.$textElem.attr('contenteditable', false);
+                this.draft.draft_name = this.blackboard.blackboard_name;
+                this.draft.draft_text = this.blackboard.blackboard_text;
+                if(this.sid !== '') this.draft.sector_id = Number(this.sid);
+                var t = new Date();
+                this.draft.write_date = t.format("yyyy-MM-dd HH:mm:ss");
+                this.$http.post(server.url + '/draft/save', this.draft, {headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}}).then(response => {
+                    if (response.status == 200){
+                        this.editor.$textElem.attr('contenteditable', true);
+                        this.postLoading = false;
+                        this.$message({type: 'success', message: '黑板报已保存'});
+                    }
+                    else{
+                        this.postLoading = false;
+                        this.editor.$textElem.attr('contenteditable', true);
+                        this.$message({type: 'error', message: '保存失败'});
+                    }
+                }, response => {
+                    this.editor.$textElem.attr('contenteditable', true);
+                    this.postLoading = false;
+                    this.$message({type: 'error', message: '保存失败'});
+                }).catch((response) => {
+                    this.postLoading = false;
+                    this.$message({type: 'error', message: '保存失败'});
+                });
+            },
+            // 发布
+            postOn: function(){
+                if(this.blackboard.blackboard_name === '') {
+                    this.$message({type: 'error', message: '请输入标题！'});
+                    return
+                }
+                if(this.blackboard.blackboard_text === '') {
+                    this.$message({type: 'error', message: '请输入内容！'});
+                    return
+                }
+                if(this.sid === '') {
+                    this.$message({type: 'error', message: '请选择分类！'});
+                    return
+                }
+                this.postLoading = true;
+                this.editor.$textElem.attr('contenteditable', false);
+                this.blackboard.sector_id = Number(this.sid);
+                var t = new Date();
+                this.blackboard.blackboard_date = t.format("yyyy-MM-dd HH:mm:ss");
+                this.$http.post(server.url + '/blackboard/save', this.blackboard, {headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}}).then(response => {
+                    if (response.status === 200){
+                        this.editor.$textElem.attr('contenteditable', true);
+                        this.$message({type: 'success', message: '发表成功'});
+                        this.postLoading = false;
+                        this.blackboard.blackboard_name = '';
+                        this.blackboard.blackboard_text = '';
+                        this.editor.txt.clear();
+                        this.sid = '';
+                        this.loading = true;
+                        this.loadBlackboards(1, this.pageSize);
+                    }
+                    else{
+                        this.postLoading = false;
+                        this.editor.$textElem.attr('contenteditable', true);
+                        this.$message({type: 'error', message: '发表失败'});
+                    }
+                }, response => {
+                    this.editor.$textElem.attr('contenteditable', true);
+                    this.postLoading = false;
+                    this.$message({type: 'error', message: '发表失败'});
+                }).catch((response) => {
+                    this.postLoading = false;
+                    this.$message({type: 'error', message: '发表失败'});
+                });
+            },
+            // 显示内容
+            createNode: function(val) {
+                const template = `<div class='child'>${val}</div>`;
+                let tempNode = document.createElement('div');
+                tempNode.innerHTML = template;
+                return tempNode.firstChild;
+            },
+            loadText: function(item) {
+                const container = document.getElementById(item.blackboard_id);
+                if (container.childElementCount === 0) {
+                    container.appendChild(this.createNode(item.blackboard_text));
+                }
+            }
         },
 
         filters:{
-            // 将图片转换成文字显示
-            imgEncode: function(val) {
-                if(val !== null) return val.replace(/<img src="http:\/\/tjce-image(.*?)>/g, "[图片]")
-            },
-            // 将表情转换成文字显示
-            sEncode: function(val) {
-                if(val !== null) return val.replace(/<img(.*?)>/g, "[表情]")
-            },
             // 显示emoji
             htmlDecode: function(val) {
                 //1.首先动态创建一个容器标签元素，如DIV
@@ -405,41 +775,11 @@
 </script>
 
 <style type="text/css">
-    .topic-table-footer {
-        box-sizing: content-box;
-        margin-top: 20px;
-    }
-
-    .page-change {
-        color: #939393;
-    }
 
     .type-select {
         width: 100px;
         margin-left: 10px;
     }
-
-    .search-button {
-        margin-left: 10px;
-        background-color: #1ac7c3;
-        border-color: #1ac7c3;
-    }
-
-    .topic-table {
-        overflow-x: hidden;
-        overflow-y: hidden;
-        margin-top: 10px;
-    }
-
-    .topic-content {
-        white-space: nowrap;
-        text-overflow:ellipsis;
-        overflow:hidden;
-        font-size: 12px;
-        color: #B0B0B0;
-        padding-bottom: 8px;
-    }
-
 
     .navbar-light .navbar-text a {
         color: rgba(0, 0, 0, 0.9);
@@ -453,6 +793,12 @@
         -ms-flex: 1 1 auto;
         flex: 1 1 auto;
         padding: 1.25rem;
+    }
+
+    .img {
+        width: 80px;
+        height: 80px;
+        border-radius: 10px;
     }
 
 </style>

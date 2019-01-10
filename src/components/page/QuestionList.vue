@@ -16,8 +16,8 @@
                                 </template>
                                 <!-- 问题列表 -->
                                 <template slot-scope="scope">
-                                    <div style="padding-top: 10px; padding-bottom: 10px" align="left" @click="goDetails(scope.$index)">
-                                        <el-row :gutter="20">
+                                    <div style="padding-top: 10px; padding-bottom: 10px" align="left" @click="dialogVisible = true">
+                                        <el-row :gutter="10">
                                             <!-- 图片 -->
                                             <el-col :span="4">
                                                 <div><img :src="scope.row.picture_path" class="img"/></div>
@@ -30,13 +30,13 @@
                                                 <el-row style="margin-top: 5px">
                                                     <div style="white-space: nowrap; text-overflow:ellipsis; overflow:hidden;font-size: 13px;padding-left: 3px">{{scope.row.question_text}}</div>
                                                 </el-row>
-                                                <el-row :gutter="0" style="margin-top: 6px">
-                                                    <el-col :span="4">
+                                                <el-row :gutter="5" style="margin-top: 6px">
+                                                    <el-col :span="7">
                                                         <div>
                                                             <div style="border-right: solid 1px #E1E1E1"><el-tag color="#fff" style="color: #AAAAAA; border-color: #AAAAAA">{{scope.row.sector_name}}</el-tag></div>
                                                         </div>
                                                     </el-col>
-                                                    <el-col :span="7">
+                                                    <el-col :span="6">
                                                         <el-rate
                                                             v-model="scope.row.question_evaluation"
                                                             disabled
@@ -45,7 +45,7 @@
                                                             score-template="{value}" style="zoom: 80%; padding-top: 6px">
                                                         </el-rate>
                                                     </el-col>
-                                                    <el-col :span="13">
+                                                    <el-col :span="11">
                                                         <div style="font-size: 12px; margin-left: 5px; color: #AAAAAA">
                                                             {{scope.row.question_participate}}人参与
                                                         </div>
@@ -54,6 +54,18 @@
                                             </el-col>
                                         </el-row>
                                     </div>
+                                    <el-dialog title="问题详情" :visible.sync="dialogVisible">
+                                        <div>
+                                            <el-card shadow="never">
+                                                <div slot="header">
+                                                    <span style="font-size: 15px">{{scope.row.question_title}}</span>
+                                                </div>
+                                                <div>
+                                                    {{scope.row.question_text}}
+                                                </div>
+                                            </el-card>
+                                        </div>
+                                    </el-dialog>
                                 </template>
                             </el-table-column>
                         </el-table>
@@ -104,7 +116,8 @@
                 loading: false,
                 currentPage: 1,
                 pageSize: 10,
-                totalCount: 0
+                totalCount: 0,
+                dialogVisible: false
             }
         },
         methods : {
@@ -158,16 +171,6 @@
                 this.currentPage = currentPage;
                 this.loading = true;
                 this.loadBlogs(currentPage, this.pageSize);
-            },
-            // 跳转至详情页面
-            goDetails: function(index) {
-                this.$router.push({
-                    path: '/question-details',
-                    name: 'QuestionDetails',
-                    query: {
-                        index: this.questions[index]
-                    }
-                })
             }
         },
         mounted: function() {

@@ -93,7 +93,7 @@ var UPLOADER = editor => {
                     var url = host + '/' + objectNname;
                     console.log('上传成功 ', url);
                     // 插入到编辑器中
-                    editor.cmd.do('insertHTML', '<img src="'+url+'" />');
+                    editor.cmd.do('insertHTML', '<img src="'+url+'" style="max-width: 100%;max-height: 100%;"/>');
                 }
                 else {
                     alert('上传失败！')

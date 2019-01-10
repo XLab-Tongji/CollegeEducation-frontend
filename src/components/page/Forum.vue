@@ -4,7 +4,7 @@
         <el-main style="padding-top: 0">
             <div>
                 <el-breadcrumb separator="/" style="margin-top: 10px">
-                    <el-breadcrumb-item :to="{ path: '/class-list' }" replace>首页</el-breadcrumb-item>
+                    <el-breadcrumb-item :to="{ path: '/class-list' }" replace>班级</el-breadcrumb-item>
                     <el-breadcrumb-item :to="{ path: '/topic-list' }" replace @click="setTopicPage">文章</el-breadcrumb-item>
                     <el-breadcrumb-item :to="{ path: '/blackboard-list' }" replace @click="setBlackboardPage">黑板报</el-breadcrumb-item>
                     <el-breadcrumb-item :to="{ path: '/question-list' }" replace>答疑</el-breadcrumb-item>

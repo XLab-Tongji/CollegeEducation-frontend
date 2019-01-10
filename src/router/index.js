@@ -95,16 +95,6 @@ export default new Router({
                             meta: { title: '黑板报列表' }
                         },
                         {
-                            path: '/topic-post',
-                            component: resolve => require(['../components/page/TopicPost.vue'], resolve),
-                            meta: { title: '发表文章'}
-                        },
-                        {
-                            path: '/blackboard-post',
-                            component: resolve => require(['../components/page/Blackboard.vue'], resolve),
-                            meta: { title: '发表黑板报'}
-                        },
-                        {
                             path: '/question-list',
                             name: 'QuestionList',
                             component: resolve => require(['../components/page/QuestionList.vue'], resolve),
@@ -121,13 +111,7 @@ export default new Router({
                             name: 'BoardDetails',
                             component: resolve => require(['../components/page/BoardDetails.vue'], resolve),
                             meta: { title: '黑板报详情'}
-                        },
-                        {
-                            path: '/question-details',
-                            name: 'QuestionDetails',
-                            component: resolve => require(['../components/page/QuestionDetails.vue'], resolve),
-                            meta: { title: '问题详情'}
-                        },
+                        }
                     ]
                 },
                 {

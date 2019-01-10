@@ -95,6 +95,7 @@
             if (this.blackboard.favourite_id !== -1) this.isCollected = true;
             const container = document.getElementById('text');
             container.appendChild(this.createNode(this.blackboard.blackboard_text));
+            this.getAuthorImg();
             this.loadComments();
         },
         data() {
@@ -282,9 +283,9 @@
             },
             // 获取楼主头像
             getAuthorImg: function() {
-                this.$http.get(server.url + '/user/image/get?userID=' + this.article.UserId, {headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}}).then((response) => {
+                this.$http.get(server.url + '/user/image/get?userID=' + this.blackboard.user_id, {headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}}).then((response) => {
                     if (response.status === 200) {
-                        this.replyImg.push(JSON.parse(response.bodyText).data);
+                        this.authorImg = JSON.parse(response.bodyText).data;
                     } else {
                         this.$message({type: 'error', message: '头像加载失败!'});
                     }
