@@ -198,6 +198,7 @@
                                   placeholder="请输入标题..."
                                   style="width: 350px">
                         </el-input>
+                        <el-button type="text" style="margin-left: 500px">选择草稿</el-button>
                     </div>
                     <!----- 编辑器 ----->
                     <div id="editor" style="margin-top: 20px"></div>
@@ -389,6 +390,7 @@
                     // 按标题
                     if (this.searchType === 1) {
                         this.searchUrl = '/blackboard/get?userID=1&SectorId=1&keywords=' + this.keywords;
+                        this.keywords = '';
                     }
                     // 按标签和全部
                     else {
@@ -397,14 +399,15 @@
                             for (var i = 0; i < k.length; i++) {
                                 this.sectorKeyword.push(k[i]);
                             }
+                            this.keywords = '';
                         }
                         this.searchUrl = '/blackboard/get?userID=1&SectorId=' + this.searchType;
                         for (var i = 0; i < this.sectorKeyword.length; i++) {
                             this.searchUrl += '&SectorName=' + this.sectorKeyword[i];
                         }
-                        this.sectorKeyword = [];
                     }
                 }
+                this.sectorKeyword = [];
                 this.currentChange(1);
             },
             // 翻页

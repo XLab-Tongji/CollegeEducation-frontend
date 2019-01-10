@@ -169,18 +169,21 @@
         name: "ClassCreate",
         data() {
             // 检验表单内容是否有效
+            // 班级编号必填
             var checkNo = (rule, value, callback) => {
                 if (!value) {
                     return callback(new Error('此项不能为空'));
                 }
                 callback();
             };
+            // 班级名称必填
             var checkName = (rule, value, callback) => {
                 if (!value) {
                     return callback(new Error('此项不能为空'));
                 }
                 callback();
             };
+            // 验证码格式
             var checkCode = (rule, value, callback) => {
                 let myReg = /^[0-9a-zA-Z]*$/g;
                 if (!value) {
@@ -193,17 +196,7 @@
                     return callback();
                 }
             };
-            var checkVolume = (rule, value, callback) => {
-                if (!value) {
-                    return callback(new Error('此项不能为空'));
-                }
-                else if (!Number.isInteger(value)) {
-                    return callback(new Error('此项只能包含数字'));
-                }
-                else {
-                    return callback();
-                }
-            };
+            // 邮箱格式
             var checkEmail = (rule, value, callback) => {
                 let myReg=/^[a-zA-Z0-9_-]+@([a-zA-Z0-9]+\.)+(com|cn|net|org)$/;
                 if(!value){
@@ -283,16 +276,15 @@
                 schoolOptions:[],
                 loading1: false,
                 // 管理成员
-                course_no: '',
-                memberEmail: '',
-                emailArray: [],
-                checked: false,
-                dialogVisible: false,
-                students: [],
-                fileList: [],
-                value: [],
-                loading2: false,
-                loading4: false,
+                course_no: '', // 班级编号
+                memberEmail: '', // 学生邮箱
+                emailArray: [], // 学生邮箱数组
+                checked: false, // 是否为筛选模式
+                dialogVisible: false, // 控制弹窗
+                students: [], // 筛选模式下所有的学生
+                value: [], // 筛选模式下已选择的索引值
+                loading2: false, // 弹窗
+                loading4: false, // 原页面
                 // 加入班级
                 classAccessCode: '',
                 loading3: false,
@@ -308,8 +300,6 @@
                     auth: 1,
                     admissionYear: "2016"
                 },
-                // 其他
-                activeName: 'first'
             };
         },
         methods: {
@@ -329,7 +319,7 @@
                 this.newClass.course_credit = this.ruleForm.course_credit;
                 this.loading1 = true;
 
-                this.$http.post(server.url + '/email', {params: {receiver: this.ruleForm.admin_email}, headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}}).then(response => {
+                this.$http.post(server.url + '/email', {}, {params: {receiver: this.ruleForm.admin_email}, headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}}).then(response => {
                     if (response.status === 200){ }
                     else{
                         this.loading1 = false;
@@ -339,7 +329,7 @@
                     this.loading1 = false;
                     this.$message({type: 'error', message: '请重试!'});
                 });
-                /*
+
                 this.$http.post(server.url + '/class', this.newClass, {headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}}).then(response => {
                     if (response.status === 200) {
                         this.loading1 = false;
@@ -351,13 +341,12 @@
                         this.$message({type: 'error', message: '请重试'});
                     }
                 }).catch((response) => {
-                this.loading = false;
+                this.loading1 = false;
                 this.$message({type: 'error', message: '请重试!'});
-                });*/
+                });
             },
             // 添加成员
             addStudents(mEmail) {
-                // TODO: 学生邮箱转数组
                 if (this.course_no === '') {
                     this.$message({type: 'error', message: '请输入班级编号!'});
                     return;
@@ -367,7 +356,6 @@
                     return;
                 }
                 this.loading4 = true;
-                //this.emailArray = mEmail.split(',');
                 let myReg=/^[a-zA-Z0-9_-]+@([a-zA-Z0-9]+\.)+(com|cn|net|org)$/;
                 if (!myReg.test(mEmail)) {
                     this.$message({type: 'error', message: '请检查邮箱格式!'});
@@ -394,36 +382,34 @@
                     return;
                 }
                 if (mEmail === '') {
-                    this.$message({type: 'error', message: '请输入学生邮箱!'});
                     return;
                 }
-                this.loading4 = true;
-                //this.emailArray = this.mEmail.split(',');
+                this.loading2 = true;
                 let myReg=/^[a-zA-Z0-9_-]+@([a-zA-Z0-9]+\.)+(com|cn|net|org)$/;
                 if (!myReg.test(mEmail)) {
                     this.$message({type: 'error', message: '请检查邮箱格式!'});
-                    this.loading4 = false;
+                    this.loading2 = false;
                     return;
                 }
                 let email = {student_email: mEmail};
                 this.$http.delete(server.url + '/class/student', email, {params: {course_no: this.course_no}, headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}}).then(response => {
                     if (response.status === 200) {
-                        this.loading4 = false;
+                        this.loading2 = false;
                     }
                     else {
-                        this.loading4 = false;
+                        this.loading2 = false;
                         this.$message({type: 'error', message: '请重试'});
                     }
                 }, (response) => {
                     if (response.status === 403) {
-                        this.loading = false;
+                        this.loading2 = false;
                         this.$message({type: 'error', message: response.response.data});
                     } else {
-                        this.loading = false;
+                        this.loading2 = false;
                         this.$message({type: 'error', message: '请重试!'});
                     }
                 }).catch((response) => {
-                    this.loading = false;
+                    this.loading2 = false;
                     this.$message({type: 'error', message: '请重试!'});
                 });
             },
@@ -480,7 +466,7 @@
                         this.$message({type: 'error', message: '加载失败!'});
                     }
                 }).catch((response) => {
-                    this.loading = false;
+                    this.loading2 = false;
                     this.$message({type: 'error', message: '加载失败!'});
                 });
                 this.dialogVisible = true
@@ -541,14 +527,14 @@
                         }
                     }, (response) => {
                         if (response.status === 403) {
-                            this.loading = false;
+                            this.loading3 = false;
                             this.$message({type: 'error', message: response.response.data});
                         } else {
-                            this.loading = false;
+                            this.loading3 = false;
                             this.$message({type: 'error', message: '请重试!'});
                         }
                     }).catch((response) => {
-                        this.loading = false;
+                        this.loading3 = false;
                         this.$message({type: 'error', message: '请重试!'});
                     });
                 }

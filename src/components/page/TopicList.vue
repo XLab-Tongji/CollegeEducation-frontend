@@ -57,7 +57,7 @@
                         width="500" style="text-align: center">
                         <template slot-scope="scope">
                             <p class="margin-top: 10px;"><el-button type="text" @click="goDetails(scope.$index)" style="font-size: 14px; font-weight: bold; color: #0A9894">{{ scope.row.TopicTitle }}</el-button></p>
-                            <p class="topic-content"> {{scope.row.TopicText | filterHtml | htmlDecode}}</p>
+                            <p class="topic-content"> {{scope.row.TopicText | imgEncode | sEncode | htmlDecode}}</p>
                         </template>
                     </el-table-column>
                     <!-- 作者 -->
@@ -125,6 +125,7 @@
                                   placeholder="请输入标题..."
                                   style="width: 350px">
                         </el-input>
+                        <el-button type="text" style="margin-left: 500px">选择草稿</el-button>
                     </div>
                     <!----- 编辑器 ----->
                     <div id="editor" style="margin-top: 20px"></div>
@@ -271,6 +272,7 @@
                     // 按标题
                     if (this.searchType === 1) {
                         this.searchUrl = '/article/all?userID=1&SectorId=1&keywords=' + this.keywords;
+                        this.keywords = '';
                     }
                     // 按标签和全部
                     else {
@@ -285,9 +287,9 @@
                         for(var i = 0; i < this.sectorKeyword.length;i++){
                             this.searchUrl += '&SectorName=' + this.sectorKeyword[i];
                         }
-                        this.sectorKeyword = [];
                     }
                 }
+                this.sectorKeyword = [];
                 this.currentChange(1);
             },
             // 翻页
@@ -467,9 +469,14 @@
         },
 
         filters:{
+
             // 将图片转换成文字显示
-            filterHtml: function(val) {
-                return val.replace(/<img(.*?)>/g, "[图片]")
+            imgEncode: function(val) {
+                if(val !== null) return val.replace(/<img src="http:\/\/tjce-image(.*?)>/g, "[图片]");
+            },
+            // 将表情转换成文字显示
+            sEncode: function(val) {
+                if (val !== null) return val.replace(/<img(.*?)>/g, "[表情]");
             },
             // 显示emoji
             htmlDecode: function(val) {
