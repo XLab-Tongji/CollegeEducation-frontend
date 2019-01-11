@@ -7,6 +7,7 @@
         <div style="margin-top: 10px" v-loading="loading">
             <el-row :gutter="10">
                 <el-col :span="8">
+                    <!-- 我创建的班级 -->
                     <div style="font-size: 14px; font-weight: bold; margin-top: 10px">我创建的</div>
                     <div>
                         <el-card style="margin-top: 10px; width: 400px" v-for="item in classes1">
@@ -33,6 +34,7 @@
                         </el-card>
                     </div>
                 </el-col>
+                <!-- 我加入的班级 -->
                 <el-col :span="8">
                     <div style="font-size: 14px; font-weight: bold; margin-top: 10px">我加入的</div>
                     <div>
@@ -72,8 +74,8 @@
         name: "ClassList",
         data() {
             return {
-                classes1: [],
-                classes2: [],
+                classes1: [], // 我创建的班级
+                classes2: [], // 我加入的班级
                 loading: false,
             }
         },
@@ -119,7 +121,7 @@
                 }, (response) => {
                     if (response.status === 403) {
                         this.loading = false;
-                        this.$message({type: 'error', message: response.response.data});
+                        this.$message({type: 'error', message: '加载失败!'});
                     } else {
                         this.loading = false;
                         this.$message({type: 'error', message: '加载失败!'});
@@ -155,19 +157,19 @@
                         }
                     } else {
                         this.loading = false;
-                        //this.$message({type: 'error', message: '加载失败!'});
+                        this.$message({type: 'error', message: '加载失败!'});
                     }
                 }, (response) => {
                     if (response.status === 403) {
                         this.loading = false;
-                        //this.$message({type: 'error', message: response.response.data});
+                        this.$message({type: 'error', message: '加载失败!'});
                     } else {
                         this.loading = false;
-                        //this.$message({type: 'error', message: '加载失败!'});
+                        this.$message({type: 'error', message: '加载失败!'});
                     }
                 }).catch((response) => {
                     this.loading = false;
-                    //this.$message({type: 'error', message: '加载失败!'});
+                    this.$message({type: 'error', message: '加载失败!'});
                 });
             }
         }

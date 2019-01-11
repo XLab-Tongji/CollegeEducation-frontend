@@ -105,12 +105,6 @@ export default new Router({
                             name: 'TopicDetails',
                             component: resolve => require(['../components/page/TopicDetails.vue'], resolve),
                             meta: { title: '文章详情'}
-                        },
-                        {
-                            path: '/blackboard-details',
-                            name: 'BoardDetails',
-                            component: resolve => require(['../components/page/BoardDetails.vue'], resolve),
-                            meta: { title: '黑板报详情'}
                         }
                     ]
                 },

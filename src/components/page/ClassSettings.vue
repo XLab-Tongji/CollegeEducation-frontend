@@ -305,18 +305,48 @@
         methods: {
             // 创建班级
             createClass: function() {
-                this.newClass.course_university = this.ruleForm.course_school;
-                this.newClass.course_major = this.ruleForm.course_major;
-                this.newClass.course_term = this.ruleForm.course_term;
+                if (this.ruleForm.course_school === '') {
+                    this.$message({type: 'error', message: '请选择学校!'});
+                    return;
+                }
+                else {
+                    this.newClass.course_university = this.ruleForm.course_school;
+                }
+                if (this.ruleForm.course_major === '') {
+                    this.$message({type: 'error', message: '请选择专业!'});
+                    return;
+                }
+                else {
+                    this.newClass.course_major = this.ruleForm.course_major;
+                }
+                if (this.ruleForm.course_term === '') {
+                    this.$message({type: 'error', message: '请选择开课学期!'});
+                    return;
+                }
+                else {
+                    this.newClass.course_term = this.ruleForm.course_term;
+                }
+                if (this.ruleForm.course_start_date === '') {
+                    this.$message({type: 'error', message: '请选择开课时间!'});
+                    return;
+                }
+                else {
+                    this.newClass.course_start_date = this.ruleForm.course_start_date.format("yyyy-MM-dd HH:mm:ss");
+                }
+                if (this.ruleForm.course_credit === '') {
+                    this.$message({type: 'error', message: '请选择课程学分!'});
+                    return;
+                }
+                else {
+                    this.newClass.course_credit = this.ruleForm.course_credit;
+                }
                 this.newClass.course_name = this.ruleForm.course_name;
                 this.newClass.course_no = this.ruleForm.course_no;
-                this.newClass.course_start_date = this.ruleForm.course_start_date.format("yyyy-MM-dd HH:mm:ss");
                 var str = this.ruleForm.course_signup_link[0] + this.ruleForm.course_signup_link[1] + this.ruleForm.course_signup_link[2];
                 this.newClass.course_signup_link = str;
                 str = this.ruleForm.course_class_link[0] + this.ruleForm.course_class_link[1] + this.ruleForm.course_class_link[2];
                 this.newClass.course_class_link = str;
                 this.newClass.course_access_code = this.ruleForm.course_access_code;
-                this.newClass.course_credit = this.ruleForm.course_credit;
                 this.loading1 = true;
 
                 this.$http.post(server.url + '/email', {}, {params: {receiver: this.ruleForm.admin_email}, headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}}).then(response => {
@@ -345,29 +375,36 @@
                 this.$message({type: 'error', message: '请重试!'});
                 });
             },
-            // 添加成员
-            addStudents(mEmail) {
+            // 批量添加成员
+            addStudents(mEmails) {
                 if (this.course_no === '') {
                     this.$message({type: 'error', message: '请输入班级编号!'});
                     return;
                 }
-                if (mEmail === '') {
+                if (mEmails === '') {
                     this.$message({type: 'error', message: '请输入学生邮箱!'});
                     return;
                 }
-                this.loading4 = true;
                 let myReg=/^[a-zA-Z0-9_-]+@([a-zA-Z0-9]+\.)+(com|cn|net|org)$/;
-                if (!myReg.test(mEmail)) {
-                    this.$message({type: 'error', message: '请检查邮箱格式!'});
-                    this.loading4 = false;
-                    return;
+                this.emailArray = this.memberEmail.split(',');
+                for (var i = 0;i < this.emailArray.length;i++) {
+                    if (!myReg.test(this.emailArray[i])) {
+                        this.$message({type: 'error', message: '请检查邮箱格式!'});
+                        return;
+                    }
                 }
+                this.loading4 = true;
+                for (var i = 0;i < this.emailArray.length;i++) {
+                    this.addStudent(this.emailArray[i]);
+                }
+                this.loading4 = false;
+            },
+            // 添加成员
+            addStudent(mEmail) {
                 let email = {student_email: mEmail};
                 this.$http.post(server.url + '/class/student', email, {params: {course_no: this.course_no}, headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}}).then(response => {
                     if (response.status === 200) {
-                        this.loading4 = false;
                         this.$message({type: 'success', message: '添加成功！'});
-                        this.$router.push('/class-list');
                     }
                     else {
                         this.loading4 = false;

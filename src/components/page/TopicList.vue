@@ -125,7 +125,7 @@
                                   placeholder="请输入标题..."
                                   style="width: 350px">
                         </el-input>
-                        <el-button type="text" style="margin-left: 500px">选择草稿</el-button>
+                        <el-button type="text" style="float: right">选择草稿</el-button>
                     </div>
                     <!----- 编辑器 ----->
                     <div id="editor" style="margin-top: 20px"></div>

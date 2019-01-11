@@ -260,6 +260,10 @@
             },
             // 发表评论
             postComment: function() {
+                if(this.commentText === '') {
+                    this.$message({type: 'error', message: '请输入内容！'});
+                    return
+                }
                 this.replyEntity.TopicId = this.article.TopicId;
                 this.replyEntity.ReplyText = this.commentText;
                 var t = new Date();
