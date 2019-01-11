@@ -107,7 +107,7 @@
                                    <!-- 发表评论 -->
                                    <div style="margin-top: 20px;font-size: 14px;font-weight: bold;color: #6A6A6A">发表评论</div>
                                    <el-input type="textarea" v-model="commentText" placeholder="输入评论内容（400字以内）" maxlength="400" :autosize="{ minRows: 9, maxRows: 9}" style="margin-top: 15px;"></el-input>
-                                   <el-button type="primary" @click="postComment(item.blackboard_id)" style="background-color: #1ac7c3; border-color: #1ac7c3;margin-top: 15px" size="mini">发表</el-button>
+                                   <el-button type="primary" @click="postComment(bid)" style="background-color: #1ac7c3; border-color: #1ac7c3;margin-top: 15px" size="mini">发表</el-button>
                                </div>
                            </el-dialog>
                        </div>
@@ -177,7 +177,7 @@
                                    <!-- 发表评论 -->
                                    <div style="margin-top: 20px;font-size: 14px;font-weight: bold;color: #6A6A6A">发表评论</div>
                                    <el-input type="textarea" v-model="commentText" placeholder="输入评论内容（400字以内）" maxlength="400" :autosize="{ minRows: 9, maxRows: 9}" style="margin-top: 15px;"></el-input>
-                                   <el-button type="primary" @click="postComment(item.blackboard_id)" style="margin-top: 15px">发表</el-button>
+                                   <el-button type="primary" @click="postComment(bid)" style="margin-top: 15px">发表</el-button>
                                </div>
                            </el-dialog>
                        </div>
@@ -306,7 +306,8 @@
                     ClickingRate: 0,
                     PraiseCount: 0,
                     type: 1
-                }
+                },
+                bid: 0, // 评论所在黑板报的id
             }
         },
 
@@ -578,7 +579,8 @@
             loadComments: function(id) {
                 this.comments = [];
                 this.replyImg = [];
-                this.$http.get(server.url + '/blackboard/reply/get?TopicId=' + id, {headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}}).then((response) => {
+                this.bid = id;
+                this.$http.get(server.url + '/blackboard/reply/get?TopicId=' + id.toString(), {headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}}).then((response) => {
                     if (response.status === 200) {
                         let commentList = JSON.parse(response.bodyText);
                         var i = 0;
@@ -626,7 +628,7 @@
                     this.$message({type: 'error', message: '请输入内容！'});
                     return
                 }
-                this.replyEntity.TopicId = id;
+                this.replyEntity.TopicId = id.toString();
                 this.replyEntity.ReplyText = this.commentText;
                 var t = new Date();
                 this.replyEntity.ReplyDate = t.format("yyyy-MM-dd HH:mm:ss");

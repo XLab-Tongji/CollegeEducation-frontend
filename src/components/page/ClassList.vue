@@ -10,7 +10,11 @@
                     <!-- 我创建的班级 -->
                     <div style="font-size: 14px; font-weight: bold; margin-top: 10px">我创建的</div>
                     <div>
-                        <el-card style="margin-top: 10px; width: 400px" v-for="item in classes1">
+                        <el-card style="margin-top: 10px; width: 400px"
+                                 v-for="item in classes1"
+                                 :key="item.course_id"
+                                 :label="item.course_name"
+                                 :value="item.course_id">
                             <div style="font-size: 13px;">
                                 <el-row>
                                     课程：{{item.course_no}}
@@ -38,7 +42,11 @@
                 <el-col :span="8">
                     <div style="font-size: 14px; font-weight: bold; margin-top: 10px">我加入的</div>
                     <div>
-                        <el-card style="margin-top: 10px; width: 400px" v-for="item in classes2">
+                        <el-card style="margin-top: 10px; width: 400px"
+                                 v-for="item in classes2"
+                                 :key="item.course_id"
+                                 :label="item.course_name"
+                                 :value="item.course_id">
                             <div style="font-size: 13px;">
                                 <el-row>
                                     课程：{{item.course_no}}
